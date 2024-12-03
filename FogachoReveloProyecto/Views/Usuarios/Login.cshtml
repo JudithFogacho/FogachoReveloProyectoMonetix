@@ -1,0 +1,48 @@
+﻿@model FogachoReveloProyecto.Models.Usuario
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<h1>Iniciar Sesión</h1>
+
+<h4>Ingresa tus credenciales</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <!-- Formulario de inicio de sesión -->
+        <form asp-action="Login" method="post">
+            <!-- Resumen de errores de validación -->
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Campo de correo electrónico -->
+            <div class="form-group">
+                <label asp-for="Email" class="control-label">Email</label>
+                <input asp-for="Email" class="form-control" type="email" required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- Campo de contraseña -->
+            <div class="form-group">
+                <label asp-for="Password" class="control-label">Contraseña</label>
+                <input asp-for="Password" class="form-control" type="password" required />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <!-- Botón para iniciar sesión -->
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Iniciar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Link para registrarse -->
+<div>
+    <p>¿No tienes cuenta? <a asp-controller="Usuarios" asp-action="Registro">Regístrate aquí</a></p>
+</div>
+
+@section Scripts {
+    <!-- Incluyendo scripts de validación para manejo de errores en el cliente -->
+    <partial name="_ValidationScriptsPartial" />
+}

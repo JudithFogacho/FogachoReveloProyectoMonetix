@@ -1,0 +1,102 @@
+﻿@model IEnumerable<FogachoReveloProyecto.Models.Gasto>
+
+@{
+    ViewData["Title"] = "PaginaInicial";
+}
+
+<h1>Pagina Principal</h1>
+<form asp-action="PaginaInicial" method="get">
+    <div class="Buscar">
+        <label for="categoria">Buscar por Categoría:</label>
+        <select id="categoria" name="categoria" class="form-control">
+            <option value="">-- Todas --</option>
+            <!-- Recorre en bucle todos los valores de categoria y los muestra-->
+            @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
+            {
+                <option value="@categoria">@categoria</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-buscar">Buscar</button>
+</form>
+<!-- Este parrafo es la sección de crear un nuevo gasto-->
+<p>
+    <a asp-action="CrearGasto">Ingresar Gasto</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FechaRegristo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FechaFinal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Categorias)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Descripcion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Valor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ValorPagado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Estados)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) 
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FechaRegristo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FechaFinal)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Categorias)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Descripcion)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Valor)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ValorPagado)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Estados)
+                </td>
+                <!-- Las acciones que se pueden hacer de cada gasto -->
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdGasto">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdGasto">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdGasto">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <!-- Al final de la tabla nos muestra los subtotales y el total de los gastos-->
+    <tfoot>
+        <tr>
+            <td colspan="4" class="text-right"><strong>Subtotal Gastos:</strong></td>
+            <td><strong>@ViewBag.SubtotalGastos.ToString("C")</strong></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-right"><strong>Subtotal Valor Pagado:</strong></td>
+            <td><strong>@ViewBag.SubtotalValorPagado.ToString("C")</strong></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-right"><strong>Total:</strong></td>
+            <td><strong>@ViewBag.Total.ToString("C")</strong></td>
+        </tr>
+    </tfoot>
+</table>

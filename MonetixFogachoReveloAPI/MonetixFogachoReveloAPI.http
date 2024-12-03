@@ -1,0 +1,6 @@
+@MonetixFogachoReveloAPI_HostAddress = http://localhost:5199
+
+GET {{MonetixFogachoReveloAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

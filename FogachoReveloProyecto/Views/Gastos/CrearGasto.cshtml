@@ -1,0 +1,65 @@
+﻿
+@model FogachoReveloProyecto.Models.Gasto
+
+@{
+    ViewData["Title"] = "CrearGasto";
+}
+
+<h1>Ingresar Gasto</h1>
+
+<h4>Gasto</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CrearGasto">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <!-- Cada div es un apartado nuevo para la creacion del gasto-->
+            <div class="form-group">
+                <label asp-for="FechaRegristo" class="control-label"></label>
+                <input asp-for="FechaRegristo" class="form-control" />
+                <span asp-validation-for="FechaRegristo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaFinal" class="control-label"></label>
+                <input asp-for="FechaFinal" class="form-control" />
+                <span asp-validation-for="FechaFinal" class="text-danger"></span>
+            </div>
+            <label asp-for="Categorias" class="control-label"></label>
+            <select asp-for="Categorias" class="form-control">
+                <!-- Este apartado/bucle recorre todo los valores del enum de categorias y los muestra-->
+                @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
+                {
+                    <option value="@categoria">@categoria</option>
+                }
+            </select>
+            <span asp-validation-for="Categorias" class="text-danger"></span>
+            <div class="form-group">
+                <label asp-for="Descripcion" class="control-label"></label>
+                <input asp-for="Descripcion" class="form-control" />
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Valor" class="control-label"></label>
+                <input asp-for="Valor" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="Valor" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ValorPagado" class="control-label"></label>
+                <input asp-for="ValorPagado" class="form-control" type="number" step="0.01"/>
+                <span asp-validation-for="ValorPagado" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="PaginaInicial">Cancelar</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+}
