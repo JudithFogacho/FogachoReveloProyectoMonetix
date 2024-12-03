@@ -1,10 +1,13 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FogachoReveloProyecto", "FogachoReveloProyecto\FogachoReveloProyecto.csproj", "{FB5406C0-8AE1-42DA-9BC9-72DCCA382372}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonetixFogachoReveloAPI", "MonetixFogachoReveloAPI\MonetixFogachoReveloAPI.csproj", "{57603F74-67AC-409D-B6D0-96669CE3068D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonetixFogachoReveloAPI", "MonetixFogachoReveloAPI\MonetixFogachoReveloAPI.csproj", "{57603F74-67AC-409D-B6D0-96669CE3068D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonetixProyectoAPP", "MonetixProyectoAPP\MonetixProyectoAPP.csproj", "{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +23,12 @@ Global
 		{57603F74-67AC-409D-B6D0-96669CE3068D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57603F74-67AC-409D-B6D0-96669CE3068D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57603F74-67AC-409D-B6D0-96669CE3068D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
