@@ -9,7 +9,7 @@
         <VerticalStackLayout Grid.Row="1" 
                             Spacing="20" 
                             Padding="20"
-                            VerticalOptions="Center">
+                            VerticalOptions="FillAndExpand">
 
             <Label Text="MONETIX"
                    FontSize="48"
@@ -82,11 +82,17 @@
                 <Label Text="¿No tienes cuenta?"
                        FontSize="16"
                        TextColor="Black"
-                       FontFamily="Koulen"/>
-                <Label Text="Registrate"
+                       FontFamily="Koulen"
+                       VerticalOptions="Center"/>
+                <Label Text="Regístrate"
                        FontSize="16"
                        TextColor="#849671"
-                       FontFamily="Koulen"/>
+                       FontFamily="Koulen"
+                       VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnRegisterTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
             </HorizontalStackLayout>
         </VerticalStackLayout>
     </Grid>
