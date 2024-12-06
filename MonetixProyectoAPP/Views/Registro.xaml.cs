@@ -1,47 +1,77 @@
 using System.Net.Http.Json;
+using MonetixProyectoAPP.Models;
 
-namespace MonetixProyectoAPP.Views;
-
-public partial class Registro : ContentPage
+namespace MonetixProyectoAPP.Views
 {
-    private readonly HttpClient _httpClient = new HttpClient
+    public partial class Registro : ContentPage
     {
-        BaseAddress = new Uri("https://localhost:7156/api/") 
-    };
-    public Registro()
-	{
-		InitializeComponent();
-	}
-
-    private async void OnRegisterButtonClicked(object sender, EventArgs e)
-    {
-        // Crear el objeto con los datos del usuario
-        var nuevoUser = new
+        private readonly HttpClient _httpClient = new HttpClient
         {
-            Nombre = "NombreDeUsuario", // Cambia según tus campos de entrada
-            Email = "correo@example.com", // Asegúrate de obtener estos datos del usuario
-            Contrasena = "Contrasena123"  // Puedes aplicar hashing en la API
+            BaseAddress = new Uri("https://localhost:7156/api/")
         };
 
-        try
+        public Registro()
         {
-            // Enviar datos a la API
-            var response = await _httpClient.PostAsJsonAsync("usuarios/registro", nuevoUser);
+            InitializeComponent();
+        }
 
-            if (response.IsSuccessStatusCode)
+        private async void OnRegisterButtonClicked(object sender, EventArgs e)
+        {
+            // Verifica que los campos no estén vacíos
+            if (string.IsNullOrEmpty(txtNombre.Text) || string.IsNullOrEmpty(txtApellido.Text) ||
+                string.IsNullOrEmpty(txtEmail.Text) || string.IsNullOrEmpty(txtPassword.Text))
             {
-                await DisplayAlert("Registro exitoso", "Usuario registrado correctamente.", "OK");
-                await Navigation.PushAsync(new Login());
+                await DisplayAlert("Error", "Por favor complete todos los campos", "OK");
+                return;
             }
-            else
+
+            var nuevoUsuario = new Usuario
             {
-                var error = await response.Content.ReadAsStringAsync();
-                await DisplayAlert("Error", $"Error al registrar: {error}", "OK");
+                Nombre = txtNombre.Text?.Trim(),
+                Apellido = txtApellido.Text?.Trim(),
+                Email = txtEmail.Text?.Trim(),
+                Password = txtPassword.Text?.Trim()
+            };
+
+            try
+            {
+                // Muestra un indicador de carga
+                IsBusy = true;
+
+                var response = await _httpClient.PostAsJsonAsync("Usuario", nuevoUsuario);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var usuarioCreado = await response.Content.ReadFromJsonAsync<Usuario>();
+                    await DisplayAlert("Éxito", "Registro completado con éxito", "OK");
+                    await Shell.Current.GoToAsync("///Login");
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    await DisplayAlert("Error", errorMessage, "OK");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                await DisplayAlert("Error de Conexión",
+                    "No se pudo conectar con el servidor. Verifique su conexión a internet.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error",
+                    "Ocurrió un error inesperado. Por favor intente nuevamente.", "OK");
+            }
+            finally
+            {
+                // Oculta el indicador de carga
+                IsBusy = false;
             }
         }
-        catch (Exception ex)
+
+        private async void OnLoginTapped(object sender, TappedEventArgs e)
         {
-            await DisplayAlert("Error", $"No se pudo registrar al usuario: {ex.Message}", "OK");
+            await Shell.Current.GoToAsync("Login");
         }
     }
 }
