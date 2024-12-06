@@ -9,18 +9,20 @@ public partial class PaginaInicial : ContentPage
     private readonly HttpClient _httpClient;
     public ObservableCollection<Gasto> Gastos { get; set; } = new();
     public PaginaInicial()
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri("https://localhost:7156/api/Gasto") // Cambia por la URL de tu API
         };
         BindingContext = this;
     }
+
     private void OnIngresarGastoClicked(object sender, EventArgs e)
     {
-
+        // Lógica para agregar un nuevo gasto
     }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -37,6 +39,7 @@ public partial class PaginaInicial : ContentPage
                 Gastos.Clear();
                 foreach (var gasto in gastos)
                 {
+                    gasto.AsignarColorEstado(); // Método para asignar color al estado
                     Gastos.Add(gasto);
                 }
             }

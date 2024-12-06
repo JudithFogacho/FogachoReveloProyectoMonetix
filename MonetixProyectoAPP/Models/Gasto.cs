@@ -24,6 +24,27 @@ namespace MonetixProyectoAPP.Models
         public double ValorPagado { get; set; }
         public Estado Estados { get; set; }
 
+        public string ColorEstado { get; private set; }
+        public void AsignarColorEstado()
+        {
+            switch (Estados)
+            {
+                case Estado.Atrasado:
+                    ColorEstado = "#E57373"; // Rojo
+                    break;
+                case Estado.Pendiente:
+                    ColorEstado = "#FFD54F"; // Amarillo
+                    break;
+                case Estado.Finalizado:
+                    ColorEstado = "#81C784"; // Verde
+                    break;
+                default:
+                    ColorEstado = "#FFFFFF"; // Blanco por defecto
+                    break;
+            }
+        }
+
+
 
         //Este metodo se utiliza para calcular el valor del gasto
         public double CalcularValorGasto(double valorPago)
