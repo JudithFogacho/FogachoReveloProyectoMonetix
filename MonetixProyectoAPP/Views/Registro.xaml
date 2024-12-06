@@ -56,7 +56,7 @@
                                    FontSize="16"
                                    TextColor="Black"/>
                         </Border>
-                        <Label Text="Usuario"
+                        <Label Text="Email"
                                FontSize="18"
                                TextColor="Black"
                                FontFamily="Koulen"/>

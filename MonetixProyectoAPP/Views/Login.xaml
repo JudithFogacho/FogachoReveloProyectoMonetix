@@ -30,7 +30,7 @@
                        HasShadow="True"
                        BorderColor= "#E5E0D8">
                     <VerticalStackLayout Spacing="15">
-                        <Label Text="Usuario"
+                        <Label Text="Email"
                                FontSize="18"
                                TextColor="Black"
                                FontFamily="Koulen"/>
