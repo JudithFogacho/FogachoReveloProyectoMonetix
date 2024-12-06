@@ -15,5 +15,9 @@
     <ShellContent Title="Registro" 
                   Route="Registro" 
                   ContentTemplate="{DataTemplate local:Registro}" />
-
+    
+    <ShellContent Title="PaginaInicial" 
+                  Route="PaginaInicial" 
+                  ContentTemplate="{DataTemplate local:PaginaInicial}" />
+    
 </Shell>

@@ -6,94 +6,87 @@
              BackgroundColor="#E5E0D8">
 
     <Grid RowDefinitions="Auto,*">
-        <VerticalStackLayout Grid.Row="1" 
-                            Spacing="20" 
-                            Padding="20"
-                            VerticalOptions="FillAndExpand">
-
-            <Label Text="MONETIX"
-                   FontSize="48"
-                   TextColor="#809671"
-                   FontFamily="Koulen"
-                   HorizontalOptions="Center"/>
-
-            <Image Source="https://i.imgur.com/KWshaxa.png"
-                   HeightRequest="180"
-                   WidthRequest="180"
-                   HorizontalOptions="Center"/>
-
-            <Label Text="Iniciar Sesion"
-                   FontSize="32"
-                   TextColor="Black"
-                   FontFamily="Koulen"
-                   HorizontalOptions="Center"/>
-
-            <Frame BackgroundColor="White"
-                   CornerRadius="25"
-                   Padding="20"
-                   HasShadow="True"
-                   BorderColor= "#E5E0D8">
-
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Usuario"
-                           FontSize="18"
-                           TextColor="Black"
-                           FontFamily="Koulen"/>
-
-                    <Border StrokeShape="RoundRectangle 10"
-                            BackgroundColor="#E5E0D8"
-                            Padding="10,5"
-                            Stroke="#E5E0D8">
-                        <Entry Placeholder="Escribe tu usuario"
-                               FontSize="16"
-                               TextColor="Black"/>
-                    </Border>
-
-                    <Label Text="CONTRASENA"
-                           FontSize="18"
-                           TextColor="Black"
-                           FontFamily="Koulen"/>
-
-                    <Border StrokeShape="RoundRectangle 10"
-                            BackgroundColor="#E5E0D8"
-                            Padding="10,5"
-                            Stroke="#E5E0D8">
-                        <Entry Placeholder="Escribe tu contraseña"
-                               FontSize="16"
-                               IsPassword="True"
-                               TextColor="Black"
-                               />
-
-                    </Border>
-
-                    <Button Text="Entrar"
-                            FontSize="18"
-                            BackgroundColor="#849671"
-                            TextColor="White"
-                            CornerRadius="30"
-                            HeightRequest="45"
-                            WidthRequest="200"
-                            HorizontalOptions="Center"
-                            FontFamily="Koulen"/>
-                </VerticalStackLayout>
-            </Frame>
-
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
-                <Label Text="¿No tienes cuenta?"
-                       FontSize="16"
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="20" 
+                                Padding="20"
+                                VerticalOptions="FillAndExpand">
+                <Label Text="MONETIX"
+                       FontSize="48"
+                       TextColor="#809671"
+                       FontFamily="Koulen"
+                       HorizontalOptions="Center"/>
+                <Image Source="https://i.imgur.com/KWshaxa.png"
+                       HeightRequest="180"
+                       WidthRequest="180"
+                       HorizontalOptions="Center"/>
+                <Label Text="Iniciar Sesion"
+                       FontSize="32"
                        TextColor="Black"
                        FontFamily="Koulen"
-                       VerticalOptions="Center"/>
-                <Label Text="Regístrate"
-                       FontSize="16"
-                       TextColor="#849671"
-                       FontFamily="Koulen"
-                       VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnRegisterTapped" />
-                    </Label.GestureRecognizers>
-                </Label>
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
+                       HorizontalOptions="Center"/>
+                <Frame BackgroundColor="White"
+                       CornerRadius="25"
+                       Padding="20"
+                       HasShadow="True"
+                       BorderColor= "#E5E0D8">
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Usuario"
+                               FontSize="18"
+                               TextColor="Black"
+                               FontFamily="Koulen"/>
+                        <Border StrokeShape="RoundRectangle 10"
+                                BackgroundColor="#E5E0D8"
+                                Padding="10,5"
+                                Stroke="#E5E0D8">
+                            <Entry x:Name="txtEmail"
+                                   Placeholder="Escribe tu usuario"
+                                   FontSize="16"
+                                   TextColor="Black"/>
+                        </Border>
+                        <Label Text="CONTRASENA"
+                               FontSize="18"
+                               TextColor="Black"
+                               FontFamily="Koulen"/>
+                        <Border StrokeShape="RoundRectangle 10"
+                                BackgroundColor="#E5E0D8"
+                                Padding="10,5"
+                                Stroke="#E5E0D8">
+                            <Entry x:Name="txtPassword"
+                                   Placeholder="Escribe tu contraseña"
+                                   FontSize="16"
+                                   IsPassword="True"
+                                   TextColor="Black"
+                                   />
+                        </Border>
+                        <Button Clicked="OnLoginButtonClicked"
+                                Text="Entrar"
+                                FontSize="18"
+                                BackgroundColor="#849671"
+                                TextColor="White"
+                                CornerRadius="30"
+                                HeightRequest="45"
+                                WidthRequest="200"
+                                HorizontalOptions="Center"
+                                FontFamily="Koulen"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                    <Label Text="¿No tienes cuenta?"
+                           FontSize="16"
+                           TextColor="Black"
+                           FontFamily="Koulen"
+                           VerticalOptions="Center"/>
+                    <Label Text="Regístrate"
+                           FontSize="16"
+                           TextColor="#849671"
+                           FontFamily="Koulen"
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRegisterTapped" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>

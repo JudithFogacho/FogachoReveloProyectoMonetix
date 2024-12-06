@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonetixProyectoAPP.Views.PaginaInicial"
+             Title="PaginaInicial">
+    <VerticalStackLayout Padding="20" Spacing="10">
+
+        <Label Text="MONETIX"
+               FontSize="32"
+               HorizontalOptions="Center"
+               TextColor="#809671"
+               FontFamily="Koulen" />
+
+        <!-- Barra de búsqueda -->
+        <HorizontalStackLayout Spacing="10" Padding="0,10">
+            <SearchBar Placeholder="Buscar categoría"
+                       FontSize="14"
+                       BackgroundColor="#F2F2F2"
+                       TextColor="Black"
+                       PlaceholderColor="Gray" />
+            <Button BackgroundColor="#849671"
+                    Text="⚙️"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    CornerRadius="20"
+                    TextColor="White" />
+        </HorizontalStackLayout>
+
+        <!-- Indicadores de estado -->
+        <HorizontalStackLayout Spacing="10" Padding="0,5">
+            <!-- Indicador Atrasado -->
+            <Frame CornerRadius="5"
+                   BackgroundColor="#E57373"
+                   Padding="10"
+                   HasShadow="False">
+                <Label Text="Atrasado"
+                       FontSize="14"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Frame>
+
+            <!-- Indicador Pendiente -->
+            <Frame CornerRadius="5"
+                   BackgroundColor="#FFD54F"
+                   Padding="10"
+                   HasShadow="False">
+                <Label Text="Pendiente"
+                       FontSize="14"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Frame>
+
+            <!-- Indicador Finalizado -->
+            <Frame CornerRadius="5"
+                   BackgroundColor="#81C784"
+                   Padding="10"
+                   HasShadow="False">
+                <Label Text="Finalizado"
+                       FontSize="14"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Frame>
+        </HorizontalStackLayout>
+
+        <!-- Lista de gastos -->
+        <CollectionView x:Name="GastosCollectionView"
+                        ItemsSource="{Binding Gastos}"
+                        SelectionMode="None">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BackgroundColor="White"
+                           CornerRadius="10"
+                           Padding="10"
+                           Margin="0,5"
+                           HasShadow="True">
+                        <Grid ColumnDefinitions="4*,1*" RowDefinitions="Auto">
+                            <!-- Estado -->
+                            <BoxView Color="{Binding Estados}"
+                                     CornerRadius="5"
+                                     WidthRequest="15"
+                                     HeightRequest="15"
+                                     VerticalOptions="Center"
+                                     HorizontalOptions="Start" />
+
+                            <!-- Categoría y fecha -->
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding Categorias}"
+                                       FontSize="16"
+                                       TextColor="Black"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}"
+                                       FontSize="12"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+
+                            <!-- Monto -->
+                            <Label Text="{Binding Valor, StringFormat='${0:F2}'}"
+                                   FontSize="16"
+                                   TextColor="Black"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center"
+                                   Grid.Column="1" />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Total y botón -->
+        <Grid ColumnDefinitions="*,Auto" Padding="10,5">
+            <Label Text="TOTAL"
+                   FontSize="18"
+                   TextColor="Black"
+                   FontAttributes="Bold" />
+            <Label Text="{Binding TotalGastos, StringFormat='${0:F2}'}"
+                   FontSize="18"
+                   TextColor="Black"
+                   FontAttributes="Bold"
+                   HorizontalOptions="End" />
+        </Grid>
+
+        <Button Text="Ingresar Gasto"
+                FontSize="18"
+                BackgroundColor="#849671"
+                TextColor="White"
+                CornerRadius="30"
+                HeightRequest="45"
+                HorizontalOptions="Center"
+                Clicked="OnIngresarGastoClicked" />
+
+    </VerticalStackLayout>
+</ContentPage>
