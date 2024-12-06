@@ -67,44 +67,44 @@
 
         <!-- Lista de gastos -->
         <CollectionView x:Name="GastosCollectionView"
-                        ItemsSource="{Binding Gastos}"
-                        SelectionMode="None">
+                ItemsSource="{Binding Gastos}"
+                SelectionMode="None">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame BackgroundColor="White"
-                           CornerRadius="10"
-                           Padding="10"
-                           Margin="0,5"
-                           HasShadow="True">
+                   CornerRadius="10"
+                   Padding="10"
+                   Margin="0,5"
+                   HasShadow="True">
                         <Grid ColumnDefinitions="4*,1*" RowDefinitions="Auto">
                             <!-- Estado -->
                             <BoxView Color="{Binding Estados}"
-                                     CornerRadius="5"
-                                     WidthRequest="15"
-                                     HeightRequest="15"
-                                     VerticalOptions="Center"
-                                     HorizontalOptions="Start" />
+                             CornerRadius="5"
+                             WidthRequest="15"
+                             HeightRequest="15"
+                             VerticalOptions="Center"
+                             HorizontalOptions="Start" />
 
                             <!-- Categoría y fecha -->
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
                                 <Label Text="{Binding Categorias}"
-                                       FontSize="16"
-                                       TextColor="Black"
-                                       FontAttributes="Bold" />
+                               FontSize="16"
+                               TextColor="Black"
+                               FontAttributes="Bold" />
                                 <Label Text="{Binding FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}"
-                                       FontSize="12"
-                                       TextColor="Gray" />
+                               FontSize="12"
+                               TextColor="Gray" />
                             </VerticalStackLayout>
 
                             <!-- Monto -->
                             <Label Text="{Binding Valor, StringFormat='${0:F2}'}"
-                                   FontSize="16"
-                                   TextColor="Black"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Center"
-                                   Grid.Column="1" />
+                           FontSize="16"
+                           TextColor="Black"
+                           FontAttributes="Bold"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           Grid.Column="1" />
                         </Grid>
                     </Frame>
                 </DataTemplate>
