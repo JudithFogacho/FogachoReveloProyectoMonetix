@@ -13,14 +13,14 @@ public partial class PaginaInicial : ContentPage
         InitializeComponent();
         _httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7156/api/Gasto") // Cambia por la URL de tu API
+            BaseAddress = new Uri("https://localhost:7156/api/Gasto") 
         };
         BindingContext = this;
     }
 
-    private void OnIngresarGastoClicked(object sender, EventArgs e)
+    private async void OnIngresarGastoClicked(object sender, EventArgs e)
     {
-        // Lógica para agregar un nuevo gasto
+        await Navigation.PushAsync(new IngresarGasto());
     }
 
     protected override async void OnAppearing()
