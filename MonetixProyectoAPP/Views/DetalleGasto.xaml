@@ -27,7 +27,7 @@
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout HorizontalOptions="End">
-                    <Label Text="{Binding Estados}" 
+                    <Label Text="{Binding Estados}"
                            FontSize="16"
                            FontFamily="Koulen"
                            TextColor="Black" />
@@ -103,11 +103,36 @@
                 </VerticalStackLayout>
             </StackLayout>
         </ScrollView>
+        <Frame x:Name="EliminarDialogo"
+               BackgroundColor="White"
+               CornerRadius="20"
+               BorderColor="White"
+               Padding="20"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               IsVisible="False">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="¿Está seguro que desea eliminar este gasto?" 
+                       FontSize="Medium"
+                       FontFamily="Koulen"
+                       HorizontalOptions="Center" />
 
+                <Button Text="Eliminar" 
+                        Clicked="OnEliminarButtonClicked" 
+                        BackgroundColor="#BF7373" 
+                        TextColor="White" />
+
+                <Button Text="Cancelar" 
+                        Clicked="OnCancelarButtonClicked" 
+                        BackgroundColor="Gray" 
+                        TextColor="White" />
+            </VerticalStackLayout>
+        </Frame>
         <!-- Diálogo de Pago -->
         <Frame x:Name="PagoDialogo"
                BackgroundColor="White"
                CornerRadius="20"
+               BorderColor="White"
                Padding="20"
                HorizontalOptions="Center"
                VerticalOptions="Center"
@@ -122,11 +147,12 @@
                        HeightRequest="200"
                        WidthRequest="200" />
                 <Entry x:Name="EntryPago"
-                       Placeholder="$"
-                       FontSize="18"
+                       Placeholder="Ingrese el valor a pagar"
                        Keyboard="Numeric"
+                       Text="{Binding Valor, StringFormat='{0:C2}'}"
+                       FontSize="18"
+                       TextColor="Gray"
                        HorizontalOptions="Fill" />
-
                 <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                     <Button Text="CANCELAR"
                             BackgroundColor="Gray"

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using MonetixProyectoAPP.Models;
 using System.Net.Http.Json;
+using Newtonsoft.Json;
 
 namespace MonetixProyectoAPP.Views;
 
@@ -52,11 +53,12 @@ public partial class PaginaInicial : ContentPage
     }
     private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is Gasto gastoSeleccionado)
-        {
-            await Navigation.PushAsync(new DetalleGasto(gastoSeleccionado));
-        }
+            if (e.CurrentSelection.FirstOrDefault() is Gasto gastoSeleccionado)
+            {
+                await Navigation.PushAsync(new DetalleGasto(gastoSeleccionado));
+            }
 
         ((CollectionView)sender).SelectedItem = null;
+        
     }
 }

@@ -3,93 +3,122 @@ namespace MonetixProyectoAPP.Views
     using MonetixProyectoAPP.Models;
     using System;
     using System.Net.Http;
+    using Newtonsoft.Json;
     using System.Threading.Tasks;
     using Microsoft.Maui.Controls;
+    using System.Text;
+    using System.Net.Http.Json;
 
     public partial class DetalleGasto : ContentPage
     {
-        private readonly int _gastoId;
+        private readonly HttpClient _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri("https://localhost:7156/api/")  
+        };
 
-        private Gasto _gasto;
-
+        private int _gastoId; 
         public DetalleGasto(Gasto gasto)
         {
             InitializeComponent();
-            _gasto = gasto;
-            BindingContext = _gasto; // Asocia el gasto al BindingContext
+            _gastoId = gasto.IdGasto; 
+            BindingContext = gasto;
         }
 
-        private async void OnEliminarClicked(object sender, EventArgs e)
+        private void OnEliminarClicked(object sender, EventArgs e)
         {
-            bool confirm = await DisplayAlert("Confirmación", "¿Estás seguro de eliminar este gasto?", "Sí", "No");
-            if (confirm)
-            {
-                try
-                {
-                    HttpClient client = new HttpClient();
-                    string url = $"https://tuapi.com/api/gastos/{_gastoId}"; // Cambia por tu URL base
-                    HttpResponseMessage response = await client.DeleteAsync(url);
+            
+            DisplayEliminarDialog();
+        }
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        await DisplayAlert("Éxito", "El gasto ha sido eliminado.", "OK");
-                        await Navigation.PopAsync();
-                    }
-                    else
-                    {
-                        await DisplayAlert("Error", "No se pudo eliminar el gasto.", "OK");
-                    }
-                }
-                catch (Exception ex)
+        // Mostrar cuadro de confirmación
+        private void DisplayEliminarDialog()
+        {
+            EliminarDialogo.IsVisible = true;
+        }
+
+        private async void OnEliminarButtonClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"gastos/{_gastoId}");
+
+                if (response.IsSuccessStatusCode)
                 {
-                    await DisplayAlert("Error", $"Ocurrió un error: {ex.Message}", "OK");
+                    await DisplayAlert("Éxito", "Gasto eliminado correctamente.", "OK");
+                    await Shell.Current.GoToAsync("///PaginaInicial"); 
                 }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    await DisplayAlert("Error", errorMessage, "OK");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                await DisplayAlert("Error de Conexión", "No se pudo conectar con el servidor. Verifique su conexión a internet.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "Ocurrió un error inesperado. Por favor intente nuevamente.", "OK");
+            }
+            finally
+            {
+                EliminarDialogo.IsVisible = false;
             }
         }
 
-        private void OnPagarGastoClicked(object sender, EventArgs e)
+        // Este método se ejecuta cuando el usuario decide cancelar la eliminación
+        private void OnCancelarButtonClicked(object sender, EventArgs e)
         {
-            // Mostrar el diálogo de pago
+            EliminarDialogo.IsVisible = false;
+        }
+
+        private async void OnPagarGastoClicked(object sender, EventArgs e)
+        {
+            // Mostrar el cuadro de pago
             PagoDialogo.IsVisible = true;
         }
 
+        // Este método se ejecuta cuando el usuario cancela el pago
         private void OnCancelarPagoClicked(object sender, EventArgs e)
         {
-            // Ocultar el diálogo de pago
             PagoDialogo.IsVisible = false;
         }
 
         private async void OnConfirmarPagoClicked(object sender, EventArgs e)
         {
-            var valorPago = EntryPago.Text;
-            if (double.TryParse(valorPago, out double cantidad))
+            try
             {
-                try
+                var pagoData = new
                 {
-                    // Aquí puedes agregar la lógica para registrar el pago
-                    // Por ejemplo: Llamar a la API para registrar el pago
-                    HttpClient client = new HttpClient();
-                    string url = $"https://tuapi.com/api/gastos/pagar/{_gastoId}";
-                    var response = await client.PutAsync(url, new StringContent(cantidad.ToString()));
+                    IdGasto = _gastoId, // El ID del gasto que hemos asignado
+                    ValorPagado = Convert.ToDouble(EntryPago.Text)
+                };
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        await DisplayAlert("Éxito", "Pago realizado correctamente.", "OK");
-                        PagoDialogo.IsVisible = false;
-                    }
-                    else
-                    {
-                        await DisplayAlert("Error", "Hubo un problema al procesar el pago.", "OK");
-                    }
-                }
-                catch (Exception ex)
+                // Convertir el objeto a JSON
+                var content = new StringContent(JsonConvert.SerializeObject(pagoData), Encoding.UTF8, "application/json");
+
+                // Hacer la solicitud PUT para actualizar el gasto
+                var response = await _httpClient.PutAsync($"Gasto/{_gastoId}", content);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    await DisplayAlert("Error", $"Ocurrió un error: {ex.Message}", "OK");
+                    await DisplayAlert("Éxito", "El pago ha sido procesado correctamente.", "OK");
+                    PagoDialogo.IsVisible = false;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    await DisplayAlert("Error", errorMessage, "OK");
                 }
             }
-            else
+            catch (HttpRequestException ex)
             {
-                await DisplayAlert("Error", "Por favor ingresa un valor válido para el pago.", "OK");
+                await DisplayAlert("Error de Conexión", "No se pudo conectar con el servidor. Verifique su conexión a internet.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "Ocurrió un error inesperado. Por favor intente nuevamente.", "OK");
             }
         }
     }

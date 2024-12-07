@@ -49,19 +49,17 @@ namespace MonetixProyectoAPP.Models
         //Este metodo se utiliza para calcular el valor del gasto
         public double CalcularValorGasto(double valorPago)
         {
-            if (Valor > 0 && valorPago > 0)
+            if (Valor.HasValue && valorPago > 0)
             {
                 ValorPagado += valorPago;
-                double nuevoValor = (double)(Valor - ValorPagado);
-                // Aseguramos que no sea negativo
-                Valor = nuevoValor < 0 ? 0 : nuevoValor; 
-                //usamos el metodo de recursividad
-                ActualizacionPagos(); 
-                return (double)Valor;
+                double nuevoValor = (Valor.Value - ValorPagado);
+                // Aseguramos que el valor no sea negativo
+                Valor = nuevoValor < 0 ? 0 : nuevoValor;
+                ActualizacionPagos();
+                return Valor.Value;
             }
-            return 0;
+            return Valor ?? 0;
         }
-
         //Este metodo se utiliza para cambiar el estado de los gastos
         public void ActualizacionPagos()
         {
