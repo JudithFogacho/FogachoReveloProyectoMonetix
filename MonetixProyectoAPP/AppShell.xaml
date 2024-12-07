@@ -19,5 +19,7 @@
     <ShellContent Title="PaginaInicial" 
                   Route="PaginaInicial" 
                   ContentTemplate="{DataTemplate local:PaginaInicial}" />
-    
+    <ShellContent Title="Detalle Gasto" 
+                  Route="DetalleGasto" 
+                  ContentTemplate="{DataTemplate local:DetalleGasto}" />
 </Shell>

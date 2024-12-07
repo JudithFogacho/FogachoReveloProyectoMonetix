@@ -7,42 +7,47 @@
     <ScrollView>
         <StackLayout Padding="20" Spacing="10">
             <Label Text="MONETIX"
-                   FontSize="24"
+                   FontSize="26"
                    FontAttributes="Bold"
+                   FontFamily="Koulen"
                    HorizontalOptions="Center"
-                   TextColor="#5A5A5A" />
+                   TextColor="#809671" />
 
             <Label Text="INGRESAR GASTO"
-                   FontSize="20"
+                   FontSize="36"
                    FontAttributes="Bold"
+                   FontFamily="Koulen"
                    HorizontalOptions="Center"
                    TextColor="#000000" />
 
             <!-- Fecha -->
             <Label Text="FECHA"
-                   FontSize="14"
+                   FontFamily="Koulen"
+                   FontSize="26"
                    FontAttributes="Bold"
-                   TextColor="#5A5A5A" />
+                   TextColor="Black" />
             <DatePicker x:Name="FechaRegistroPicker"
                         Format="dd/MM/yyyy"
-                        TextColor="#000000" />
+                        TextColor="#000000"
+                        BackgroundColor="White" />
 
             <!-- Categoría -->
             <Label Text="CATEGORÍA"
-                   FontSize="14"
+                   FontSize="26"
+                   FontFamily="Koulen"
                    FontAttributes="Bold"
-                   TextColor="#5A5A5A" />
+                   TextColor="Black" />
             <Picker x:Name="CategoriaPicker"
-                    Title="Seleccionar categoría"
                     TitleColor="#5A5A5A"
                     TextColor="#000000"
                     BackgroundColor="#FFFFFF" />
 
             <!-- Descripción -->
             <Label Text="DESCRIPCIÓN"
-                   FontSize="14"
+                   FontSize="26"
+                   FontFamily="Koulen"
                    FontAttributes="Bold"
-                   TextColor="#5A5A5A" />
+                   TextColor="Black" />
             <Entry x:Name="DescripcionEntry"
                    Placeholder="Ingrese una descripción"
                    TextColor="#000000"
@@ -50,9 +55,10 @@
 
             <!-- Valor -->
             <Label Text="VALOR"
-                   FontSize="14"
+                   FontFamily="Koulen"
+                   FontSize="26"
                    FontAttributes="Bold"
-                   TextColor="#5A5A5A" />
+                   TextColor="Black" />
             <Entry x:Name="ValorEntry"
                    Placeholder="Ingrese el valor"
                    Keyboard="Numeric"
@@ -63,11 +69,17 @@
             <StackLayout Orientation="Horizontal" Spacing="20" HorizontalOptions="Center">
                 <Button Text="CANCELAR"
                         TextColor="#FFFFFF"
-                        BackgroundColor="#A3A3A3"
+                        FontFamily="Koulen"
+                        FontSize="22"
+                        BackgroundColor="#95928F"
+                        CornerRadius="25"
                         Clicked="OnCancelarClicked" />
                 <Button Text="CREAR"
+                        FontSize="22"
                         TextColor="#FFFFFF"
-                        BackgroundColor="#6A994E"
+                        FontFamily="Koulen"
+                        BackgroundColor="#849671"
+                        CornerRadius="25"
                         Clicked="OnGuardarGastoClicked" />
             </StackLayout>
         </StackLayout>

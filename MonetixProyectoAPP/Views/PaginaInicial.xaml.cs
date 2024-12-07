@@ -50,4 +50,13 @@ public partial class PaginaInicial : ContentPage
             await DisplayAlert("Error", $"No se pudieron cargar los gastos: {ex.Message}", "OK");
         }
     }
+    private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is Gasto gastoSeleccionado)
+        {
+            await Navigation.PushAsync(new DetalleGasto(gastoSeleccionado));
+        }
+
+        ((CollectionView)sender).SelectedItem = null;
+    }
 }

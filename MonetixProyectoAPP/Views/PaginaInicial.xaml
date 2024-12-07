@@ -2,10 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonetixProyectoAPP.Views.PaginaInicial"
-             Title="PaginaInicial">
+             Title="PaginaInicial"
+             BackgroundColor="#EFEDE5">
 
-
-    <Grid RowDefinitions="Auto,*">
+    <ScrollView>
+        <Grid RowDefinitions="Auto,*">
         <VerticalStackLayout Padding="20" Spacing="10">
                 <Label Text="MONETIX"
                        FontSize="32"
@@ -13,52 +14,66 @@
                        TextColor="#809671"
                        FontFamily="Koulen" />
                 <!-- Barra de búsqueda -->
-                <HorizontalStackLayout Spacing="10" Padding="0,10">
+                <HorizontalStackLayout Spacing="10" Padding="0,10" HorizontalOptions="Center">
                     <SearchBar Placeholder="Buscar categoría"
                                FontSize="14"
+                               FontFamily="Koulen"
                                BackgroundColor="#F2F2F2"
                                TextColor="Black"
                                PlaceholderColor="Gray" />
-                    <Button BackgroundColor="#849671"
-                            Text="⚙️"
-                            WidthRequest="40"
-                            HeightRequest="40"
-                            CornerRadius="20"
-                            TextColor="White" />
+
+                    <ImageButton Source="https://i.imgur.com/188LNTH.png"
+                         WidthRequest="30"
+                         HeightRequest="30"
+                         BackgroundColor="#849671"
+                         CornerRadius="20"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         Aspect="AspectFit" />
                 </HorizontalStackLayout>
+                <Label Text="GASTOS"
+                       FontSize="26"
+                       FontFamily="Koulen"
+                       TextColor="Black"/>
                 <!-- Indicadores de estado -->
-                <HorizontalStackLayout Spacing="10" Padding="0,5">
+                <HorizontalStackLayout Spacing="10" Padding="0,5" HorizontalOptions="Center">
                     <!-- Indicador Atrasado -->
-                    <Frame CornerRadius="5"
+                    <Frame CornerRadius="10"
                            BackgroundColor="#E57373"
                            Padding="10"
-                           HasShadow="False">
+                           HasShadow="False"
+                           BorderColor="#E57373">
                         <Label Text="Atrasado"
                                FontSize="14"
+                               FontFamily="Koulen"
                                TextColor="White"
                                HorizontalOptions="Center"
                                VerticalOptions="Center" />
                     </Frame>
 
                     <!-- Indicador Pendiente -->
-                    <Frame CornerRadius="5"
+                    <Frame CornerRadius="10"
                            BackgroundColor="#FFD54F"
+                           BorderColor="#FFD54F"
                            Padding="10"
                            HasShadow="False">
                         <Label Text="Pendiente"
                                FontSize="14"
+                               FontFamily="Koulen"
                                TextColor="White"
                                HorizontalOptions="Center"
                                VerticalOptions="Center" />
                     </Frame>
 
                     <!-- Indicador Finalizado -->
-                    <Frame CornerRadius="5"
+                    <Frame CornerRadius="10"
                            BackgroundColor="#81C784"
+                           BorderColor="#81C784"
                            Padding="10"
                            HasShadow="False">
                         <Label Text="Finalizado"
                                FontSize="14"
+                               FontFamily="Koulen"
                                TextColor="White"
                                HorizontalOptions="Center"
                                VerticalOptions="Center" />
@@ -66,10 +81,11 @@
                 </HorizontalStackLayout>
 
                 <!-- Lista de gastos -->
-                <Frame MaximumHeightRequest="400">
+            <Frame MaximumHeightRequest="400" BackgroundColor="#EFEDE5"  BorderColor="#EFEDE5">
                     <CollectionView x:Name="GastosCollectionView"
                                     ItemsSource="{Binding Gastos}"
-                                    SelectionMode="None">
+                                    SelectionMode="Single"
+                                    SelectionChanged="OnGastoSeleccionado">
 
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
@@ -77,21 +93,27 @@
                                        CornerRadius="10"
                                        Padding="10"
                                        Margin="0,5"
-                                       HasShadow="True">
+                                       HasShadow="True"
+                                       BorderColor="#EFEDE5">
+                                    
                                     <Grid ColumnDefinitions="Auto, 4*, 1*" 
                                           RowDefinitions="Auto">
                                         <!-- Franja de color -->
                                         <BoxView Color="{Binding ColorEstado}"
-                                                 WidthRequest="10"
+                                                 WidthRequest="15"
                                                  VerticalOptions="FillAndExpand"
                                                  HorizontalOptions="Start"
-                                                 Grid.Column="0" />
+                                                 Grid.Column="0"
+                                                 CornerRadius="5"/>
 
                                         <!-- Categoría y fecha -->
-                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <VerticalStackLayout Grid.Column="1" 
+                                                             Spacing="2" 
+                                                             Padding="6">
                                             <Label Text="{Binding Categorias}"
                                                    FontSize="16"
                                                    TextColor="Black"
+                                                   FontFamily="Koulen"
                                                    FontAttributes="Bold" 
                                                    Padding="5"/>
                                             <Label Text="{Binding FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}"
@@ -103,6 +125,7 @@
                                         <Label Text="{Binding Valor, StringFormat='${0:F2}'}"
                                                FontSize="16"
                                                TextColor="Black"
+                                               FontFamily="Koulen"
                                                FontAttributes="Bold"
                                                HorizontalOptions="End"
                                                VerticalOptions="Center"
@@ -117,11 +140,13 @@
                 <Grid ColumnDefinitions="*,Auto" Padding="10,5">
                     <Label Text="TOTAL"
                            FontSize="18"
+                           FontFamily="Koulen"
                            TextColor="Black"
                            FontAttributes="Bold" />
                     <Label Text="{Binding TotalGastos, StringFormat='${0:F2}'}"
                            FontSize="18"
                            TextColor="Black"
+                           FontFamily="Koulen"
                            FontAttributes="Bold"
                            HorizontalOptions="End" />
                 </Grid>
@@ -130,11 +155,13 @@
                         FontSize="18"
                         BackgroundColor="#849671"
                         TextColor="White"
-                        CornerRadius="30"
+                        FontFamily="Koulen"
+                        CornerRadius="25"
                         HeightRequest="45"
                         HorizontalOptions="Center"
                         Clicked="OnIngresarGastoClicked" />
 
             </VerticalStackLayout>
-    </Grid>
+        </Grid>
+    </ScrollView>
 </ContentPage>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonetixProyectoAPP.Views.DetalleGasto"
+             Title="DetalleGasto"
+             BackgroundColor="#EFEDE5">
+    <Grid>
+        <!-- Contenido Principal -->
+        <ScrollView>
+            <StackLayout Padding="20" Spacing="10">
+                <Label Text="MONETIX"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       FontFamily="Koulen"
+                       HorizontalOptions="Center"
+                       TextColor="#809671" />
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label Text="Detalles"
+                           FontSize="36"
+                           FontAttributes="Bold"
+                           FontFamily="Koulen"
+                           HorizontalOptions="Center"
+                           TextColor="#000000" />
+                    <Image Source="https://i.imgur.com/KWshaxa.png"
+                           HeightRequest="35"
+                           WidthRequest="35" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout HorizontalOptions="End">
+                    <Label Text="{Binding Estados}" 
+                           FontSize="16"
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                </HorizontalStackLayout>
+
+                <VerticalStackLayout Padding="20">
+                    <Label Text="Fecha Inicial"
+                           FontAttributes="Bold" 
+                           FontSize="18" 
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                    <Label Text="{Binding FechaRegistro, StringFormat='{0:dd/MMM/yyyy}'}" 
+                           FontSize="16"
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                    
+                    <Label Text="Fecha Final"
+                           FontAttributes="Bold" 
+                           FontSize="18" 
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                    <Label Text="{Binding FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}" 
+                           FontSize="16"
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+
+                    <Label Text="Categoria"
+                           FontAttributes="Bold" 
+                           FontSize="18" 
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                    <Label Text="{Binding Categorias}" 
+                           FontSize="16"
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                    
+                    <Label Text="Descripcion"
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            FontFamily="Koulen"
+                            TextColor="Black" />
+                    <Label Text="{Binding Descripcion}" 
+                            FontSize="16"
+                            FontFamily="Koulen"
+                            TextColor="Black" />
+
+                    <Label Text="Valor"
+                           FontAttributes="Bold" 
+                           FontSize="18" 
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+                    <Label Text="{Binding Valor, StringFormat='${0:F2}'}" 
+                           FontSize="16" 
+                           FontFamily="Koulen"
+                           TextColor="Black" />
+
+                    <StackLayout Orientation="Horizontal" Spacing="20" HorizontalOptions="Center">
+                        <Button Text="ELIMINAR"
+                                TextColor="#FFFFFF"
+                                FontFamily="Koulen"
+                                FontSize="22"
+                                BackgroundColor="#BF7373"
+                                CornerRadius="25"
+                                Clicked="OnEliminarClicked" />
+                        <Button Text="PAGAR"
+                                FontSize="22"
+                                TextColor="#FFFFFF"
+                                FontFamily="Koulen"
+                                BackgroundColor="#849671"
+                                CornerRadius="25"
+                                Clicked="OnPagarGastoClicked" />
+                    </StackLayout>
+                </VerticalStackLayout>
+            </StackLayout>
+        </ScrollView>
+
+        <!-- Diálogo de Pago -->
+        <Frame x:Name="PagoDialogo"
+               BackgroundColor="White"
+               CornerRadius="20"
+               Padding="20"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               IsVisible="False">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="INGRESE EL VALOR QUE DESEA PAGAR"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="Black" />
+                <Image Source="https://i.imgur.com/KWshaxa.png"
+                       HeightRequest="200"
+                       WidthRequest="200" />
+                <Entry x:Name="EntryPago"
+                       Placeholder="$"
+                       FontSize="18"
+                       Keyboard="Numeric"
+                       HorizontalOptions="Fill" />
+
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Button Text="CANCELAR"
+                            BackgroundColor="Gray"
+                            TextColor="White"
+                            FontSize="18"
+                            CornerRadius="25"
+                            Clicked="OnCancelarPagoClicked" />
+                    <Button Text="PAGAR"
+                            BackgroundColor="#849671"
+                            TextColor="White"
+                            FontSize="18"
+                            CornerRadius="25"
+                            Clicked="OnConfirmarPagoClicked" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>
