@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Json;
 using Microsoft.Maui.Controls;
 using MonetixProyectoAPP.Models;
 
@@ -7,13 +8,17 @@ namespace MonetixProyectoAPP.Views
 {
     public partial class IngresarGasto : ContentPage
     {
+        private readonly HttpClient _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri("https://localhost:7156/api/")
+        };
+
         public IngresarGasto()
         {
             InitializeComponent();
             CargarCategorias();
         }
 
-        // Método para cargar las categorías en el Picker
         private void CargarCategorias()
         {
             var categorias = new List<string>
@@ -30,12 +35,10 @@ namespace MonetixProyectoAPP.Views
             CategoriaPicker.ItemsSource = categorias;
         }
 
-        // Botón "Crear"
         private async void OnGuardarGastoClicked(object sender, EventArgs e)
         {
             try
             {
-                // Validaciones de entrada
                 if (CategoriaPicker.SelectedItem == null ||
                     string.IsNullOrWhiteSpace(DescripcionEntry.Text) ||
                     string.IsNullOrWhiteSpace(ValorEntry.Text) ||
@@ -45,31 +48,29 @@ namespace MonetixProyectoAPP.Views
                     return;
                 }
 
-                // Crear el objeto Gasto
                 var nuevoGasto = new Gasto
                 {
                     FechaRegristo = FechaRegistroPicker.Date,
-                    FechaFinal = FechaRegistroPicker.Date.AddDays(30), // Ejemplo: 30 días desde la fecha de registro
+                    FechaFinal = FechaRegistroPicker.Date.AddDays(30),
                     Categorias = Enum.TryParse(CategoriaPicker.SelectedItem.ToString(), out Categoria categoriaSeleccionada)
                         ? categoriaSeleccionada
                         : Categoria.Otro,
                     Descripcion = DescripcionEntry.Text,
                     Valor = valor,
-                    ValorPagado = 0, // Por defecto, inicialmente no se ha pagado nada
-                    Estados = Estado.Pendiente // Estado inicial como "Pendiente"
+                    ValorPagado = 0,
+                    Estados = Estado.Pendiente
                 };
 
-                // Asignar el color del estado
-                nuevoGasto.AsignarColorEstado();
-
-                // Aquí puedes guardar el nuevo gasto en tu base de datos o colección
-                // Por ejemplo:
-                // await App.Database.SaveGastoAsync(nuevoGasto);
-
-                await DisplayAlert("Éxito", "El gasto se ha registrado correctamente.", "OK");
-
-                // Regresar a la página anterior
-                await Navigation.PopAsync();
+                var response = await _httpClient.PostAsJsonAsync("Gasto", nuevoGasto);
+                if (response.IsSuccessStatusCode)
+                {
+                    await DisplayAlert("Éxito", "El gasto se ha registrado correctamente.", "OK");
+                    await Navigation.PopAsync();
+                }
+                else
+                {
+                    await DisplayAlert("Error", "No se pudo guardar el gasto. Intente nuevamente.", "OK");
+                }
             }
             catch (Exception ex)
             {
@@ -77,10 +78,9 @@ namespace MonetixProyectoAPP.Views
             }
         }
 
-        // Botón "Cancelar"
         private async void OnCancelarClicked(object sender, EventArgs e)
         {
-            await Navigation.PopAsync(); // Regresa a la página anterior
+            await Navigation.PopAsync();
         }
     }
 }

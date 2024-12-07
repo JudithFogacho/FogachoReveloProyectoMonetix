@@ -8,6 +8,7 @@
         Ropa,
         Educacion,
         Salud,
-        ServiciosBasicos
+        ServiciosBasicos,
+        Otros
     }
 }
