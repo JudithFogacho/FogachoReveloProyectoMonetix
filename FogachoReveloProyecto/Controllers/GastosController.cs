@@ -15,183 +15,189 @@ namespace FogachoReveloProyecto.Controllers
 
         public GastosController(FogachoReveloDataBase context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // GET: Gasto
         // GET: Gasto
         public async Task<IActionResult> PaginaInicial(string categoria)
         {
             var gastos = from g in _context.Gasto select g;
 
-            // Si la categoría no es nula o vacía, se filtra los gastos por la categoría seleccionada
-            if (!string.IsNullOrEmpty(categoria))
+            if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, out var categoriaEnum))
             {
-                Categoria categoriaEnum;
-                if (Enum.TryParse(categoria, out categoriaEnum))
-                {
-                    gastos = gastos.Where(g => g.Categorias == categoriaEnum);
-                }
+                gastos = gastos.Where(g => g.Categorias == categoriaEnum);
             }
 
-            // Pasa el total a la vista
             var subtotalGastos = await gastos.SumAsync(g => g.Valor);
             var subtotalValorPagado = await gastos.SumAsync(g => g.ValorPagado);
-
-            // Calcular el total restando el subtotalGastos y el subtotalGastosPagados
             var total = subtotalGastos - subtotalValorPagado;
 
-            // Pasar los subtotales y el total a la vista
             ViewBag.SubtotalGastos = subtotalGastos;
             ViewBag.SubtotalValorPagado = subtotalValorPagado;
             ViewBag.Total = total;
 
-
             return View(await gastos.ToListAsync());
         }
 
+        [HttpGet]
         public IActionResult CrearGasto()
         {
-            return View();
+            return View(new Gasto { FechaRegristo = DateTime.Now });
         }
-        
 
         [HttpPost]
-        //Metodo para crear un gasto desde el controlador
-        public async Task<IActionResult> CrearGasto(Gasto gasto)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearGasto([Bind("FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
         {
-            if (ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid)
+                {
+                    return View(gasto);
+                }
+
                 gasto.ValidarValor();
-                _context.Add(gasto);
+                await _context.AddAsync(gasto);
                 await _context.SaveChangesAsync();
-                // Redirige a la lista de gastos después de crear
-                return RedirectToAction(nameof(PaginaInicial)); 
+
+                TempData["Success"] = "Gasto creado exitosamente.";
+                return RedirectToAction(nameof(PaginaInicial));
             }
-            // Si hay errores vuelve a la vista con el gasto
-            return View(gasto); 
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al crear el gasto: " + ex.Message);
+                return View(gasto);
+            }
         }
 
-        // GET: Gasto/Details/5
-        //Muestra los detalles del Gasto 
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
-                return NotFound();
+                return BadRequest("ID de gasto no proporcionado.");
             }
 
             var gasto = await _context.Gasto
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.IdGasto == id);
+
             if (gasto == null)
             {
-                return NotFound();
+                return NotFound($"No se encontró el gasto con ID: {id}");
             }
 
             return View(gasto);
         }
 
-
-        // POST: Gasto/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        
-        // GET: Gasto/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
-                return NotFound();
+                return BadRequest("ID de gasto no proporcionado.");
             }
 
             var gasto = await _context.Gasto.FindAsync(id);
+
             if (gasto == null)
             {
-                return NotFound();
+                return NotFound($"No se encontró el gasto con ID: {id}");
             }
+
             return View(gasto);
         }
 
-        // POST: Gasto/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //Este metodo nos ayuda a editar un gasto
         public async Task<IActionResult> Edit(int id, [Bind("IdGasto,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
         {
             if (id != gasto.IdGasto)
             {
-                return NotFound();
+                return BadRequest("ID de gasto no coincide.");
             }
 
-            if (ModelState.IsValid)
+            if (!await GastoExists(id))
             {
-                try
-                {
-                    // Llamar a ActualizacionPagos antes de actualizar el gasto
-                    // Actualizamos el estado
-                    gasto.ValidarValor(); 
-                    _context.Update(gasto);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GastoExists(gasto.IdGasto))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                //Nos retorna a la pagina inicial
+                return NotFound($"No se encontró el gasto con ID: {id}");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(gasto);
+            }
+
+            try
+            {
+                gasto.ValidarValor();
+                _context.Update(gasto);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Gasto actualizado exitosamente.";
                 return RedirectToAction(nameof(PaginaInicial));
             }
-            return View(gasto);
+            catch (DbUpdateConcurrencyException)
+            {
+                ModelState.AddModelError("", "Error de concurrencia al actualizar el gasto.");
+                return View(gasto);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al actualizar el gasto: " + ex.Message);
+                return View(gasto);
+            }
         }
 
-        // GET: Gasto/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            if (!id.HasValue)
             {
-                return NotFound();
+                return BadRequest("ID de gasto no proporcionado.");
             }
 
             var gasto = await _context.Gasto
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.IdGasto == id);
+
             if (gasto == null)
             {
-                return NotFound();
+                return NotFound($"No se encontró el gasto con ID: {id}");
             }
 
             return View(gasto);
         }
 
-        // POST: Gasto/Delete/5
-        //Metodo que elimina un gasto
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var gasto = await _context.Gasto.FindAsync(id);
-            //Verificamos que el gasto exista
-            if (gasto != null)
+
+            if (gasto == null)
             {
-                //eliminamos el gasto
-                _context.Gasto.Remove(gasto);
+                return NotFound($"No se encontró el gasto con ID: {id}");
             }
-            //Nos manda a la pagina inicial
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(PaginaInicial));
+
+            try
+            {
+                _context.Gasto.Remove(gasto);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Gasto eliminado exitosamente.";
+                return RedirectToAction(nameof(PaginaInicial));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al eliminar el gasto: " + ex.Message;
+                return RedirectToAction(nameof(PaginaInicial));
+            }
         }
 
-        //Verifica que el gasto exista por medio de su ID
-        private bool GastoExists(int id)
+        private async Task<bool> GastoExists(int id)
         {
-            return _context.Gasto.Any(e => e.IdGasto == id);
+            return await _context.Gasto.AnyAsync(e => e.IdGasto == id);
         }
     }
 }
