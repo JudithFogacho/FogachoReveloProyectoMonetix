@@ -20,16 +20,13 @@
                    HorizontalOptions="Center"
                    TextColor="#000000" />
 
-            <!-- Fecha -->
-            <Label Text="FECHA"
-                   FontFamily="Koulen"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
-            <DatePicker x:Name="FechaRegistroPicker"
-                        Format="dd/MM/yyyy"
-                        TextColor="#000000"
-                        BackgroundColor="White" />
+            <!-- DatePicker para Fecha de Registro -->
+            <Label Text="Fecha de Registro" />
+            <DatePicker x:Name="FechasRegistroPicker" />
+
+            <!-- DatePicker para Fecha Final -->
+            <Label Text="Fecha Final" />
+            <DatePicker x:Name="FechaFinalPicker" />
 
             <!-- Categoría -->
             <Label Text="CATEGORÍA"

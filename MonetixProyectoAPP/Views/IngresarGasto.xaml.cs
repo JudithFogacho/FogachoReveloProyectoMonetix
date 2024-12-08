@@ -48,19 +48,24 @@ namespace MonetixProyectoAPP.Views
                     return;
                 }
 
+                // Crear el gasto
                 var nuevoGasto = new Gasto
                 {
-                    FechaRegristo = FechaRegistroPicker.Date,
-                    FechaFinal = FechaRegistroPicker.Date.AddDays(30),
+                    FechaRegristo = FechasRegistroPicker.Date,
+                    FechaFinal = FechaFinalPicker.Date,
                     Categorias = Enum.TryParse(CategoriaPicker.SelectedItem.ToString(), out Categoria categoriaSeleccionada)
                         ? categoriaSeleccionada
                         : Categoria.Otro,
                     Descripcion = DescripcionEntry.Text,
                     Valor = valor,
-                    ValorPagado = 0,
-                    Estados = Estado.Pendiente
+                    ValorPagado = 0
                 };
 
+                // Validar y actualizar el estado del gasto
+                nuevoGasto.ValidarValor();
+                nuevoGasto.AsignarColorEstado();
+
+                // Enviar el gasto al servidor
                 var response = await _httpClient.PostAsJsonAsync("Gasto", nuevoGasto);
                 if (response.IsSuccessStatusCode)
                 {
