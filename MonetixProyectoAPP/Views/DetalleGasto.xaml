@@ -54,7 +54,7 @@
                            FontSize="18" 
                            FontFamily="Koulen"
                            TextColor="Black" />
-                    <Label Text="{Binding Gasto.FechaRegistro, StringFormat='{0:dd/MMM/yyyy}'}" 
+                    <Label Text="{Binding Gasto.FechaRegristo, StringFormat='{0:dd/MMM/yyyy}'}" 
                            FontSize="16"
                            FontFamily="Koulen"
                            TextColor="Black" />
