@@ -163,5 +163,10 @@ namespace MonetixProyectoAPP.Views
                 await DisplayAlert("Error", "Ocurrió un error inesperado. Por favor intente nuevamente.", "OK");
             }
         }
+
+        private async void OnBackClicked(object sender, EventArgs e)
+        {
+            await Navigation.PopAsync();
+        }
     }
 }
