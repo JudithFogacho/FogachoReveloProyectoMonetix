@@ -34,7 +34,7 @@ public partial class PaginaInicial : ContentPage
     // Propiedades para los totales
     public decimal SubtotalGastos => (decimal)GastosFiltrados.Sum(g => g.Valor);
     public decimal SubtotalValorPagado => (decimal)GastosFiltrados.Sum(g => g.ValorPagado);
-    public decimal TotalGastos => SubtotalGastos + SubtotalValorPagado;
+    public decimal TotalGastos => SubtotalGastos - SubtotalValorPagado;
 
     private async Task CargarGastos()
     {
