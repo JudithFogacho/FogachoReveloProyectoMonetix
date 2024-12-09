@@ -31,6 +31,11 @@ public partial class PaginaInicial : ContentPage
         await CargarGastos();
     }
 
+    // Propiedades para los totales
+    public decimal SubtotalGastos => (decimal)GastosFiltrados.Sum(g => g.Valor);
+    public decimal SubtotalValorPagado => (decimal)GastosFiltrados.Sum(g => g.ValorPagado);
+    public decimal TotalGastos => SubtotalGastos + SubtotalValorPagado;
+
     private async Task CargarGastos()
     {
         try
@@ -46,6 +51,10 @@ public partial class PaginaInicial : ContentPage
                 }
                 // Inicializamos GastosFiltrados con la lista completa al cargar
                 GastosFiltrados = new ObservableCollection<Gasto>(Gastos);
+                // Notificar que los totales han cambiado
+                OnPropertyChanged(nameof(SubtotalGastos));
+                OnPropertyChanged(nameof(SubtotalValorPagado));
+                OnPropertyChanged(nameof(TotalGastos));
             }
         }
         catch (Exception ex)
@@ -73,6 +82,11 @@ public partial class PaginaInicial : ContentPage
 
         // Actualizar la vista con los resultados filtrados
         GastosCollectionView.ItemsSource = GastosFiltrados;
+
+        // Actualizar totales después del filtrado
+        OnPropertyChanged(nameof(SubtotalGastos));
+        OnPropertyChanged(nameof(SubtotalValorPagado));
+        OnPropertyChanged(nameof(TotalGastos));
     }
     private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
     {

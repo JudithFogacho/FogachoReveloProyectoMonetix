@@ -138,18 +138,21 @@
                     </CollectionView>
                 </Frame>
                 <!-- Total y botón -->
-                <Grid ColumnDefinitions="*,Auto" Padding="10,5">
-                    <Label Text="TOTAL"
-                           FontSize="18"
-                           FontFamily="Koulen"
-                           TextColor="Black"
-                           FontAttributes="Bold" />
-                    <Label Text="{Binding TotalGastos, StringFormat='${0:F2}'}"
-                           FontSize="18"
-                           TextColor="Black"
-                           FontFamily="Koulen"
-                           FontAttributes="Bold"
-                           HorizontalOptions="End" />
+                <Grid Padding="10,5" RowDefinitions="Auto,Auto,Auto">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Row="0" Text="Subtotal Gastos:" FontSize="16" FontAttributes="Bold" />
+                    <Label Grid.Row="0" Text="{Binding SubtotalGastos, StringFormat='${0:F2}'}" FontSize="16" HorizontalOptions="End" />
+
+                    <Label Grid.Row="1" Text="Subtotal Valor Pagado:" FontSize="16" FontAttributes="Bold" />
+                    <Label Grid.Row="1" Text="{Binding SubtotalValorPagado, StringFormat='${0:F2}'}" FontSize="16" HorizontalOptions="End" />
+
+                    <Label Grid.Row="2" Text="Total:" FontSize="18" FontAttributes="Bold" />
+                    <Label Grid.Row="2" Text="{Binding TotalGastos, StringFormat='${0:F2}'}" FontSize="18" HorizontalOptions="End" />
                 </Grid>
 
                 <Button Text="Ingresar Gasto"
