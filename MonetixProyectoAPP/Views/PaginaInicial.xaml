@@ -20,7 +20,8 @@
                                FontFamily="Koulen"
                                BackgroundColor="#F2F2F2"
                                TextColor="Black"
-                               PlaceholderColor="Gray" />
+                               PlaceholderColor="Gray"
+                               TextChanged="OnSearchBarTextChanged" />
 
                     <ImageButton Source="https://i.imgur.com/188LNTH.png"
                          WidthRequest="30"

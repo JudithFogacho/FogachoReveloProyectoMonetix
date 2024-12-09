@@ -9,6 +9,7 @@ public partial class PaginaInicial : ContentPage
 {
     private readonly HttpClient _httpClient;
     public ObservableCollection<Gasto> Gastos { get; set; } = new();
+    public ObservableCollection<Gasto> GastosFiltrados { get; set; } = new();
     public PaginaInicial()
     {
         InitializeComponent();
@@ -43,6 +44,8 @@ public partial class PaginaInicial : ContentPage
                     gasto.AsignarColorEstado(); // Método para asignar color al estado
                     Gastos.Add(gasto);
                 }
+                // Inicializamos GastosFiltrados con la lista completa al cargar
+                GastosFiltrados = new ObservableCollection<Gasto>(Gastos);
             }
         }
         catch (Exception ex)
@@ -50,6 +53,26 @@ public partial class PaginaInicial : ContentPage
             // Maneja errores de conexión o datos aquí
             await DisplayAlert("Error", $"No se pudieron cargar los gastos: {ex.Message}", "OK");
         }
+    }
+
+    private void OnSearchBarTextChanged(object sender, TextChangedEventArgs e)
+    {
+        var textoBusqueda = e.NewTextValue?.ToLower();
+        if (string.IsNullOrWhiteSpace(textoBusqueda))
+        {
+            // Si no hay texto, mostrar todos los gastos
+            GastosFiltrados = new ObservableCollection<Gasto>(Gastos);
+        }
+        else
+        {
+            // Filtrar los gastos por la categoría que coincida con el texto ingresado
+            GastosFiltrados = new ObservableCollection<Gasto>(
+                Gastos.Where(g => g.Categorias.ToString().ToLower().Contains(textoBusqueda))
+            );
+        }
+
+        // Actualizar la vista con los resultados filtrados
+        GastosCollectionView.ItemsSource = GastosFiltrados;
     }
     private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
     {
