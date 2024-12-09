@@ -13,7 +13,7 @@ namespace FogachoReveloProyecto.Models
         public DateTime FechaFinal { get; set; }
         
         [Required]
-        public Categoria Categorias { get; set; }
+        public Categoria? Categorias { get; set; }
         [Required]
         public string? Descripcion { get; set; }
         [Required]

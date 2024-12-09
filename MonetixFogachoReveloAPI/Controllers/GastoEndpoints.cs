@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OpenApi;
 using MonetixFogachoReveloAPI.Data;
 using MonetixFogachoReveloAPI.Data.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MonetixFogachoReveloAPI.Controllers;
 public static class GastoEndpoints
@@ -43,7 +44,7 @@ public static class GastoEndpoints
             if (gasto.FechaFinal != default)
                 gastoExistente.FechaFinal = gasto.FechaFinal;
 
-            if (gasto.Categorias != null)
+            if (gasto.Categorias != default(Categoria)) // Verifica si se proporcionó un valor válido
                 gastoExistente.Categorias = gasto.Categorias;
 
             if (!string.IsNullOrWhiteSpace(gasto.Descripcion))
