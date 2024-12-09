@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FogachoReveloProyecto", "Fo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonetixFogachoReveloAPI", "MonetixFogachoReveloAPI\MonetixFogachoReveloAPI.csproj", "{57603F74-67AC-409D-B6D0-96669CE3068D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonetixProyectoAPP", "MonetixProyectoAPP\MonetixProyectoAPP.csproj", "{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonetixProyectoAPP", "MonetixProyectoAPP\MonetixProyectoAPP.csproj", "{CFB6ADE3-8082-4935-8A2D-EBDD296710EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocumentoPDF", "DocumentoPDF", "{284CDC6B-31E2-4962-90A5-31D94EB39A66}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Downloads\PropuestaProyectoPrograIV (1).pdf = ..\..\..\Downloads\PropuestaProyectoPrograIV (1).pdf
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
