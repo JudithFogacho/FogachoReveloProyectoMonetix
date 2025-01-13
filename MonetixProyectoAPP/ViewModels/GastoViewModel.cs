@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MonetixProyectoAPP.ViewModels
 {
-    internal class DetalleGastoViewModel
+    internal class GastoViewModel
     {
     }
 }
