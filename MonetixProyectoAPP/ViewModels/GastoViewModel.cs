@@ -20,7 +20,6 @@ namespace MonetixProyectoAPP.ViewModels
 
         public GastoViewModel() { 
             LoadGastos ();
-        
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
