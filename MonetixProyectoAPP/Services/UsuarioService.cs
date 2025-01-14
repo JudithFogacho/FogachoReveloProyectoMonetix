@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
 using Microsoft.Maui.Storage;
+using MonetixProyectoAPP.Models;
 
 namespace MonetixProyectoAPP.Services
 {
@@ -36,8 +37,24 @@ namespace MonetixProyectoAPP.Services
             return _httpClient;
         }
 
+        public async Task<List<Usuario>> GetUsuariosAsync()
+        {
+            return await _httpClient.GetFromJsonAsync<List<Usuario>>("Usuario") ?? new List<Usuario>();
+
+        }
+
         public class TokenResponse { 
             public string Token { get; set; }
         }
+        public async Task CreateUsuarioAsync(Usuario nuevoUsuario)
+        {
+            await _httpClient.PostAsJsonAsync("Usuario", nuevoUsuario);
+        }
+        public async Task DeleteUsuarioAsync(int idUsuario)
+        {
+            await _httpClient.DeleteAsync($"Usuario/{idUsuario}");
+        }
+
+
     }
 }
