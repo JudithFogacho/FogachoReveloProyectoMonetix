@@ -2,6 +2,7 @@
 using MonetixProyectoAPP.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -12,11 +13,18 @@ namespace MonetixProyectoAPP.ViewModels
 {
     public class GastoViewModel: INotifyPropertyChanged
     {
+        private readonly ApiPublicaService _apiPublicaService = new ApiPublicaService();
+
         private readonly GastoService _service = new GastoService();
 
         private List<Gasto> _gasto = new List<Gasto>();
 
+        private ObservableCollection<Local> _locales = new ObservableCollection<Local>();
+
         public List<Gasto> Gastos { get => _gasto; set { _gasto = value; OnPropertyChanged(); } }
+
+        public ObservableCollection<Local> Locales { get => _locales; set { _locales = value; OnPropertyChanged(); } }
+
 
         public GastoViewModel() { 
             LoadGastos ();
@@ -51,6 +59,17 @@ namespace MonetixProyectoAPP.ViewModels
         {
             await _service.DeleteGastoAsync(idGasto);
             await LoadGastos();
+        }
+
+
+        public async Task CargarLocalesPorCategoria(string categoria)
+        {
+            var locales = await _apiPublicaService.GetLocalesPorCategoriaAsync(categoria);
+            Locales.Clear();
+            foreach (var local in locales)
+            {
+                Locales.Add(local);
+            }
         }
 
 
