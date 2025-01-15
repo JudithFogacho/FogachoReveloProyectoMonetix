@@ -20,13 +20,25 @@ namespace MonetixProyectoAPP.Services
         public async Task<string> LoginAsync(string email, string password) {
             var credenciales = new { Email = email, Password = password };
 
-            var respuesta = await _httpClient.PostAsJsonAsync("Usuario/login", credenciales);
+            try
+            {
+                var respuesta = await _httpClient.PostAsJsonAsync("Usuario/login", credenciales);
+                if (respuesta.IsSuccessStatusCode) { 
+                    var usuario = await respuesta.Content.ReadFromJsonAsync<Usuario>();
 
-            if (respuesta.IsSuccessStatusCode) {
-                var tokenResponse = await respuesta.Content.ReadFromJsonAsync<TokenResponse>();
-                return tokenResponse?.Token;
+                    if (usuario != null && usuario.Email == email && usuario.Password == password) {
+
+                        var token = "simulated-token";
+                        return token;
+                    }
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex) {
+                Console.WriteLine($"Error en LoginAsync: {ex.Message}");
+                return null;
+            }
+            
         }
 
         public HttpClient GetAutheticatedHttpClient() {

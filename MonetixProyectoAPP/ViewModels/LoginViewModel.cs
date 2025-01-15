@@ -14,7 +14,7 @@ using MonetixProyectoAPP.Views;
 
 namespace MonetixProyectoAPP.ViewModels
 {
-    public class LoginViewModel: INotifyPropertyChanged
+    public class LoginViewModel: BaseViewModel
     {
         private readonly UsuarioService _service = new UsuarioService();
 
@@ -23,20 +23,13 @@ namespace MonetixProyectoAPP.ViewModels
 
         public string Email {
             get => _email; 
-            set { 
-                _email = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty(ref _email, value);
         }
 
         public string Password
         {
             get => _password;
-            set
-            {
-                _password = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty(ref _password, value);
         }
 
         //Creación de metodos para que nos permita enlazar acciones en la interfaz de usuario
@@ -46,14 +39,6 @@ namespace MonetixProyectoAPP.ViewModels
             loginCommand = new Command(async () => await LoginAsync());
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        }
 
         private async Task LoginAsync() {
 
@@ -62,19 +47,35 @@ namespace MonetixProyectoAPP.ViewModels
                 return;
             }
 
-            try {
-                var token = await _service.LoginAsync(Email, Password);
-                if (!string.IsNullOrEmpty(token))
-                {
-                    Preferences.Set("auth_token", token);
-                    await Application.Current.MainPage.Navigation.PushAsync(new PaginaInicial());
-                }
-                else { 
-                    await Application.Current.MainPage.DisplayAlert("ERROR", "Credenciales Incorrectas", "OK");
-                }
-            } catch (Exception ex) {
+            try
+            {
 
-                await Application.Current.MainPage.DisplayAlert("ERROR", $"Ocurrio un error: {ex.Message}", "OK");
+                await ExecuteAsync(async () =>
+                {
+                    var token = await _service.LoginAsync(Email, Password);
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        Preferences.Set("auth_token", token);
+                        await Shell.Current.GoToAsync("///PaginaInicial");
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("ERROR", "Credenciales Incorrectas", "OK");
+                    }
+                });
+
+
+            }
+            catch (System.Net.Http.HttpRequestException ex){
+                await Application.Current.MainPage.DisplayAlert("Error", "No se pudo conectar al servidor. Verifica tu conexion a internet.", "OK");
+                Console.WriteLine($"Error de conexion: {ex.Message}");
+
+
+            }catch (Exception ex)
+            {
+
+                await Application.Current.MainPage.DisplayAlert("Error", "Ocurrio un error inesperado. Intentalo más tarde.", "OK");
+                Console.WriteLine($"Error inesperado: {ex.Message}");
             }
         }
 
