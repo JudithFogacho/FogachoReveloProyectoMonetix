@@ -82,6 +82,20 @@ h1 {
     max-width: 80px;
 }
 
+.TituloCG {
+    font-family: "Kosugi Maru", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 15px;
+}
+.TituloSG {
+    font-family: "Kosugi Maru", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+}
+
 .imagen-bienvenida {
     display: flex;
     align-items: center;
