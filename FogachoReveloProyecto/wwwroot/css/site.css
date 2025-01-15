@@ -45,6 +45,11 @@ h1 {
     font-size: 2.5rem;
     text-align: center;
 }
+.container h4 {
+    color: black;
+    font-size: 2.5rem;
+    text-align: left;
+}
 
 
 .ImgLogo{
@@ -82,6 +87,16 @@ h1 {
     align-items: center;
     padding: 10px 20px;
 }
+
+.imagen-gasto {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    justify-content: center;
+}
+
+
+
 .cerrar-sesion{
     padding-left: 900px;
 }
