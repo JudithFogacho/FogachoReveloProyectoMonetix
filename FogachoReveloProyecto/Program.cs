@@ -7,7 +7,16 @@ builder.Services.AddDbContext<FogachoReveloDataBase>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Usuarios/Login";
+        options.AccessDeniedPath = "/Usuarios/AccessDenied";
+    });
+
 var app = builder.Build();
+
+app.UseAuthentication();  // Importante para manejar la autenticación
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

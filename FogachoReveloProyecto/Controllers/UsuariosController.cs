@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 namespace FogachoReveloProyecto.Controllers
 {
@@ -66,7 +68,14 @@ namespace FogachoReveloProyecto.Controllers
                 ModelState.AddModelError(string.Empty, "Contraseña incorrecta.");
                 return View(usuario);
             }
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userBaseDatos.Nombre),
+                new Claim(ClaimTypes.Email, userBaseDatos.Email)
+            };
 
+            var claimsIdentity = new ClaimsIdentity(claims, "Login");
+            await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity));
             return RedirectToAction("PaginaInicial", "Gastos");
         }
 

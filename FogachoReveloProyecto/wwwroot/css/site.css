@@ -13,7 +13,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem #809671, 0 0 0 0.25rem white;
 }
 
 /* Estilos generales */
@@ -71,7 +71,20 @@ h1 {
     font-style: normal;
     font-size:40px;
 }
+.logopi {
+    margin: auto;
+    width: 50%; /* Ajusta el tamaño al 50% del contenedor */
+    max-width: 80px;
+}
 
+.imagen-bienvenida {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+}
+.cerrar-sesion{
+    padding-left: 900px;
+}
 .Subtitulo {
     font-family: "Kosugi Maru", serif;
     font-weight: 400;
@@ -135,37 +148,28 @@ input:focus {
 }
 
     .btn-primary:hover {
-        background-color: #E5E0D8;
+        background-color: #809671;
     }
-/*.btn-buscar {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    width: 20%;
-}*/
+
 .btn-buscar {
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: #809671;
+    border-radius: 10px;
     color: white;
     padding: 10px 20px;
     font-size: 1rem;
     border-radius: 5px;
     transition: background-color 0.3s ease;
     width: 20%;
-    margin-bottom: 15px; /* Añadido margen inferior para separarlo */
+    margin-bottom: 25px;
 }
-.btn-ingresar-gasto {
+.btn-success {
     margin-top: 20px; /* Asegura suficiente separación del botón Buscar */
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: #809671;
+    border-color: #809671;
     color: white;
     padding: 10px 20px;
     font-size: 1rem;
-    border-radius: 5px;
+    margin-bottom: 5px;
     transition: background-color 0.3s ease;
 }
 
@@ -190,6 +194,10 @@ table {
         text-align: center; /* Centrar texto */
         padding: 10px; /* Espaciado dentro de la celda */
         border-bottom: 2px solid #ddd; /* Separador inferior */
+        font-family: "Kosugi Maru", serif;
+        font-weight: 400;
+        font-style: normal;
+        font-weight: bold;
     }
 
     /* Celdas de la tabla */
@@ -200,10 +208,15 @@ table {
         border-bottom: 1px solid #ddd; /* Separador entre filas */
     }
 
-    /* Alternar colores de las filas */
-    table tbody tr:nth-child(even) {
-        background-color: #f9f9f9; /* Color más claro */
-    }
+.tabla-body {
+    font-family: "Kosugi Maru", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+/* Alternar colores de las filas */
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Color más claro */
+}
 
     table tbody tr:nth-child(odd) {
         background-color: #ffffff; /* Fondo blanco */
@@ -214,6 +227,43 @@ table {
         background-color: #f1f1f1; /* Resaltar fila */
     }
 
+.totales1 {
+    margin: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: white;
+    text-align:inherit
+}
+
+.totales2 {
+    margin: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: white;
+}
+
+.totales3 {
+    margin: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: white;
+}
+
+.text-right {
+    font-family: "Kosugi Maru", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+.precio1 {
+    padding-left: 550px;
+}
+
+.precio2 {
+    padding-left: 500px;
+}
+.precio3 {
+    padding-left: 650px;
+}
 
 
 /* Mensaje de registro */

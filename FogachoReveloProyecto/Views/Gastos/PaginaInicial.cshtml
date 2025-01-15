@@ -16,7 +16,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
 
-<h1 class="koulen-regular">Monetix</h1>
+<div class="bienvenida">
+    <div class="imagen-bienvenida">
+
+        <img src="~/img/LogoImg.png" alt="LogoImg" asp-append-version="true" class="logopi"/>
+        
+        <div> <p>Bienvenido, @ViewBag.NombreUsuario</p> </div>
+        <div class="cerrar-sesion"> <p> <a asp-controller="Usuarios" asp-action="Login">Cerrar Sesión</a></div> </p>
+    </div>
+   
+    <div>
+        <h1 class="koulen-regular">Monetix</h1>
+    </div>
+    
+</div>
+
 <h2 class="TituloIS"> PAGINA INICIAL</h2>
 
 
@@ -31,7 +45,7 @@
             }
         </select>
     </div>
-    <button type="submit" class="btn btn-buscar">Buscar</button>
+    <button type="submit" class="btn btn-buscar">-----Buscar-----</button>
 </form>
 
 <p>
@@ -55,14 +69,14 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.FechaRegristo)</td>
-                <td>@Html.DisplayFor(modelItem => item.FechaFinal)</td>
-                <td>@Html.DisplayFor(modelItem => item.Categorias)</td>
-                <td>@Html.DisplayFor(modelItem => item.Descripcion)</td>
-                <td>@Html.DisplayFor(modelItem => item.Valor)</td>
-                <td>@Html.DisplayFor(modelItem => item.ValorPagado)</td>
-                <td>@Html.DisplayFor(modelItem => item.Estados)</td>
-                <td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.FechaRegristo)</td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.FechaFinal)</td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Categorias)</td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Descripcion)</td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Valor)</td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.ValorPagado)</td>
+                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Estados)</td>
+                <td class="tabla-body">
                     <a asp-action="Edit" asp-route-id="@item.IdGasto">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.IdGasto">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.IdGasto">Delete</a>
@@ -70,18 +84,25 @@
             </tr>
         }
     </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="4" class="text-right"><strong>Subtotal Gastos:</strong></td>
-            <td><strong>@ViewBag.SubtotalGastos.ToString("C")</strong></td>
-        </tr>
-        <tr>
-            <td colspan="4" class="text-right"><strong>Subtotal Valor Pagado:</strong></td>
-            <td><strong>@ViewBag.SubtotalValorPagado.ToString("C")</strong></td>
-        </tr>
-        <tr>
-            <td colspan="4" class="text-right"><strong>Total:</strong></td>
-            <td><strong>@ViewBag.Total.ToString("C")</strong></td>
-        </tr>
-    </tfoot>
 </table>
+    <div class="totales1">
+        <div colspan="4" class="text-right">
+            <strong>Subtotal Gastos:</strong>
+            <strong class="precio1">@ViewBag.SubtotalGastos.ToString("C")</strong>
+        </div>
+
+    </div>
+    <div class="totales2">
+        <div colspan="4" class="text-right">
+            <strong>Subtotal Valor Pagado:</strong>
+            <strong class="precio2">@ViewBag.SubtotalValorPagado.ToString("C")</strong>
+        </div>
+    </div>
+    <div class="totales3">
+        <div colspan="4" class="text-right">
+            <strong>Total:</strong>
+            <strong class="precio3">@ViewBag.Total.ToString("C")</strong>
+        </div>
+    </div>
+    
+       

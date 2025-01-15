@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace FogachoReveloProyecto.Controllers
 {
@@ -17,10 +19,12 @@ namespace FogachoReveloProyecto.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-
         // GET: Gasto
         public async Task<IActionResult> PaginaInicial(string categoria)
         {
+            var nombreUsuario = User.Identity.IsAuthenticated ? User.Identity.Name : "Invitado";
+            ViewBag.NombreUsuario = nombreUsuario;
+
             var gastos = from g in _context.Gasto select g;
 
             if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, out var categoriaEnum))
@@ -198,6 +202,12 @@ namespace FogachoReveloProyecto.Controllers
         private async Task<bool> GastoExists(int id)
         {
             return await _context.Gasto.AnyAsync(e => e.IdGasto == id);
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Login", "Usuarios");
         }
     }
 }
