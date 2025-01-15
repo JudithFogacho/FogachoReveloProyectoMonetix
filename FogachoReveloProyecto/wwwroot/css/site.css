@@ -66,7 +66,11 @@ h1 {
     font-size:40px;
 }
 
-
+.Subtitulo {
+    font-family: "Kosugi Maru", serif;
+    font-weight: 400;
+    font-style: normal;
+}
 /* Contenedor de la columna */
 .col-md-4 {
     background-color: #ffffff;
