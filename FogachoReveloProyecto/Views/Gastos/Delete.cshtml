@@ -3,60 +3,49 @@
 @{
     ViewData["Title"] = "Delete";
 }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
 
-<h1>Eliminar</h1>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&display=swap" rel="stylesheet">
 
-<h3>¿Estás seguro de eliminar este gasto?</h3>
-<div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
+
+
+<div class="container mt-5">
+    <h2 class="TituloCG">ELIMINAR GASTO</h2>
+    <p class="text-danger TituloSG">¿Estás seguro de eliminar este gasto?</p>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaRegristo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaRegristo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaFinal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaFinal)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Categorias)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categorias)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Valor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Valor)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ValorPagado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ValorPagado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estados)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estados)
-        </dd>
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.FechaRegristo):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FechaRegristo)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.FechaFinal):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FechaFinal)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Categorias):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Categorias)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Descripcion):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Descripcion)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Valor):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Valor)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.ValorPagado):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ValorPagado)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Estados):</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Estados)</dd>
     </dl>
-    
-    <form asp-action="Delete">
+
+    <form asp-action="Delete" class="mt-4">
         <input type="hidden" asp-for="IdGasto" />
-        <input type="submit" value="Eliminar" class="btn btn-danger" /> |
-        <a asp-action="PaginaInicial">Back to List</a>
+        <button type="submit" class="btn btn-danger btn-eliminar">Eliminar</button>
+        <a asp-action="PaginaInicial" class="btn btn-secondary btn-cancelar">Cancelar</a>
     </form>
 </div>

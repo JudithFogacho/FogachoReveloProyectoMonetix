@@ -4,57 +4,62 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Detalles</h1>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&display=swap" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
+
+
+<div class="imagen-gasto">
+    <div>
+        <h1 class="koulen-regular">Monetix</h1>
+    </div>
+    <div>
+        <img src="~/img/LogoImg.png" alt="LogoImg" class="logopi" />
+    </div>
+</div>
+
+<h2 class="TituloCG">DETALLES DEL GASTO</h2>
 
 <div>
-    <h4>Gasto</h4>
-    <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaRegristo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaRegristo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaFinal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaFinal)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Categorias)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categorias)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Valor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Valor)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ValorPagado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ValorPagado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estados)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estados)
-        </dd>
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.FechaRegristo)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FechaRegristo)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.FechaFinal)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FechaFinal)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Categorias)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Categorias)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Descripcion)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Valor)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Valor)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.ValorPagado)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ValorPagado)</dd>
+
+        <dt class="col-sm-3 TituloSG">@Html.DisplayNameFor(model => model.Estados)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Estados)</dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdGasto">Editar</a> |
-    <a asp-action="PaginaInicial">Volver</a>
+
+<div class="botones-detalles">
+    <a asp-action="Edit" asp-route-id="@Model?.IdGasto" class="btn-editar">Editar</a>
+    <a asp-action="PaginaInicial" class="btn-volver">Volver</a>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

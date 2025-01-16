@@ -83,11 +83,10 @@ h1 {
 }
 
 .TituloCG {
-    font-family: "Kosugi Maru", serif;
+    font-family: "Lilita One", serif;
     font-weight: 400;
     font-style: normal;
-    font-weight: bold;
-    font-size: 15px;
+    font-size: 20px;
 }
 .TituloSG {
     font-family: "Kosugi Maru", serif;
@@ -356,3 +355,134 @@ footer {
         footer .privacy-link:hover {
             text-decoration: underline;
         }
+
+/* Estilo específico para los botones en la página de detalles */
+.botones-detalles {
+    display: flex;
+    justify-content: start; /* Alinea los botones al inicio del contenedor */
+    gap: 10px; 
+    margin-top: 20px;
+}
+
+    .botones-detalles a {
+        font-size: 0.875rem; 
+        padding: 5px 15px; 
+        border-radius: 5px; /* Bordes redondeados */
+        text-decoration: none;
+        text-align: center;
+        font-family: 'Kosugi Maru', sans-serif;
+    }
+
+        /* Botón de editar */
+        .botones-detalles a.btn-editar {
+            background-color: #007bff; /* Azul */
+            color: white;
+            border: 1px solid #007bff;
+            transition: background-color 0.3s ease;
+        }
+
+            .botones-detalles a.btn-editar:hover {
+                background-color: #0056b3; /* Azul más oscuro */
+                border-color: #0056b3;
+            }
+
+        /* Botón de volver */
+        .botones-detalles a.btn-volver {
+            background-color: #6c757d; /* Gris */
+            color: white;
+            border: 1px solid #6c757d;
+            transition: background-color 0.3s ease;
+        }
+
+            .botones-detalles a.btn-volver:hover {
+                background-color: #5a6268; /* Gris más oscuro */
+                border-color: #5a6268;
+            }
+/* Contenedor de los botones en Edit */
+.botones-edit {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    gap: 15px; 
+    margin-top: 20px; 
+}
+
+    /* Botón Guardar */
+    .botones-edit .btn-guardar {
+        background-color: #28a745; /* Verde */
+        color: white;
+        border: 1px solid #28a745;
+        font-size: 0.875rem; 
+        padding: 5px 15px; 
+        border-radius: 5px; /* Bordes redondeados */
+        transition: background-color 0.3s ease;
+        text-align: center;
+        font-family: "Kosugi Maru", sans-serif; 
+        font-weight: 400;
+        font-style: normal; 
+    }
+
+        .botones-edit .btn-guardar:hover {
+            background-color: #218838; /* Verde más oscuro */
+            border-color: #218838;
+        }
+
+    /* Botón Cancelar */
+    .botones-edit .btn-cancelar {
+        background-color: #6c757d; /* Gris */
+        color: white;
+        border: 1px solid #6c757d;
+        font-size: 0.875rem; 
+        padding: 5px 15px; 
+        border-radius: 5px; /* Bordes redondeados */
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+        text-align: center;
+        font-family: "Kosugi Maru", sans-serif; 
+        font-weight: 400; 
+        font-style: normal; 
+    }
+
+        .botones-edit .btn-cancelar:hover {
+            background-color: #5a6268; /* Gris más oscuro */
+            border-color: #5a6268;
+        }
+/* Contenedor de la vista Delete */
+.col-md-6 {
+    font-family: "Kosugi Maru", sans-serif; /* Tipografía consistente */
+}
+
+/* Botón Eliminar */
+.btn-eliminar {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    padding: 10px 25px;
+    font-family: "Kosugi Maru", sans-serif;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+    .btn-eliminar:hover {
+        background-color: #c82333; /* Rojo más oscuro */
+        border-color: #c82333;
+    }
+
+/* Botón Cancelar */
+.btn-cancelar {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    padding: 10px 25px;
+    font-family: "Kosugi Maru", sans-serif;
+    font-size: 1rem;
+    border-radius: 8px;
+    margin-left: 15px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+    .btn-cancelar:hover {
+        background-color: #5a6268; /* Gris más oscuro */
+        border-color: #5a6268;
+    }

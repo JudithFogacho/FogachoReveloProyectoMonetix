@@ -4,15 +4,37 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
 
-<h4>Gasto</h4>
-<hr />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&display=swap" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
+
+<div class="imagen-gasto">
+    <div>
+        <h1 class="koulen-regular">Monetix</h1>
+    </div>
+    <div>
+        <img src="~/img/LogoImg.png" alt="LogoImg" class="logopi" />
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-4">
+       
+        <h2 class="TituloCG">EDITAR GASTO</h2>
+        <div class="TituloSG">Gasto</div>
+
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="IdGasto" />
+
             <div class="form-group">
                 <label asp-for="FechaRegristo" class="control-label"></label>
                 <input asp-for="FechaRegristo" class="form-control" />
@@ -23,17 +45,14 @@
                 <input asp-for="FechaFinal" class="form-control" />
                 <span asp-validation-for="FechaFinal" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
-                <label asp-for="Categorias" class="control-label"></label>
-                <select asp-for="Categorias" class="form-control">
-                    @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
-                    {
-                        <option value="@categoria">@categoria</option>
-                    }
-                </select>
-                <span asp-validation-for="Categorias" class="text-danger"></span>
-            </div>
+            <label asp-for="Categorias" class="control-label"></label>
+            <select asp-for="Categorias" class="form-control">
+                @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
+                {
+                    <option value="@categoria">@categoria</option>
+                }
+            </select>
+            <span asp-validation-for="Categorias" class="text-danger"></span>
             <div class="form-group">
                 <label asp-for="Descripcion" class="control-label"></label>
                 <input asp-for="Descripcion" class="form-control" />
@@ -41,25 +60,25 @@
             </div>
             <div class="form-group">
                 <label asp-for="Valor" class="control-label"></label>
-                <input asp-for="Valor" class="form-control" />
+                <input asp-for="Valor" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="Valor" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ValorPagado" class="control-label"></label>
-                <input asp-for="ValorPagado" class="form-control" />
+                <input asp-for="ValorPagado" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="ValorPagado" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="botones-edit">
+                <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                <a asp-action="PaginaInicial" class="btn-cancelar">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="PaginaInicial">Back to List</a>
-</div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
