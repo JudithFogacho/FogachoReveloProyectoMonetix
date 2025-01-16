@@ -89,6 +89,21 @@ public static class GastoEndpoints
         })
         .WithName("DeleteGasto")
         .WithOpenApi();
+
+        group.MapPut("/Pagar/{id}", async Task<Results<Ok, NotFound, BadRequest<string>>> (int id, PagoRequest pagoRequest, FogachoReveloDataContext db) =>
+        {
+            var gastoExistente = await db.Gastos.FirstOrDefaultAsync(g => g.IdGasto == id);
+            if (gastoExistente is null)
+                return TypedResults.NotFound();
+            if (pagoRequest.ValorRequest <= 0)
+                return TypedResults.BadRequest("El valor a pagar debe ser mayor que cero.");
+            gastoExistente.ValorPagado += pagoRequest.ValorPagado;
+            ActualizarEstado(gastoExistente);
+            await db.SaveChangesAsync();
+            return TypedResults.Ok();
+        })
+        .WithName("PagarGasto")
+        .WithOpenApi();
     }
 
     // Método auxiliar para actualizar el estado
@@ -113,4 +128,10 @@ public static class GastoEndpoints
             gasto.Estados = Estado.Pendiente;
         }
     }
+
+    public class PagoRequest 
+    {
+        public double ValorPagado { get; set; }
+    }   
+
 }
