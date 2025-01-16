@@ -32,7 +32,7 @@ namespace MonetixProyectoAPP.ViewModels
             get {
                 if (ValorPendiente == 0)
                 {
-                    return "Pagado";
+                    return "Pendiente";
                 }
                 else if (Gasto.FechaFinal < DateTime.Now)
                 {

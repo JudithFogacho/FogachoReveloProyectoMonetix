@@ -1,5 +1,4 @@
-﻿using Kotlin.Properties;
-using MonetixProyectoAPP.Models;
+﻿using MonetixProyectoAPP.Models;
 using MonetixProyectoAPP.Services;
 using System;
 using System.Collections.Generic;
@@ -31,9 +30,9 @@ namespace MonetixProyectoAPP.ViewModels
             get => _gastosFiltrados;
             set { 
                 SetProperty(ref _gastosFiltrados, value);
-                OnPropertyChanged(nameof(SubtotalGastos);
-                OnPropertyChanged(nameof(SubtotalValorPagado);
-                OnPropertyChanged(nameof(TotalGastos);
+                OnPropertyChanged(nameof(SubtotalGastos));
+                OnPropertyChanged(nameof(SubtotalValorPagado));
+                OnPropertyChanged(nameof(TotalGastos));
             }
         }
 
@@ -42,7 +41,7 @@ namespace MonetixProyectoAPP.ViewModels
             get => _textoBusqueda;
             set { 
                 SetProperty(ref _textoBusqueda, value);
-                FiltradosGastos();
+                FiltrarGastos();
             }
 
         }
@@ -85,11 +84,13 @@ namespace MonetixProyectoAPP.ViewModels
             }
         }
 
-        public async Task NavegarADetalleGastO (Gasto gasto)
+        public async Task NavegarADetalleGastO(Gasto gasto)
         {
             if (gasto != null) {
                 await Shell.Current.GoToAsync($"DetalleGasto?gastoId={gasto.IdGasto}");
             }
+
+        }
     }
     
 }

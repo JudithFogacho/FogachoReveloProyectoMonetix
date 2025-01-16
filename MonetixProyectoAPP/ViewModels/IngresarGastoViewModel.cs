@@ -90,7 +90,7 @@ namespace MonetixProyectoAPP.ViewModels
             await _gastoService.CreateGastoAsync(nuevoGasto);
 
             await Application.Current.MainPage.DisplayAlert("Exito", "El gasto se ha registrado correctamente.", "OK");
-            await Shell.Current.GoToAsync("///PaginaInical");
+            await Shell.Current.GoToAsync("///PaginaInicial");
         }
     }
 }

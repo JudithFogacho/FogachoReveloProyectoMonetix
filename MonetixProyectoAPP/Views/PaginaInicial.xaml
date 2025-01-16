@@ -2,9 +2,14 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonetixProyectoAPP.Views.PaginaInicial"
+             xmlns:viewModels="clr-namespace:MonetixProyectoAPP.ViewModels"
              Title="PaginaInicial"
              BackgroundColor="#EFEDE5">
 
+    <ContentPage.BindingContext>
+        <viewModels:PaginaInicialViewModel />
+    </ContentPage.BindingContext>
+    
     <ScrollView>
         <Grid RowDefinitions="Auto,*">
         <VerticalStackLayout Padding="20" Spacing="10">
@@ -21,9 +26,9 @@
                                BackgroundColor="#F2F2F2"
                                TextColor="Black"
                                PlaceholderColor="Gray"
-                               TextChanged="OnSearchBarTextChanged" />
+                               Text="{Binding TextoBusqueda}" />
 
-                    <ImageButton Source="https://i.imgur.com/188LNTH.png"
+                    <ImageButton Source="./Images/LogoImg.png"
                          WidthRequest="30"
                          HeightRequest="30"
                          BackgroundColor="#849671"
@@ -84,7 +89,7 @@
                 <!-- Lista de gastos -->
             <Frame MaximumHeightRequest="400" BackgroundColor="#EFEDE5"  BorderColor="#EFEDE5">
                     <CollectionView x:Name="GastosCollectionView"
-                                    ItemsSource="{Binding Gastos}"
+                                    ItemsSource="{Binding GastosFiltrados}"
                                     SelectionMode="Single"
                                     SelectionChanged="OnGastoSeleccionado">
 
@@ -138,21 +143,21 @@
                     </CollectionView>
                 </Frame>
                 <!-- Total y botón -->
-                <Grid Padding="10,5" RowDefinitions="Auto,Auto,Auto">
+                <Grid Padding="10,5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Label Grid.Row="0" Text="Subtotal Gastos:" FontSize="16" FontAttributes="Bold" />
-                    <Label Grid.Row="0" Text="{Binding SubtotalGastos, StringFormat='${0:F2}'}" FontSize="16" HorizontalOptions="End" />
+                    <Label Grid.Row="0" Text="Subtotal Gastos:" FontSize="16" FontAttributes="Bold" TextColor="Black" />
+                    <Label Grid.Row="0" Text="{Binding SubtotalGastos, StringFormat='${0:F2}'}" TextColor="Black" FontSize="16" HorizontalOptions="End" />
 
-                    <Label Grid.Row="1" Text="Subtotal Valor Pagado:" FontSize="16" FontAttributes="Bold" />
-                    <Label Grid.Row="1" Text="{Binding SubtotalValorPagado, StringFormat='${0:F2}'}" FontSize="16" HorizontalOptions="End" />
+                    <Label Grid.Row="1" Text="Subtotal Valor Pagado:" FontSize="16" FontAttributes="Bold" TextColor="Black"/>
+                    <Label Grid.Row="1" Text="{Binding SubtotalValorPagado, StringFormat='${0:F2}'}" TextColor="Black" FontSize="16" HorizontalOptions="End" />
 
-                    <Label Grid.Row="2" Text="Total:" FontSize="18" FontAttributes="Bold" />
-                    <Label Grid.Row="2" Text="{Binding TotalGastos, StringFormat='${0:F2}'}" FontSize="18" HorizontalOptions="End" />
+                    <Label Grid.Row="2" Text="Total:" FontSize="18" FontAttributes="Bold" TextColor="Black"/>
+                    <Label Grid.Row="2" Text="{Binding TotalGastos, StringFormat='${0:F2}'}" TextColor="Black" FontSize="18" HorizontalOptions="End" />
                 </Grid>
 
                 <Button Text="Ingresar Gasto"

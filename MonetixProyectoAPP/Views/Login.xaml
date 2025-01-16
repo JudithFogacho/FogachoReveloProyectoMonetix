@@ -2,9 +2,14 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonetixProyectoAPP.Views.Login"
+             xmlns:viewModels="clr-namespace:MonetixProyectoAPP.ViewModels"
              Title="Login"
              BackgroundColor="#E5E0D8">
 
+    <ContentPage.BindingContext>
+        <viewModels:LoginViewModel/>
+    </ContentPage.BindingContext>
+    
     <Grid RowDefinitions="Auto,*">
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="20" 
@@ -15,7 +20,7 @@
                        TextColor="#809671"
                        FontFamily="Koulen"
                        HorizontalOptions="Center"/>
-                <Image Source="https://i.imgur.com/KWshaxa.png"
+                <Image Source="./Images/LogoImg.png"
                        HeightRequest="180"
                        WidthRequest="180"
                        HorizontalOptions="Center"/>
@@ -41,7 +46,8 @@
                             <Entry x:Name="txtEmail"
                                    Placeholder="Escribe tu usuario"
                                    FontSize="16"
-                                   TextColor="Black"/>
+                                   TextColor="Black"
+                                   Text="{Binding Email}"/>
                         </Border>
                         <Label Text="CONTRASENA"
                                FontSize="18"
@@ -56,9 +62,10 @@
                                    FontSize="16"
                                    IsPassword="True"
                                    TextColor="Black"
+                                   Text="{Binding Password}"
                                    />
                         </Border>
-                        <Button Clicked="OnLoginButtonClicked"
+                        <Button Command="{Binding loginCommand}"
                                 Text="Entrar"
                                 FontSize="18"
                                 BackgroundColor="#849671"

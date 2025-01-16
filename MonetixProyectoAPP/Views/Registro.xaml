@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:MonetixProyectoAPP.ViewModels"
              x:Class="MonetixProyectoAPP.Views.Registro"
              Title="Registro"
              BackgroundColor="#E5E0D8">
 
+    <ContentPage.BindingContext>
+        <viewModels:RegistroViewModel />
+    </ContentPage.BindingContext>
+    
     <Grid RowDefinitions="Auto,*">
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="20" 
@@ -15,7 +20,7 @@
                        TextColor="#809671"
                        FontFamily="Koulen"
                        HorizontalOptions="Center"/>
-                <Image Source="https://i.imgur.com/KWshaxa.png"
+                <Image Source="./Images/LogoImg.png"
                        HeightRequest="180"
                        WidthRequest="180"
                        HorizontalOptions="Center"/>
@@ -38,7 +43,7 @@
                                 BackgroundColor="#E5E0D8"
                                 Padding="10,5"
                                 Stroke="#E5E0D8">
-                            <Entry x:Name="txtNombre"
+                            <Entry Text="{Binding Nombre}"
                                    Placeholder="Escribe tu nombre"
                                    FontSize="16"
                                    TextColor="Black"/>
@@ -51,7 +56,7 @@
                                 BackgroundColor="#E5E0D8"
                                 Padding="10,5"
                                 Stroke="#E5E0D8">
-                            <Entry x:Name="txtApellido"
+                            <Entry Text="{Binding Apellido}"
                                    Placeholder="Escribe tu apellido"
                                    FontSize="16"
                                    TextColor="Black"/>
@@ -64,7 +69,7 @@
                                 BackgroundColor="#E5E0D8"
                                 Padding="10,5"
                                 Stroke="#E5E0D8">
-                            <Entry x:Name="txtEmail"
+                            <Entry Text="{Binding Email}"
                                    Placeholder="Escribe tu email"
                                    FontSize="16"
                                    TextColor="Black"/>
@@ -77,13 +82,13 @@
                                 BackgroundColor="#E5E0D8"
                                 Padding="10,5"
                                 Stroke="#E5E0D8">
-                            <Entry x:Name="txtPassword"
+                            <Entry Text="{Binding Password}"
                                    Placeholder="Escribe tu contraseña"
                                    FontSize="16"
                                    IsPassword="True"
                                    TextColor="Black"/>
                         </Border>
-                        <Button Clicked="OnRegisterButtonClicked"
+                        <Button Command="{Binding RegisterCommand}"
                                 Text="Registrar"
                                 FontSize="18"
                                 BackgroundColor="#849671"
@@ -107,7 +112,7 @@
                            FontFamily="Koulen"
                            VerticalOptions="Center">
                         <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnLoginTapped" />
+                            <TapGestureRecognizer Command="{Binding GoToLoginCommand}" />
                         </Label.GestureRecognizers>
                     </Label>
                 </HorizontalStackLayout>

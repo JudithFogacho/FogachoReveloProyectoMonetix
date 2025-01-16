@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonetixProyectoAPP.Views.DetalleGasto"
+             xmlns:viewModels="clr-namespace:MonetixProyectoAPP.ViewModels"
              Title="DetalleGasto"
              BackgroundColor="#EFEDE5">
 
@@ -27,22 +28,22 @@
                            FontFamily="Koulen"
                            HorizontalOptions="Center"
                            TextColor="#809671" />
-                    
 
-                    <HorizontalStackLayout HorizontalOptions="Center">
+
+                <HorizontalStackLayout HorizontalOptions="Center">
                     <Label Text="Detalles"
                            FontSize="36"
                            FontAttributes="Bold"
                            FontFamily="Koulen"
                            HorizontalOptions="Center"
                            TextColor="#000000" />
-                    <Image Source="https://i.imgur.com/KWshaxa.png"
+                    <Image Source="./Images/LogoImg.png"
                            HeightRequest="35"
                            WidthRequest="35" />
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout HorizontalOptions="End">
-                    <Label Text="{Binding Gasto.Estados}"
+                    <Label Text="{Binding Estado}"
                            FontSize="16"
                            FontFamily="Koulen"
                            TextColor="Black" />
@@ -58,7 +59,7 @@
                            FontSize="16"
                            FontFamily="Koulen"
                            TextColor="Black" />
-                    
+
                     <Label Text="Fecha Final"
                            FontAttributes="Bold" 
                            FontSize="18" 
@@ -78,7 +79,7 @@
                            FontSize="16"
                            FontFamily="Koulen"
                            TextColor="Black" />
-                    
+
                     <Label Text="Descripcion"
                             FontAttributes="Bold" 
                             FontSize="18" 
@@ -98,7 +99,7 @@
                            FontSize="16" 
                            FontFamily="Koulen"
                            TextColor="Black" />
-                    
+
                     <Label Text="Valor Pendiente"
                            FontAttributes="Bold"
                            FontSize="18"
@@ -108,7 +109,7 @@
                            FontSize="16"
                            FontFamily="Koulen"
                            TextColor="Black" />
-                    
+
                     <StackLayout Orientation="Horizontal" Spacing="20" HorizontalOptions="Center">
                         <Button Text="ELIMINAR"
                                 TextColor="#FFFFFF"
@@ -116,96 +117,17 @@
                                 FontSize="22"
                                 BackgroundColor="#BF7373"
                                 CornerRadius="25"
-                                Clicked="OnEliminarClicked" />
+                                Command="{Binding EliminarGastoCommand}" />
                         <Button Text="PAGAR"
                                 FontSize="22"
                                 TextColor="#FFFFFF"
                                 FontFamily="Koulen"
                                 BackgroundColor="#849671"
                                 CornerRadius="25"
-                                Clicked="OnPagarGastoClicked" />
+                                Command="{Binding PagarGastoCommand}" />
                     </StackLayout>
                 </VerticalStackLayout>
             </StackLayout>
         </ScrollView>
-        <Frame x:Name="EliminarDialogo"
-               BackgroundColor="White"
-               CornerRadius="20"
-               BorderColor="White"
-               Padding="20"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               IsVisible="False">
-            <VerticalStackLayout Spacing="10">
-                <Label Text="¿esta seguro de eliminar?"
-                    FontSize="22"
-                    FontAttributes="Bold"
-                    FontFamily="Koulen"
-                    HorizontalOptions="Center"
-                    TextColor="Black" />
-                <Image Source="https://i.imgur.com/KWshaxa.png"
-                        HeightRequest="200"
-                        WidthRequest="200" />
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                    <Button Text="Eliminar" 
-                            Clicked="OnEliminarButtonClicked" 
-                            FontFamily="Koulen"
-                            BackgroundColor="#BF7373" 
-                            TextColor="White" />
-
-                    <Button Text="Cancelar" 
-                            FontFamily="Koulen"
-                            Clicked="OnCancelarButtonClicked" 
-                            BackgroundColor="Gray" 
-                            TextColor="White" />
-                </HorizontalStackLayout>
-                
-            </VerticalStackLayout>
-        </Frame>
-        <!-- Diálogo de Pago -->
-        <Frame x:Name="PagoDialogo"
-               BackgroundColor="White"
-               CornerRadius="20"
-               BorderColor="White"
-               Padding="20"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               IsVisible="False">
-            <VerticalStackLayout Spacing="10">
-                <Label Text="INGRESE EL VALOR QUE DESEA PAGAR"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       FontFamily="Koulen"
-                       HorizontalOptions="Center"
-                       TextColor="Black" />
-                <Image Source="https://i.imgur.com/KWshaxa.png"
-                       HeightRequest="200"
-                       WidthRequest="200" />
-                <Entry x:Name="EntryPago"
-                       Placeholder="Ingrese el valor a pagar"
-                       Keyboard="Numeric"
-                       Text="{Binding Valor, StringFormat='{0:C2}'}"
-                       FontSize="18"
-                       FontFamily="Koulen"
-                       TextColor="Gray"
-                       HorizontalOptions="Fill" />
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Button Text="CANCELAR"
-                            BackgroundColor="Gray"
-                            TextColor="White"
-                            FontFamily="Koulen"
-                            FontSize="18"
-                            CornerRadius="25"
-                            Clicked="OnCancelarPagoClicked" />
-                    <Button Text="PAGAR"
-                            BackgroundColor="#849671"
-                            TextColor="White"
-                            FontSize="18"
-                            FontFamily="Koulen"
-                            CornerRadius="25"
-                            Clicked="OnConfirmarPagoClicked" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
-        </Frame>
     </Grid>
 </ContentPage>

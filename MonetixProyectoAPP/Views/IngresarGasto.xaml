@@ -2,8 +2,14 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonetixProyectoAPP.Views.IngresarGasto"
+             xmlns:viewModels="clr-namespace:MonetixProyectoAPP.ViewModels"
              Title="IngresarGasto"
              BackgroundColor="#EFEDE5">
+    
+    <ContentPage.BindingContext>
+        <viewModels:IngresarGastoViewModel />
+    </ContentPage.BindingContext>
+    
     <ScrollView>
         <StackLayout Padding="20" Spacing="10">
             <Label Text="MONETIX"
@@ -31,7 +37,7 @@
                     FontFamily="Koulen"
                     FontAttributes="Bold"
                     TextColor="Black" />
-            <DatePicker x:Name="FechasRegistroPicker"
+            <DatePicker Date="{Binding FechaRegistro}"
                         TextColor="#000000"
                         BackgroundColor="#FFFFFF" />
 
@@ -41,7 +47,7 @@
                     FontFamily="Koulen"
                     FontAttributes="Bold"
                     TextColor="Black"/>
-            <DatePicker x:Name="FechaFinalPicker"
+            <DatePicker Date="{Binding FechaFinal}"
                         TextColor="#000000"
                         BackgroundColor="#FFFFFF" />
 
@@ -51,7 +57,9 @@
                    FontFamily="Koulen"
                    FontAttributes="Bold"
                    TextColor="Black" />
-            <Picker x:Name="CategoriaPicker"
+            <Picker ItemsSource="{Binding Categorias}"
+                    SelectedItem="{Binding CategoriaSeleccionada}"
+                    Title="Seleccione una categoría"
                     TitleColor="#5A5A5A"
                     TextColor="#000000"
                     BackgroundColor="#FFFFFF" />
@@ -62,7 +70,7 @@
                    FontFamily="Koulen"
                    FontAttributes="Bold"
                    TextColor="Black" />
-            <Entry x:Name="DescripcionEntry"
+            <Entry Text="{Binding Descripcion}"
                    Placeholder="Ingrese una descripción"
                    TextColor="#000000"
                    BackgroundColor="#FFFFFF" />
@@ -73,7 +81,7 @@
                    FontSize="26"
                    FontAttributes="Bold"
                    TextColor="Black" />
-            <Entry x:Name="ValorEntry"
+            <Entry Text="{Binding Valor}"
                    Placeholder="Ingrese el valor"
                    Keyboard="Numeric"
                    TextColor="#000000"
@@ -94,7 +102,7 @@
                         FontFamily="Koulen"
                         BackgroundColor="#849671"
                         CornerRadius="25"
-                        Clicked="OnGuardarGastoClicked" />
+                        Command="{Binding GuardarGastoCommand}" />
             </StackLayout>
         </StackLayout>
     </ScrollView>
