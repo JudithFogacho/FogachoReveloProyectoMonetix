@@ -7,46 +7,61 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MonetixProyectoAPP.ViewModels
 {
-    public class RegistroViewModel
+    public class RegistroViewModel : BaseViewModel
     {
         private readonly UsuarioService _service = new UsuarioService();
 
-        private List<Usuario> _usuario = new List<Usuario>();
-        public List<Usuario> Usuarios { get => _usuario; set { _usuario = value; OnPropertyChanged(); } }
+        private string _nombre;
+        private string _apellido;
+        private string _email;
+        private string _password;
+        public string Nombre {  get => _nombre; set=> SetProperty(ref _nombre, value); }
+        public string Apellido { get => _apellido; set => SetProperty(ref _apellido, value); }
+
+        public string Email { get => _email; set => SetProperty(ref _email, value); }
+
+        public string Password { get => _password; set => SetProperty(ref _password, value); }
+
+        public ICommand RegisterCommand { get; }
+
+        public ICommand GoToLoginCommand { get; }
+
         public RegistroViewModel()
         {
-            LoadUsuarios();
+            RegisterCommand = new Command(async () => await RegisterAsync());
+            GoToLoginCommand = new Command(async () => await GoToLoginAsync());
         }
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        }
-        private async Task LoadUsuarios()
+        private async Task RegisterAsync()
         {
-            var usuarios = await _service.GetUsuariosAsync();
-            Usuarios.Clear();
-            foreach (var usuario in usuarios)
-            {
-                Usuarios.Add(usuario);
+            if (string.IsNullOrEmpty(Nombre) || string.IsNullOrEmpty(Apellido) ||
+                string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password)) { 
+                
+                await Application.Current.MainPage.DisplayAlert("Error", "Por favor complete todos los campos", "OK");
+                return;
             }
+            await ExecuteAsync(async () => {
+                var nuevoUsuario = new Usuario { 
+                    Nombre = Nombre,
+                    Apellido = Apellido,
+                    Email = Email,
+                    Password = Password
+                };
 
-        }
-        public async Task IngresarUsuario(Usuario nuevoUsuario)
-        {
-            await _service.CreateUsuarioAsync(nuevoUsuario);
-            await LoadUsuarios();
+                await _service.CreateUsuarioAsync(nuevoUsuario);
+
+                await Application.Current.MainPage.DisplayAlert("Éxito", "Registro completado con éxito", "OK");
+
+                await Shell.Current.GoToAsync("///Login");
+            });
         }
 
-        public async Task EliminarUsuario(int idUsuario)
-        {
-            await _service.DeleteUsuarioAsync(idUsuario);
-            await LoadUsuarios();
+        private async Task GoToLoginAsync() {
+            await Shell.Current.GoToAsync("///Login");
         }
     }
 }
