@@ -6,6 +6,7 @@ using MonetixFogachoReveloAPI.Data.Models;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MonetixFogachoReveloAPI.Controllers;
+
 public static class GastoEndpoints
 {
     public static void MapGastoEndpoints(this IEndpointRouteBuilder routes)
@@ -90,15 +91,23 @@ public static class GastoEndpoints
         .WithName("DeleteGasto")
         .WithOpenApi();
 
+        // Endpoint para realizar un pago sobre un gasto
         group.MapPut("/Pagar/{id}", async Task<Results<Ok, NotFound, BadRequest<string>>> (int id, PagoRequest pagoRequest, FogachoReveloDataContext db) =>
         {
             var gastoExistente = await db.Gastos.FirstOrDefaultAsync(g => g.IdGasto == id);
+
             if (gastoExistente is null)
                 return TypedResults.NotFound();
+
             if (pagoRequest.ValorPagado <= 0)
                 return TypedResults.BadRequest("El valor a pagar debe ser mayor que cero.");
+
+            // Actualizar el valor pagado
             gastoExistente.ValorPagado += pagoRequest.ValorPagado;
+
+            // Actualizar el estado del gasto
             ActualizarEstado(gastoExistente);
+
             await db.SaveChangesAsync();
             return TypedResults.Ok();
         })
@@ -113,7 +122,7 @@ public static class GastoEndpoints
         DateTime fechaFinalSinHora = gasto.FechaFinal.Date;
 
         // Si ya está todo pagado el estado será finalizado
-        if (gasto.Valor != null && gasto.ValorPagado == gasto.Valor)
+        if (gasto.Valor != null && gasto.ValorPagado >= gasto.Valor)
         {
             gasto.Estados = Estado.Finalizado;
         }
@@ -129,9 +138,9 @@ public static class GastoEndpoints
         }
     }
 
-    public class PagoRequest 
+    // Modelo para la solicitud de pago
+    public class PagoRequest
     {
         public double ValorPagado { get; set; }
-    }   
-
+    }
 }

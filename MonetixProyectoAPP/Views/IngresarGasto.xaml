@@ -31,7 +31,7 @@
             </HorizontalStackLayout>
             
 
-            <!-- DatePicker para Fecha de Registro -->
+            <!-- Fecha de Registro -->
             <Label Text="Fecha de Registro"
                    FontSize="26"
                     FontFamily="Koulen"
@@ -41,7 +41,7 @@
                         TextColor="#000000"
                         BackgroundColor="#FFFFFF" />
 
-            <!-- DatePicker para Fecha Final -->
+            <!-- Fecha Final -->
             <Label Text="Fecha Final"
                    FontSize="26"
                     FontFamily="Koulen"
@@ -64,13 +64,17 @@
                     TextColor="#000000"
                     BackgroundColor="#FFFFFF" />
 
+            <!-- Empresa -->
             <Label Text="Empresa"
                    FontSize="18"
                    FontAttributes="Bold"
                    TextColor="Black" />
             <Picker ItemsSource="{Binding Empresas}"
                     SelectedItem="{Binding EmpresaSeleccionada}"
-                    Title="Seleccione una empresa" />
+                    Title="Seleccione una empresa" 
+                    TitleColor="#5A5A5A"
+                    TextColor="#000000"
+                    BackgroundColor="#FFFFFF"/>
             
             
             <Entry Text="{Binding Descripcion}"

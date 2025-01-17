@@ -12,14 +12,14 @@ namespace MonetixProyectoAPP.ViewModels
     public class BaseViewModel : INotifyPropertyChanged
 
     {
-        private bool estaOcupado;
+        private bool _estaOcupado;
 
         public bool EstaOcupado {
-            get => estaOcupado; 
+            get => _estaOcupado; 
             set {
-                if (estaOcupado != value)
+                if (_estaOcupado != value)
                 {
-                    estaOcupado = value;
+                    _estaOcupado = value;
                     OnPropertyChanged();
                 }
             } 
