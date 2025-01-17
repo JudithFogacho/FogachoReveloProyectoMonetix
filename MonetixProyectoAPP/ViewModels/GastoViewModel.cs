@@ -19,13 +19,21 @@ namespace MonetixProyectoAPP.ViewModels
         private ObservableCollection<Local> _locales = new ObservableCollection<Local>();
         private ObservableCollection<Gasto> _gastos = new ObservableCollection<Gasto>();
 
-        public ObservableCollection<Gasto> Gastos { get => _gastos; set { _gastos = value; OnPropertyChanged(); } }
+        public ObservableCollection<Gasto> Gastos
+        {
+            get => _gastos;
+            set => SetProperty(ref _gastos, value);
+        }
 
-        public ObservableCollection<Local> Locales { get => _locales; set { _locales = value; OnPropertyChanged(); } }
+        public ObservableCollection<Local> Locales
+        {
+            get => _locales;
+            set => SetProperty(ref _locales, value);
+        }
 
 
         public GastoViewModel() { 
-            LoadGastos ();
+            LoadGastos();
         }
 
         private async Task LoadGastos()
@@ -41,6 +49,19 @@ namespace MonetixProyectoAPP.ViewModels
                 }
 
             }); 
+        }
+
+        public async Task CargarLocalesPorCategoria(string categoria)
+        {
+            await ExecuteAsync(async () =>
+            {
+                var locales = await _apiPublicaService.GetLocalesPorCategoriaAsync(categoria);
+                Locales.Clear();
+                foreach (var local in locales)
+                {
+                    Locales.Add(local);
+                }
+            });
         }
 
         public async Task IngresarGasto (Gasto nuevoGasto)
@@ -59,22 +80,5 @@ namespace MonetixProyectoAPP.ViewModels
             });    
             
         }
-
-
-        public async Task CargarLocalesPorCategoria(string categoria)
-        {
-            await ExecuteAsync(async () => {
-
-                var locales = await _apiPublicaService.GetLocalesPorCategoriaAsync(categoria);
-                Locales.Clear();
-                foreach (var local in locales)
-                {
-                    Locales.Add(local);
-                }
-            });
-
-        }
-
-
     }
 }

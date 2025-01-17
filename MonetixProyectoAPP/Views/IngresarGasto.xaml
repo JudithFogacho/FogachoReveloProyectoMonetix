@@ -64,16 +64,18 @@
                     TextColor="#000000"
                     BackgroundColor="#FFFFFF" />
 
-            <!-- Descripción -->
-            <Label Text="DESCRIPCIÓN"
-                   FontSize="26"
-                   FontFamily="Koulen"
+            <Label Text="Empresa"
+                   FontSize="18"
                    FontAttributes="Bold"
                    TextColor="Black" />
+            <Picker ItemsSource="{Binding Empresas}"
+                    SelectedItem="{Binding EmpresaSeleccionada}"
+                    Title="Seleccione una empresa" />
+            
+            
             <Entry Text="{Binding Descripcion}"
-                   Placeholder="Ingrese una descripción"
-                   TextColor="#000000"
-                   BackgroundColor="#FFFFFF" />
+                   Placeholder="Ingrese la empresa"
+                   IsVisible="{Binding MostrarCampoTexto}" />
 
             <!-- Valor -->
             <Label Text="VALOR"
