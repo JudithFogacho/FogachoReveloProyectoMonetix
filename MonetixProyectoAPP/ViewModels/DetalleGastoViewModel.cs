@@ -42,7 +42,7 @@ namespace MonetixProyectoAPP.ViewModels
             {
                 if (ValorPendiente == 0)
                 {
-                    return "Pendiente";
+                    return "Finalizado";
                 }
                 else if (Gasto.FechaFinal < DateTime.Now)
                 {
@@ -50,7 +50,7 @@ namespace MonetixProyectoAPP.ViewModels
                 }
                 else
                 {
-                    return "Finalizado";
+                    return "Pendiente";
                 }
             }
         }

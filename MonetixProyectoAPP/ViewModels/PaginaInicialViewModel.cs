@@ -54,7 +54,7 @@ namespace MonetixProyectoAPP.ViewModels
             CargarGastos();
         }
 
-        private async Task CargarGastos()
+        public async Task CargarGastos()
         {
             await ExecuteAsync(async () => {
                 var gastos = await _gastoService.GetGastosAsync();

@@ -15,6 +15,15 @@ public partial class PaginaInicial : ContentPage
         BindingContext = new PaginaInicialViewModel();
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is PaginaInicialViewModel viewModel) 
+        {
+            await viewModel.CargarGastos();
+        }
+    }
+
     private async void OnIngresarGastoClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new IngresarGasto());

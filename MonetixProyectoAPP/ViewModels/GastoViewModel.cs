@@ -40,9 +40,7 @@ namespace MonetixProyectoAPP.ViewModels
                     Gastos.Add(gasto);
                 }
 
-            });
-
-            
+            }); 
         }
 
         public async Task IngresarGasto (Gasto nuevoGasto)

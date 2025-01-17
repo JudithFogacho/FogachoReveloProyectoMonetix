@@ -95,7 +95,7 @@ public static class GastoEndpoints
             var gastoExistente = await db.Gastos.FirstOrDefaultAsync(g => g.IdGasto == id);
             if (gastoExistente is null)
                 return TypedResults.NotFound();
-            if (pagoRequest.ValorRequest <= 0)
+            if (pagoRequest.ValorPagado <= 0)
                 return TypedResults.BadRequest("El valor a pagar debe ser mayor que cero.");
             gastoExistente.ValorPagado += pagoRequest.ValorPagado;
             ActualizarEstado(gastoExistente);

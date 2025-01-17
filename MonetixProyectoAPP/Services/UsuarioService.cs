@@ -54,10 +54,6 @@ namespace MonetixProyectoAPP.Services
             return await _httpClient.GetFromJsonAsync<List<Usuario>>("Usuario") ?? new List<Usuario>();
 
         }
-
-        public class TokenResponse { 
-            public string Token { get; set; }
-        }
         public async Task CreateUsuarioAsync(Usuario nuevoUsuario)
         {
             await _httpClient.PostAsJsonAsync("Usuario", nuevoUsuario);

@@ -14,6 +14,7 @@ namespace MonetixProyectoAPP.ViewModels
         private readonly GastoService _gastoService = new GastoService();
         
         public List<string> Categorias { get; set; }
+
         private DateTime _fechaRegistro = DateTime.Now;
 
         public DateTime FechaRegistro { get => _fechaRegistro; set => SetProperty(ref _fechaRegistro, value); }
@@ -68,7 +69,7 @@ namespace MonetixProyectoAPP.ViewModels
         {
             if (string.IsNullOrEmpty(CategoriaSeleccionada) ||
                 string.IsNullOrEmpty(Descripcion) ||
-                Valor == 0) {
+                Valor <= 0) {
                 await Application.Current.MainPage.DisplayAlert("Error", "Por favor, completa todos los campos correctamente.", "OK");
                 return;
             }
