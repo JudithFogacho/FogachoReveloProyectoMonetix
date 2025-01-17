@@ -25,7 +25,7 @@
                        FontFamily="Koulen"
                        HorizontalOptions="Center"
                        TextColor="#000000" />
-                <Image Source="https://i.imgur.com/KWshaxa.png"
+                <Image Source="cerdito.png"
                        HeightRequest="38"
                        WidthRequest="38" />
             </HorizontalStackLayout>

@@ -37,7 +37,7 @@
                            FontFamily="Koulen"
                            HorizontalOptions="Center"
                            TextColor="#000000" />
-                    <Image Source="./Images/LogoImg.png"
+                    <Image Source="cerdito.png"
                            HeightRequest="35"
                            WidthRequest="35" />
                 </HorizontalStackLayout>

@@ -28,7 +28,7 @@
                                PlaceholderColor="Gray"
                                Text="{Binding TextoBusqueda}" />
 
-                    <ImageButton Source="./Images/LogoImg.png"
+                    <ImageButton Source="cerdito.png"
                          WidthRequest="30"
                          HeightRequest="30"
                          BackgroundColor="#849671"

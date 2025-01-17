@@ -20,7 +20,7 @@
                        TextColor="#809671"
                        FontFamily="Koulen"
                        HorizontalOptions="Center"/>
-                <Image Source="./Images/LogoImg.png"
+                <Image Source="cerdito.png"
                        HeightRequest="180"
                        WidthRequest="180"
                        HorizontalOptions="Center"/>
