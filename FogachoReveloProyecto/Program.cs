@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using FogachoRevelo;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<FogachoReveloDataBase>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Data") ?? throw new InvalidOperationException("Connection string 'Data' not found.")));
 builder.Services.AddDbContext<FogachoReveloDataBase>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FogachoReveloDataBase") ?? throw new InvalidOperationException("Connection string 'FogachoReveloDataBase' not found.")));
 

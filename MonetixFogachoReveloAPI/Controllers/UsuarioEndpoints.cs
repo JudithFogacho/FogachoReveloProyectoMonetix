@@ -14,7 +14,9 @@ namespace MonetixFogachoReveloAPI.Controllers
             // Endpoint para obtener todos los usuarios
             group.MapGet("/", async (FogachoReveloDataContext db) =>
             {
-                return await db.Usuarios.ToListAsync();
+                return await db.Usuarios
+                    .Include(u => u.Gastos)
+                    .ToListAsync();
             })
             .WithName("GetAllUsuarios")
             .WithOpenApi();
@@ -22,7 +24,9 @@ namespace MonetixFogachoReveloAPI.Controllers
             // Endpoint para obtener un usuario por ID
             group.MapGet("/{id}", async Task<Results<Ok<Usuario>, NotFound>> (int idusuario, FogachoReveloDataContext db) =>
             {
-                return await db.Usuarios.AsNoTracking()
+                return await db.Usuarios
+                    .Include(u => u.Gastos)
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(model => model.IdUsuario == idusuario)
                     is Usuario model
                     ? TypedResults.Ok(model)
@@ -51,6 +55,7 @@ namespace MonetixFogachoReveloAPI.Controllers
             // Endpoint para crear un usuario
             group.MapPost("/", async (Usuario usuario, FogachoReveloDataContext db) =>
             {
+                usuario.Gastos = new List<Gasto>();
                 db.Usuarios.Add(usuario);
                 await db.SaveChangesAsync();
                 return TypedResults.Created($"/api/Usuario/{usuario.IdUsuario}", usuario);
@@ -69,6 +74,7 @@ namespace MonetixFogachoReveloAPI.Controllers
             .WithName("DeleteUsuario")
             .WithOpenApi();
 
+            // Endpoint para login
             group.MapPost("/login", async Task<Results<Ok<Usuario>, BadRequest<string>>> (Usuario usuario, FogachoReveloDataContext db) =>
             {
                 if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Password))
@@ -77,6 +83,7 @@ namespace MonetixFogachoReveloAPI.Controllers
                 }
 
                 var usuarioEncontrado = await db.Usuarios
+                    .Include(u => u.Gastos)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u => u.Email == usuario.Email);
 
@@ -94,7 +101,6 @@ namespace MonetixFogachoReveloAPI.Controllers
             })
             .WithName("Login")
             .WithOpenApi();
-
         }
     }
 }

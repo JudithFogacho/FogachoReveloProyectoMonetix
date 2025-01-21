@@ -1,5 +1,4 @@
-﻿
-@model FogachoReveloProyecto.Models.Gasto
+﻿@model FogachoReveloProyecto.Models.Gasto
 
 @{
     ViewData["Title"] = "CrearGasto";
@@ -65,7 +64,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="ValorPagado" class="control-label"></label>
-                <input asp-for="ValorPagado" class="form-control" type="number" step="0.01"/>
+                <input asp-for="ValorPagado" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="ValorPagado" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -80,6 +79,8 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
 }

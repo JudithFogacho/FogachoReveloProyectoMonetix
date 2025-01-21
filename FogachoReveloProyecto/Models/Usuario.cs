@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 namespace FogachoReveloProyecto.Models
 {
     public class Usuario
     {
-        //Creación de los atributos del usuario
+
         [Key]
         public int IdUsuario { get; set; }
         [Required]
@@ -17,5 +16,7 @@ namespace FogachoReveloProyecto.Models
         [Required]
         public string? Password { get; set; }
 
+
+        public virtual ICollection<Gasto>? Gastos { get; set; }
     }
 }

@@ -5,142 +5,175 @@ using MonetixFogachoReveloAPI.Data;
 using MonetixFogachoReveloAPI.Data.Models;
 using Microsoft.IdentityModel.Tokens;
 
-namespace MonetixFogachoReveloAPI.Controllers;
-
-public static class GastoEndpoints
+namespace MonetixFogachoReveloAPI.Controllers
 {
-    public static void MapGastoEndpoints(this IEndpointRouteBuilder routes)
+    public static class GastoEndpoints
     {
-        var group = routes.MapGroup("/api/Gasto").WithTags(nameof(Gasto));
-
-        // Obtener todos los gastos
-        group.MapGet("/", async (FogachoReveloDataContext db) =>
+        public static void MapGastoEndpoints(this IEndpointRouteBuilder routes)
         {
-            return await db.Gastos.ToListAsync();
-        })
-        .WithName("GetAllGastos")
-        .WithOpenApi();
+            var group = routes.MapGroup("/api/Gasto").WithTags(nameof(Gasto));
 
-        // Obtener un gasto por su ID
-        group.MapGet("/{id}", async Task<Results<Ok<Gasto>, NotFound>> (int id, FogachoReveloDataContext db) =>
-        {
-            var gasto = await db.Gastos.AsNoTracking().FirstOrDefaultAsync(g => g.IdGasto == id);
-            return gasto is not null ? TypedResults.Ok(gasto) : TypedResults.NotFound();
-        })
-        .WithName("GetGastoById")
-        .WithOpenApi();
-
-        // Actualizar un gasto por su ID
-        group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, Gasto gasto, FogachoReveloDataContext db) =>
-        {
-            var gastoExistente = await db.Gastos.FirstOrDefaultAsync(g => g.IdGasto == id);
-
-            if (gastoExistente is null)
-                return TypedResults.NotFound();
-
-            // Actualizar solo las propiedades no nulas o con valores válidos
-            if (gasto.FechaRegristo != default)
-                gastoExistente.FechaRegristo = gasto.FechaRegristo;
-
-            if (gasto.FechaFinal != default)
-                gastoExistente.FechaFinal = gasto.FechaFinal;
-
-            if (gasto.Categorias != default(Categoria)) // Verifica si se proporcionó un valor válido
-                gastoExistente.Categorias = gasto.Categorias;
-
-            if (!string.IsNullOrWhiteSpace(gasto.Descripcion))
-                gastoExistente.Descripcion = gasto.Descripcion;
-
-            if (gasto.Valor > 0)
-                gastoExistente.Valor = gasto.Valor;
-
-            if (gasto.ValorPagado > 0)
+            // Obtener todos los gastos de un usuario
+            // Obtener todos los gastos de un usuario
+            group.MapGet("/usuario/{userId}", async (int userId, FogachoReveloDataContext db) =>
             {
-                gastoExistente.ValorPagado = gasto.ValorPagado;
+                var usuario = await db.Usuarios.FindAsync(userId);
+                if (usuario == null)
+                {
+                    return Results.NotFound();
+                }
+
+                var gastos = await db.Gastos
+                    .Where(g => g.IdUsuario == userId)
+                    .ToListAsync();
+
+                return Results.Ok(gastos);
+            })
+            .WithName("GetGastosByUserId")
+            .WithOpenApi();
+
+            // Obtener un gasto por su ID
+            group.MapGet("/{id}", async Task<Results<Ok<Gasto>, NotFound>> (int id, FogachoReveloDataContext db) =>
+            {
+                var gasto = await db.Gastos
+                    .Include(g => g.Usuario)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(g => g.IdGasto == id);
+
+                return gasto is not null ? TypedResults.Ok(gasto) : TypedResults.NotFound();
+            })
+            .WithName("GetGastoById")
+            .WithOpenApi();
+
+            // Actualizar un gasto por su ID
+            group.MapPut("/{id}", async Task<Results<Ok, NotFound, BadRequest<string>>> (int id, Gasto gasto, FogachoReveloDataContext db) =>
+            {
+                var gastoExistente = await db.Gastos
+                    .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == gasto.IdUsuario);
+
+                if (gastoExistente is null)
+                    return TypedResults.NotFound();
+
+                if (gastoExistente.IdUsuario != gasto.IdUsuario)
+                    return TypedResults.BadRequest("No autorizado para modificar este gasto.");
+
+                if (gasto.FechaRegristo != default)
+                    gastoExistente.FechaRegristo = gasto.FechaRegristo;
+
+                if (gasto.FechaFinal != default)
+                    gastoExistente.FechaFinal = gasto.FechaFinal;
+
+                if (gasto.Categorias != default(Categoria))
+                    gastoExistente.Categorias = gasto.Categorias;
+
+                if (!string.IsNullOrWhiteSpace(gasto.Descripcion))
+                    gastoExistente.Descripcion = gasto.Descripcion;
+
+                if (gasto.Valor > 0)
+                    gastoExistente.Valor = gasto.Valor;
+
+                if (gasto.ValorPagado > 0)
+                {
+                    gastoExistente.ValorPagado = gasto.ValorPagado;
+                    ActualizarEstado(gastoExistente);
+                }
+
+                await db.SaveChangesAsync();
+                return TypedResults.Ok();
+            })
+            .WithName("UpdateGasto")
+            .WithOpenApi();
+
+            // Crear un nuevo gasto
+            group.MapPost("/", async Task<Results<Created<Gasto>, BadRequest<string>>> (Gasto gasto, FogachoReveloDataContext db) =>
+            {
+                if (gasto.IdUsuario <= 0)
+                {
+                    return TypedResults.BadRequest("Se requiere un ID de usuario válido.");
+                }
+
+                var usuario = await db.Usuarios.FindAsync(gasto.IdUsuario);
+                if (usuario == null)
+                {
+                    return TypedResults.BadRequest("Usuario no encontrado.");
+                }
+
+                gasto.ValidarValor();
+                db.Gastos.Add(gasto);
+                await db.SaveChangesAsync();
+                return TypedResults.Created($"/api/Gasto/{gasto.IdGasto}", gasto);
+            })
+            .WithName("CreateGasto")
+            .WithOpenApi();
+
+            // Eliminar un gasto
+            group.MapDelete("/{id}/{userId}", async Task<Results<Ok, NotFound, BadRequest<string>>> (int id, int userId, FogachoReveloDataContext db) =>
+            {
+                var gasto = await db.Gastos
+                    .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
+
+                if (gasto is null)
+                    return TypedResults.NotFound();
+
+                if (gasto.IdUsuario != userId)
+                    return TypedResults.BadRequest("No autorizado para eliminar este gasto.");
+
+                db.Gastos.Remove(gasto);
+                await db.SaveChangesAsync();
+                return TypedResults.Ok();
+            })
+            .WithName("DeleteGasto")
+            .WithOpenApi();
+
+            // Realizar pago a un gasto
+            group.MapPut("/Pagar/{id}/{userId}", async Task<Results<Ok, NotFound, BadRequest<string>>> (int id, int userId, PagoRequest pagoRequest, FogachoReveloDataContext db) =>
+            {
+                var gastoExistente = await db.Gastos
+                    .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
+
+                if (gastoExistente is null)
+                    return TypedResults.NotFound();
+
+                if (gastoExistente.IdUsuario != userId)
+                    return TypedResults.BadRequest("No autorizado para pagar este gasto.");
+
+                if (pagoRequest.ValorPagado <= 0)
+                    return TypedResults.BadRequest("El valor a pagar debe ser mayor que cero.");
+
+                gastoExistente.ValorPagado += pagoRequest.ValorPagado;
                 ActualizarEstado(gastoExistente);
+
+                await db.SaveChangesAsync();
+                return TypedResults.Ok();
+            })
+            .WithName("PagarGasto")
+            .WithOpenApi();
+        }
+
+        // Método auxiliar para actualizar el estado
+        private static void ActualizarEstado(Gasto gasto)
+        {
+            DateTime fechaActual = DateTime.Today;
+            DateTime fechaFinalSinHora = gasto.FechaFinal.Date;
+
+            if (gasto.Valor != null && gasto.ValorPagado >= gasto.Valor)
+            {
+                gasto.Estados = Estado.Finalizado;
             }
-
-            await db.SaveChangesAsync();
-            return TypedResults.Ok();
-        })
-        .WithName("UpdateGasto")
-        .WithOpenApi();
-
-        // Crear un nuevo gasto
-        group.MapPost("/", async (Gasto gasto, FogachoReveloDataContext db) =>
-        {
-            db.Gastos.Add(gasto);
-            await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Gasto/{gasto.IdGasto}", gasto);
-        })
-        .WithName("CreateGasto")
-        .WithOpenApi();
-
-        // Eliminar un gasto por su ID
-        group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (int id, FogachoReveloDataContext db) =>
-        {
-            var gasto = await db.Gastos.FindAsync(id);
-
-            if (gasto is null)
-                return TypedResults.NotFound();
-
-            db.Gastos.Remove(gasto);
-            await db.SaveChangesAsync();
-            return TypedResults.Ok();
-        })
-        .WithName("DeleteGasto")
-        .WithOpenApi();
-
-        // Endpoint para realizar un pago sobre un gasto
-        group.MapPut("/Pagar/{id}", async Task<Results<Ok, NotFound, BadRequest<string>>> (int id, PagoRequest pagoRequest, FogachoReveloDataContext db) =>
-        {
-            var gastoExistente = await db.Gastos.FirstOrDefaultAsync(g => g.IdGasto == id);
-
-            if (gastoExistente is null)
-                return TypedResults.NotFound();
-
-            if (pagoRequest.ValorPagado <= 0)
-                return TypedResults.BadRequest("El valor a pagar debe ser mayor que cero.");
-
-            // Actualizar el valor pagado
-            gastoExistente.ValorPagado += pagoRequest.ValorPagado;
-
-            // Actualizar el estado del gasto
-            ActualizarEstado(gastoExistente);
-
-            await db.SaveChangesAsync();
-            return TypedResults.Ok();
-        })
-        .WithName("PagarGasto")
-        .WithOpenApi();
-    }
-
-    // Método auxiliar para actualizar el estado
-    private static void ActualizarEstado(Gasto gasto)
-    {
-        DateTime fechaActual = DateTime.Today;
-        DateTime fechaFinalSinHora = gasto.FechaFinal.Date;
-
-        // Si ya está todo pagado el estado será finalizado
-        if (gasto.Valor != null && gasto.ValorPagado >= gasto.Valor)
-        {
-            gasto.Estados = Estado.Finalizado;
+            else if (fechaActual > fechaFinalSinHora && gasto.Valor > 0)
+            {
+                gasto.Estados = Estado.Atrasado;
+            }
+            else if (fechaActual <= fechaFinalSinHora && gasto.Valor > 0)
+            {
+                gasto.Estados = Estado.Pendiente;
+            }
         }
-        // Si la fecha se ha pasado de la fecha final y no se ha pagado será Atrasado
-        else if (fechaActual > fechaFinalSinHora && gasto.Valor > 0)
-        {
-            gasto.Estados = Estado.Atrasado;
-        }
-        // Si la fecha aun no ha pasado la fecha final y no está pagado será Pendiente
-        else if (fechaActual <= fechaFinalSinHora && gasto.Valor > 0)
-        {
-            gasto.Estados = Estado.Pendiente;
-        }
-    }
 
-    // Modelo para la solicitud de pago
-    public class PagoRequest
-    {
-        public double ValorPagado { get; set; }
+        // Clase para la solicitud de pago
+        public class PagoRequest
+        {
+            public double ValorPagado { get; set; }
+        }
     }
 }
