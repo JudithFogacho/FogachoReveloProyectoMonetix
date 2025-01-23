@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
 
-namespace FogachoRevelo
-{
     public class FogachoReveloDataBase : DbContext
     {
         public FogachoReveloDataBase (DbContextOptions<FogachoReveloDataBase> options)
@@ -14,7 +12,7 @@ namespace FogachoRevelo
         {
         }
 
-        public DbSet<FogachoReveloProyecto.Models.Usuario> Usuario { get; set; } = default!;
         public DbSet<FogachoReveloProyecto.Models.Gasto> Gasto { get; set; } = default!;
+
+public DbSet<FogachoReveloProyecto.Models.Usuario> Usuario { get; set; } = default!;
     }
-}

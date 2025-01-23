@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FogachoReveloProyecto.Migrations
 {
     [DbContext(typeof(FogachoReveloDataBase))]
-    partial class FogachoReveloDataBaseModelSnapshot : ModelSnapshot
+    [Migration("20250121201613_BDD")]
+    partial class BDD
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,15 +48,19 @@ namespace FogachoReveloProyecto.Migrations
                     b.Property<DateTime>("FechaRegristo")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
                     b.Property<double?>("Valor")
                         .IsRequired()
                         .HasColumnType("float");
 
-                    b.Property<double?>("ValorPagado")
-                        .IsRequired()
+                    b.Property<double>("ValorPagado")
                         .HasColumnType("float");
 
                     b.HasKey("IdGasto");
+
+                    b.HasIndex("IdUsuario");
 
                     b.ToTable("Gasto");
                 });
@@ -85,6 +92,22 @@ namespace FogachoReveloProyecto.Migrations
                     b.HasKey("IdUsuario");
 
                     b.ToTable("Usuario");
+                });
+
+            modelBuilder.Entity("FogachoReveloProyecto.Models.Gasto", b =>
+                {
+                    b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuario")
+                        .WithMany("Gastos")
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("FogachoReveloProyecto.Models.Usuario", b =>
+                {
+                    b.Navigation("Gastos");
                 });
 #pragma warning restore 612, 618
         }

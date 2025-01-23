@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FogachoReveloProyecto.Migrations
 {
     /// <inheritdoc />
-    public partial class FogachoReveloData : Migration
+    public partial class CambiosDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,23 +40,23 @@ namespace FogachoReveloProyecto.Migrations
                     Valor = table.Column<double>(type: "float", nullable: false),
                     ValorPagado = table.Column<double>(type: "float", nullable: false),
                     Estados = table.Column<int>(type: "int", nullable: false),
-                    IdUsuario = table.Column<int>(type: "int", nullable: false)
+                    UsuariosIdUsuario = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Gasto", x => x.IdGasto);
                     table.ForeignKey(
-                        name: "FK_Gasto_Usuario_IdUsuario",
-                        column: x => x.IdUsuario,
+                        name: "FK_Gasto_Usuario_UsuariosIdUsuario",
+                        column: x => x.UsuariosIdUsuario,
                         principalTable: "Usuario",
                         principalColumn: "IdUsuario",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Gasto_IdUsuario",
+                name: "IX_Gasto_UsuariosIdUsuario",
                 table: "Gasto",
-                column: "IdUsuario");
+                column: "UsuariosIdUsuario");
         }
 
         /// <inheritdoc />

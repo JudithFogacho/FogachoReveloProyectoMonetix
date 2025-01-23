@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
-using FogachoRevelo;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 namespace FogachoReveloProyecto.Controllers
 {
     public class UsuariosController : Controller
     {
+        //declaracion de una variable privada de solo lectura
         private readonly FogachoReveloDataBase _context;
 
         public UsuariosController(FogachoReveloDataBase context)
@@ -19,6 +21,8 @@ namespace FogachoReveloProyecto.Controllers
             _context = context;
         }
 
+        // GET: Usuarios/Create
+        //metodos de acción del controlador
         public IActionResult Create()
         {
             return View();
@@ -28,25 +32,30 @@ namespace FogachoReveloProyecto.Controllers
         {
             return View();
         }
-
         public IActionResult Registro()
         {
             return View();
         }
 
+        // POST: Usuarios/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
+        //Este apartado es del login y nos ayuda a verificar que el acceso con contraseñas y email
+        //esten dentro de la base de datos
+
         public async Task<IActionResult> Login([Bind("Email,Password")] Usuario usuario)
         {
+
             if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Password))
             {
                 ModelState.AddModelError(string.Empty, "Email y contraseña son requeridos.");
                 return View(usuario);
             }
 
-            var userBaseDatos = await _context.Usuario
-                .Include(u => u.Gastos) // Incluimos los gastos relacionados
-                .FirstOrDefaultAsync(u => u.Email == usuario.Email);
+            var userBaseDatos = await _context.Usuario.FirstOrDefaultAsync(u => u.Email == usuario.Email);
 
             if (userBaseDatos == null)
             {
@@ -59,31 +68,25 @@ namespace FogachoReveloProyecto.Controllers
                 ModelState.AddModelError(string.Empty, "Contraseña incorrecta.");
                 return View(usuario);
             }
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userBaseDatos.Nombre),
+                new Claim(ClaimTypes.Email, userBaseDatos.Email)
+            };
 
-            // Guardamos el ID del usuario en TempData para usarlo en otras acciones
-            TempData["UserId"] = userBaseDatos.IdUsuario;
+            var claimsIdentity = new ClaimsIdentity(claims, "Login");
+            await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity));
             return RedirectToAction("PaginaInicial", "Gastos");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        //Metodo para el registro
+        //Añade a un nuevo usuario y una vez añadido retorna al Login
         public async Task<IActionResult> Registro([Bind("IdUsuario,Nombre,Apellido,Email,Password")] Usuario usuario)
         {
             if (ModelState.IsValid)
             {
-                // Verificar si el email ya existe
-                var existingUser = await _context.Usuario
-                    .FirstOrDefaultAsync(u => u.Email == usuario.Email);
-
-                if (existingUser != null)
-                {
-                    ModelState.AddModelError("Email", "Este correo electrónico ya está registrado.");
-                    return View(usuario);
-                }
-
-                // Inicializar la colección de Gastos
-                usuario.Gastos = new List<Gasto>();
-
                 _context.Add(usuario);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Login");

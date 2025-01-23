@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
-using FogachoRevelo;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace FogachoReveloProyecto.Controllers
 {
@@ -18,27 +19,20 @@ namespace FogachoReveloProyecto.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-
         // GET: Gasto
         public async Task<IActionResult> PaginaInicial(string categoria)
         {
-            // Obtener el ID del usuario de TempData
-            var userId = TempData.Peek("UserId"); // Usamos Peek para no eliminar el valor
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Usuarios");
-            }
+            var nombreUsuario = User.Identity.IsAuthenticated ? User.Identity.Name : "Invitado";
+            ViewBag.NombreUsuario = nombreUsuario;
 
-            var gastos = _context.Gasto
-                .Include(g => g.Usuario)
-                .Where(g => g.IdUsuario == (int)userId);
+            var gastos = from g in _context.Gasto select g;
 
             if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, out var categoriaEnum))
             {
                 gastos = gastos.Where(g => g.Categorias == categoriaEnum);
             }
 
-            var subtotalGastos = await gastos.SumAsync(g => g.Valor ?? 0);
+            var subtotalGastos = await gastos.SumAsync(g => g.Valor);
             var subtotalValorPagado = await gastos.SumAsync(g => g.ValorPagado);
             var total = subtotalGastos - subtotalValorPagado;
 
@@ -52,33 +46,15 @@ namespace FogachoReveloProyecto.Controllers
         [HttpGet]
         public IActionResult CrearGasto()
         {
-            var userId = TempData.Peek("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Usuarios");
-            }
-
-            return View(new Gasto
-            {
-                FechaRegristo = DateTime.Now,
-                IdUsuario = (int)userId
-            });
+            return View(new Gasto { FechaRegristo = DateTime.Now });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CrearGasto([Bind("FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados,IdUsuario")] Gasto gasto)
+        public async Task<IActionResult> CrearGasto([Bind("FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
         {
             try
             {
-                var userId = TempData.Peek("UserId");
-                if (userId == null)
-                {
-                    return RedirectToAction("Login", "Usuarios");
-                }
-
-                gasto.IdUsuario = (int)userId;
-
                 if (!ModelState.IsValid)
                 {
                     return View(gasto);
@@ -106,16 +82,9 @@ namespace FogachoReveloProyecto.Controllers
                 return BadRequest("ID de gasto no proporcionado.");
             }
 
-            var userId = TempData.Peek("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Usuarios");
-            }
-
             var gasto = await _context.Gasto
-                .Include(g => g.Usuario)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.IdGasto == id && m.IdUsuario == (int)userId);
+                .FirstOrDefaultAsync(m => m.IdGasto == id);
 
             if (gasto == null)
             {
@@ -133,14 +102,7 @@ namespace FogachoReveloProyecto.Controllers
                 return BadRequest("ID de gasto no proporcionado.");
             }
 
-            var userId = TempData.Peek("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Usuarios");
-            }
-
-            var gasto = await _context.Gasto
-                .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == (int)userId);
+            var gasto = await _context.Gasto.FindAsync(id);
 
             if (gasto == null)
             {
@@ -152,17 +114,16 @@ namespace FogachoReveloProyecto.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdGasto,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados,IdUsuario")] Gasto gasto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdGasto,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
         {
             if (id != gasto.IdGasto)
             {
                 return BadRequest("ID de gasto no coincide.");
             }
 
-            var userId = TempData.Peek("UserId");
-            if (userId == null || gasto.IdUsuario != (int)userId)
+            if (!await GastoExists(id))
             {
-                return RedirectToAction("Login", "Usuarios");
+                return NotFound($"No se encontró el gasto con ID: {id}");
             }
 
             if (!ModelState.IsValid)
@@ -199,16 +160,9 @@ namespace FogachoReveloProyecto.Controllers
                 return BadRequest("ID de gasto no proporcionado.");
             }
 
-            var userId = TempData.Peek("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Usuarios");
-            }
-
             var gasto = await _context.Gasto
-                .Include(g => g.Usuario)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.IdGasto == id && m.IdUsuario == (int)userId);
+                .FirstOrDefaultAsync(m => m.IdGasto == id);
 
             if (gasto == null)
             {
@@ -223,14 +177,7 @@ namespace FogachoReveloProyecto.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var userId = TempData.Peek("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Usuarios");
-            }
-
-            var gasto = await _context.Gasto
-                .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == (int)userId);
+            var gasto = await _context.Gasto.FindAsync(id);
 
             if (gasto == null)
             {
@@ -254,8 +201,13 @@ namespace FogachoReveloProyecto.Controllers
 
         private async Task<bool> GastoExists(int id)
         {
-            var userId = TempData.Peek("UserId");
-            return await _context.Gasto.AnyAsync(e => e.IdGasto == id && e.IdUsuario == (int)userId);
+            return await _context.Gasto.AnyAsync(e => e.IdGasto == id);
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Login", "Usuarios");
         }
     }
 }
