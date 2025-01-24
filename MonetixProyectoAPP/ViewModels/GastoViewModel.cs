@@ -11,13 +11,15 @@ using System.Threading.Tasks;
 
 namespace MonetixProyectoAPP.ViewModels
 {
-    public class GastoViewModel: BaseViewModel
+    public class GastoViewModel : BaseViewModel
     {
-        private readonly GastoService _gastoService = new GastoService();
+        private readonly GastoService _gastoService;
+        private readonly UsuarioService _usuarioService;
         private readonly ApiPublicaService _apiPublicaService = new ApiPublicaService();
 
         private ObservableCollection<Local> _locales = new ObservableCollection<Local>();
         private ObservableCollection<Gasto> _gastos = new ObservableCollection<Gasto>();
+        private int _currentUserId;
 
         public ObservableCollection<Gasto> Gastos
         {
@@ -31,15 +33,24 @@ namespace MonetixProyectoAPP.ViewModels
             set => SetProperty(ref _locales, value);
         }
 
-
-        public GastoViewModel() { 
+        public GastoViewModel(UsuarioService usuarioService)
+        {
+            _usuarioService = usuarioService;
+            _gastoService = new GastoService(_usuarioService);
+            _currentUserId = _usuarioService.GetCurrentUserId();
             LoadGastos();
         }
 
         private async Task LoadGastos()
         {
-            await ExecuteAsync(async () => {
+            if (_currentUserId == 0)
+            {
+                // Si no hay usuario autenticado, limpiar la lista
+                Gastos.Clear();
+                return;
+            }
 
+            await ExecuteAsync(async () => {
                 var gastos = await _gastoService.GetGastosAsync();
                 Gastos.Clear();
                 foreach (var gasto in gastos)
@@ -47,8 +58,7 @@ namespace MonetixProyectoAPP.ViewModels
                     gasto.AsignarColorEstado();
                     Gastos.Add(gasto);
                 }
-
-            }); 
+            });
         }
 
         public async Task CargarLocalesPorCategoria(string categoria)
@@ -64,9 +74,16 @@ namespace MonetixProyectoAPP.ViewModels
             });
         }
 
-        public async Task IngresarGasto (Gasto nuevoGasto)
+        public async Task IngresarGasto(Gasto nuevoGasto)
         {
+            if (_currentUserId == 0)
+            {
+                // Manejar el caso de usuario no autenticado
+                return;
+            }
+
             await ExecuteAsync(async () => {
+                nuevoGasto.IdUsuario = _currentUserId;
                 await _gastoService.CreateGastoAsync(nuevoGasto);
                 await LoadGastos();
             });
@@ -74,11 +91,51 @@ namespace MonetixProyectoAPP.ViewModels
 
         public async Task EliminarGasto(int idGasto)
         {
+            if (_currentUserId == 0)
+            {
+                return;
+            }
+
             await ExecuteAsync(async () => {
                 await _gastoService.DeleteGastoAsync(idGasto);
                 await LoadGastos();
-            });    
-            
+            });
+        }
+
+        public async Task PagarGasto(int idGasto, double valorPago)
+        {
+            if (_currentUserId == 0)
+            {
+                return;
+            }
+
+            await ExecuteAsync(async () => {
+                var response = await _gastoService.PagarGastoAsync(idGasto, valorPago);
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadGastos();
+                }
+            });
+        }
+
+        public async Task ActualizarGasto(Gasto gasto)
+        {
+            if (_currentUserId == 0)
+            {
+                return;
+            }
+
+            await ExecuteAsync(async () => {
+                gasto.IdUsuario = _currentUserId;
+                await _gastoService.UpdateGastoAsync(gasto);
+                await LoadGastos();
+            });
+        }
+
+        public void ActualizarUsuarioActual()
+        {
+            _currentUserId = _usuarioService.GetCurrentUserId();
+            LoadGastos();
         }
     }
 }

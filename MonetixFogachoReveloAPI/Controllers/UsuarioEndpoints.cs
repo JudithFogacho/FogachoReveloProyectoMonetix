@@ -1,100 +1,168 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.HttpResults;
 using MonetixFogachoReveloAPI.Data;
 using MonetixFogachoReveloAPI.Data.Models;
+using MonetixFogachoReveloAPI.Interfaz;
 
 namespace MonetixFogachoReveloAPI.Controllers
 {
     public static class UsuarioEndpoints
     {
-        public static void MapUsuarioEndpoints(this IEndpointRouteBuilder routes)
+        public static void MapUsuarioEndpoints(this IEndpointRouteBuilder app)
         {
-            var group = routes.MapGroup("/api/Usuario").WithTags(nameof(Usuario));
+            var group = app.MapGroup("/api/usuarios")
+                .WithTags("Usuarios")
+                .WithOpenApi();
 
-            // Endpoint para obtener todos los usuarios
-            group.MapGet("/", async (FogachoReveloDataContext db) =>
+            group.MapPost("/register", async Task<Results<Created<UsuarioResponse>, BadRequest<ErrorResponse>>> (
+                [FromBody] CreateUsuarioRequest request,
+                [FromServices] FogachoReveloDataContext db) =>
             {
-                return await db.Usuarios.ToListAsync();
-            })
-            .WithName("GetAllUsuarios")
-            .WithOpenApi();
+                // Validación de modelo
+                if (!Validator.TryValidateObject(request, new ValidationContext(request), null, true))
+                    return TypedResults.BadRequest(new ErrorResponse("Datos de entrada inválidos"));
 
-            // Endpoint para obtener un usuario por ID
-            group.MapGet("/{id}", async Task<Results<Ok<Usuario>, NotFound>> (int idusuario, FogachoReveloDataContext db) =>
-            {
-                return await db.Usuarios.AsNoTracking()
-                    .FirstOrDefaultAsync(model => model.IdUsuario == idusuario)
-                    is Usuario model
-                    ? TypedResults.Ok(model)
-                    : TypedResults.NotFound();
-            })
-            .WithName("GetUsuarioById")
-            .WithOpenApi();
+                // Verificar email único
+                if (await db.Usuarios.AnyAsync(u => u.Email == request.Email))
+                    return TypedResults.BadRequest(new ErrorResponse("El email ya está registrado"));
 
-            // Endpoint para actualizar un usuario
-            group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int idusuario, Usuario usuario, FogachoReveloDataContext db) =>
-            {
-                var affected = await db.Usuarios
-                    .Where(model => model.IdUsuario == idusuario)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(m => m.IdUsuario, usuario.IdUsuario)
-                        .SetProperty(m => m.Nombre, usuario.Nombre)
-                        .SetProperty(m => m.Apellido, usuario.Apellido)
-                        .SetProperty(m => m.Email, usuario.Email)
-                        .SetProperty(m => m.Password, usuario.Password)
-                    );
-                return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
-            })
-            .WithName("UpdateUsuario")
-            .WithOpenApi();
+                // Mapear a entidad
+                var usuario = new Usuario
+                {
+                    Nombre = request.Nombre,
+                    Apellido = request.Apellido,
+                    Email = request.Email,
+                    Password = request.Password, // Deberías hashear la contraseña aquí
+                    Gastos = new List<Gasto>()
+                };
 
-            // Endpoint para crear un usuario
-            group.MapPost("/", async (Usuario usuario, FogachoReveloDataContext db) =>
-            {
-                db.Usuarios.Add(usuario);
+                // Guardar en BD
+                await db.Usuarios.AddAsync(usuario);
                 await db.SaveChangesAsync();
-                return TypedResults.Created($"/api/Usuario/{usuario.IdUsuario}", usuario);
+
+                // Retornar respuesta sin información sensible
+                return TypedResults.Created(
+                    $"/api/usuarios/{usuario.IdUsuario}",
+                    new UsuarioResponse(
+                        usuario.IdUsuario,
+                        usuario.Nombre,
+                        usuario.Apellido,
+                        usuario.Email));
             })
-            .WithName("CreateUsuario")
-            .WithOpenApi();
+            .WithSummary("Registrar nuevo usuario")
+            .Produces<UsuarioResponse>(StatusCodes.Status201Created)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
 
-            // Endpoint para eliminar un usuario
-            group.MapDelete("/{id}", async Task<Results<Ok, NotFound>> (int idusuario, FogachoReveloDataContext db) =>
+            group.MapPost("/login", async Task<Results<Ok<LoginResponse>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> (
+                [FromBody] LoginRequest request,
+                [FromServices] FogachoReveloDataContext db,
+                [FromServices] ITokenService tokenService) =>
             {
-                var affected = await db.Usuarios
-                    .Where(model => model.IdUsuario == idusuario)
-                    .ExecuteDeleteAsync();
-                return affected == 1 ? TypedResults.Ok() : TypedResults.NotFound();
-            })
-            .WithName("DeleteUsuario")
-            .WithOpenApi();
+                // Validación básica
+                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                    return TypedResults.BadRequest(new ErrorResponse("Email y contraseña son requeridos"));
 
-            group.MapPost("/login", async Task<Results<Ok<Usuario>, BadRequest<string>>> (Usuario usuario, FogachoReveloDataContext db) =>
-            {
-                if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Password))
-                {
-                    return TypedResults.BadRequest("Email y contraseña son requeridos.");
-                }
-
-                var usuarioEncontrado = await db.Usuarios
+                // Buscar usuario
+                var usuario = await db.Usuarios
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Email == usuario.Email);
+                    .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-                if (usuarioEncontrado == null)
-                {
-                    return TypedResults.BadRequest("Email no encontrado.");
-                }
+                // Validar credenciales
+                if (usuario == null || usuario.Password != request.Password) // Deberías comparar hashes aquí
+                    return TypedResults.Unauthorized();
 
-                if (usuarioEncontrado.Password != usuario.Password)
-                {
-                    return TypedResults.BadRequest("Contraseña incorrecta.");
-                }
+                // Generar token JWT
+                var token = tokenService.GenerateJwtToken(usuario);
 
-                return TypedResults.Ok(usuarioEncontrado);
+                return TypedResults.Ok(new LoginResponse(
+                    usuario.IdUsuario,
+                    usuario.Nombre,
+                    usuario.Apellido,
+                    usuario.Email,
+                    token));
             })
-            .WithName("Login")
-            .WithOpenApi();
+            .WithSummary("Iniciar sesión de usuario")
+            .Produces<LoginResponse>(StatusCodes.Status200OK)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
+            group.MapGet("/{id}", async Task<Results<Ok<UsuarioResponse>, NotFound>> (
+                [FromRoute] int id,
+                [FromServices] FogachoReveloDataContext db) =>
+            {
+                var usuario = await db.Usuarios
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.IdUsuario == id);
+
+                return usuario is null
+                    ? TypedResults.NotFound()
+                    : TypedResults.Ok(new UsuarioResponse(
+                        usuario.IdUsuario,
+                        usuario.Nombre,
+                        usuario.Apellido,
+                        usuario.Email));
+            })
+            .RequireAuthorization()
+            .WithSummary("Obtener usuario por ID")
+            .Produces<UsuarioResponse>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+            group.MapPut("/{id}", async Task<Results<NoContent, NotFound, BadRequest<ErrorResponse>>> (
+                [FromRoute] int id,
+                [FromBody] UpdateUsuarioRequest request,
+                [FromServices] FogachoReveloDataContext db) =>
+            {
+                var usuario = await db.Usuarios.FindAsync(id);
+                if (usuario is null) return TypedResults.NotFound();
+
+                // Actualizar campos permitidos
+                usuario.Nombre = request.Nombre ?? usuario.Nombre;
+                usuario.Apellido = request.Apellido ?? usuario.Apellido;
+
+                // Validar modelo
+                if (!Validator.TryValidateObject(usuario, new ValidationContext(usuario), null, true))
+                    return TypedResults.BadRequest(new ErrorResponse("Datos inválidos"));
+
+                await db.SaveChangesAsync();
+                return TypedResults.NoContent();
+            })
+            .RequireAuthorization()
+            .WithSummary("Actualizar usuario")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
         }
     }
+
+    // DTOs
+    public record CreateUsuarioRequest(
+        [Required][StringLength(50)] string Nombre,
+        [Required][StringLength(50)] string Apellido,
+        [Required][EmailAddress] string Email,
+        [Required][StringLength(100, MinimumLength = 6)] string Password);
+
+    public record UpdateUsuarioRequest(
+        [StringLength(50)] string? Nombre,
+        [StringLength(50)] string? Apellido);
+
+    public record UsuarioResponse(
+        int IdUsuario,
+        string Nombre,
+        string Apellido,
+        string Email);
+
+    public record LoginRequest(
+        [Required][EmailAddress] string Email,
+        [Required] string Password);
+
+    public record LoginResponse(
+        int IdUsuario,
+        string Nombre,
+        string Apellido,
+        string Email,
+        string Token);
+
+    public record ErrorResponse(string Message);
 }

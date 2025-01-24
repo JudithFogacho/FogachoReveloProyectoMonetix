@@ -13,12 +13,10 @@ namespace MonetixProyectoAPP.ViewModels
 {
     public class DetalleGastoViewModel : BaseViewModel
     {
-        private readonly GastoService _gastoService = new GastoService();
+        private readonly GastoService _gastoService;
+        private readonly UsuarioService _usuarioService;
         private readonly ApiPublicaService _apiPublicaService = new ApiPublicaService();
-        private readonly HttpClient _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri("https://localhost:7156/api/")
-        };
+        private readonly int _currentUserId;
 
         private Gasto _gasto;
         public Gasto Gasto
@@ -58,8 +56,24 @@ namespace MonetixProyectoAPP.ViewModels
         public ICommand EliminarGastoCommand { get; }
         public ICommand PagarGastoCommand { get; }
 
-        public DetalleGastoViewModel(Gasto gasto)
+        public DetalleGastoViewModel(Gasto gasto, UsuarioService usuarioService)
         {
+            _usuarioService = usuarioService;
+            _gastoService = new GastoService(_usuarioService);
+            _currentUserId = _usuarioService.GetCurrentUserId();
+
+            if (_currentUserId == 0)
+            {
+                Shell.Current.GoToAsync("///Login");
+                return;
+            }
+
+            if (gasto.IdUsuario != _currentUserId)
+            {
+                Shell.Current.GoToAsync("///PaginaInicial");
+                return;
+            }
+
             Gasto = gasto;
             EliminarGastoCommand = new Command(async () => await EliminarGastoAsync());
             PagarGastoCommand = new Command(async () => await PagarGastoAsync());
@@ -70,48 +84,47 @@ namespace MonetixProyectoAPP.ViewModels
         {
             if (Gasto == null || string.IsNullOrEmpty(Gasto.Descripcion))
             {
-                LogoSource = "imagen_local_1.png"; // Imagen por defecto
+                LogoSource = "imagen_local_1.png";
                 return;
             }
 
             try
             {
-                // Obtener todas las empresas desde la API
                 var locales = await _apiPublicaService.GetLocalesPorCategoriaAsync(Gasto.Categorias.ToString());
-
-                // Buscar la empresa correspondiente en la lista de locales
                 var empresa = locales?.FirstOrDefault(l => l.Nombre.Equals(Gasto.Descripcion, StringComparison.OrdinalIgnoreCase));
 
                 if (empresa != null && !string.IsNullOrEmpty(empresa.Logo))
                 {
-                    // Si se encuentra la empresa, usar su logo
                     LogoSource = empresa.Logo;
                 }
                 else
                 {
-                    // Si no se encuentra, usar una de las imágenes locales
                     var imagenesLocales = new List<string>
-                    {
-                        "imagen_local_1.png",
-                        "imagen_local_2.png",
-                        "imagen_local_3.png"
-                    };
+                   {
+                       "imagen_local_1.png",
+                       "imagen_local_2.png",
+                       "imagen_local_3.png"
+                   };
 
-                    // Seleccionar una imagen local al azar
                     var random = new Random();
                     LogoSource = imagenesLocales[random.Next(imagenesLocales.Count)];
                 }
             }
             catch (Exception ex)
             {
-                // Manejar errores de conexión o datos aquí
                 Console.WriteLine($"Error al cargar el logo: {ex.Message}");
-                LogoSource = "imagen_local_1.png"; // Imagen por defecto en caso de error
+                LogoSource = "imagen_local_1.png";
             }
         }
 
         private async Task EliminarGastoAsync()
         {
+            if (_currentUserId == 0 || Gasto.IdUsuario != _currentUserId)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "No tiene permisos para eliminar este gasto", "OK");
+                return;
+            }
+
             bool confirmar = await Application.Current.MainPage.DisplayAlert(
                 "Confirmar Eliminación",
                 "¿Está seguro de eliminar este gasto?",
@@ -131,6 +144,12 @@ namespace MonetixProyectoAPP.ViewModels
 
         private async Task PagarGastoAsync()
         {
+            if (_currentUserId == 0 || Gasto.IdUsuario != _currentUserId)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "No tiene permisos para pagar este gasto", "OK");
+                return;
+            }
+
             var valorPagado = await Application.Current.MainPage.DisplayPromptAsync(
                 "Pagar Gasto",
                 "Ingrese el valor a pagar",
@@ -152,24 +171,26 @@ namespace MonetixProyectoAPP.ViewModels
                 {
                     await ExecuteAsync(async () =>
                     {
-                        var pagoData = new
+                        try
                         {
-                            ValorPagado = valor
-                        };
+                            var response = await _gastoService.PagarGastoAsync(Gasto.IdGasto, valor);
 
-                        var url = $"Gasto/Pagar/{Gasto.IdGasto}";
-                        var content = new StringContent(JsonConvert.SerializeObject(pagoData), Encoding.UTF8, "application/json");
-                        var response = await _httpClient.PutAsync(url, content);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            await Application.Current.MainPage.DisplayAlert("Éxito", "El pago ha sido procesado correctamente", "OK");
-                            await Shell.Current.GoToAsync("///PaginaInicial");
+                            if (response.IsSuccessStatusCode)
+                            {
+                                await Application.Current.MainPage.DisplayAlert("Éxito", "El pago ha sido procesado correctamente", "OK");
+                                await Shell.Current.GoToAsync("///PaginaInicial");
+                            }
+                            else
+                            {
+                                var errorMessage = await response.Content.ReadAsStringAsync();
+                                await Application.Current.MainPage.DisplayAlert("Error", errorMessage, "OK");
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            var errorMessage = await response.Content.ReadAsStringAsync();
-                            await Application.Current.MainPage.DisplayAlert("Error", errorMessage, "OK");
+                            await Application.Current.MainPage.DisplayAlert("Error",
+                                "No se pudo procesar el pago. Intente nuevamente.", "OK");
+                            Console.WriteLine($"Error al procesar pago: {ex.Message}");
                         }
                     });
                 }
@@ -182,10 +203,7 @@ namespace MonetixProyectoAPP.ViewModels
 
         private bool TryParseValor(string input, out double valor)
         {
-            // Eliminar el símbolo de moneda y espacios
             input = input?.Replace("$", "").Replace(",", "").Trim();
-
-            // Intentar convertir el valor a double
             return double.TryParse(input, NumberStyles.Currency, CultureInfo.InvariantCulture, out valor);
         }
     }

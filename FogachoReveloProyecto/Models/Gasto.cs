@@ -1,17 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FogachoReveloProyecto.Models
 {
     public class Gasto
     {
-        //Atributos
         [Key]
         public int IdGasto { get; set; }
         [Required]
         public DateTime FechaRegristo { get; set; }
         [Required]
         public DateTime FechaFinal { get; set; }
-        
+
         [Required]
         public Categoria? Categorias { get; set; }
         [Required]
@@ -24,6 +24,14 @@ namespace FogachoReveloProyecto.Models
         public double ValorPagado { get; set; }
         public Estado Estados { get; set; }
 
+        // Clave foránea para la relación
+        [Required]
+        public int IdUsuario { get; set; }
+
+        // Propiedad de navegación para la relación
+        [ForeignKey("IdUsuario")]
+        public virtual Usuario? Usuario { get; set; }
+
 
         //Este metodo se utiliza para calcular el valor del gasto
         public double CalcularValorGasto(double valorPago)
@@ -33,9 +41,9 @@ namespace FogachoReveloProyecto.Models
                 ValorPagado += valorPago;
                 double nuevoValor = (double)(Valor - ValorPagado);
                 // Aseguramos que no sea negativo
-                Valor = nuevoValor < 0 ? 0 : nuevoValor; 
+                Valor = nuevoValor < 0 ? 0 : nuevoValor;
                 //usamos el metodo de recursividad
-                ActualizacionPagos(); 
+                ActualizacionPagos();
                 return (double)Valor;
             }
             return 0;
@@ -45,11 +53,11 @@ namespace FogachoReveloProyecto.Models
         public void ActualizacionPagos()
         {
             //Tomamos fechas
-            DateTime fechaActual = DateTime.Today;  
+            DateTime fechaActual = DateTime.Today;
             DateTime fechaFinalSinHora = FechaFinal.Date;
 
             // Si ya está todo pagado el estado será finalizado
-            if (Valor != null && ValorPagado == Valor) 
+            if (Valor != null && ValorPagado == Valor)
             {
                 Estados = Estado.Finalizado;
             }
@@ -59,13 +67,13 @@ namespace FogachoReveloProyecto.Models
                 Estados = Estado.Atrasado;
             }
             //si la fecha aun no ha pasado la fecha final y no esta pagado será Pendiente
-            else if (fechaActual <= fechaFinalSinHora && Valor > 0) 
+            else if (fechaActual <= fechaFinalSinHora && Valor > 0)
             {
                 Estados = Estado.Pendiente;
             }
         }
         //Este metodo se utiliza para validar el estado finalizado
-        public void ValidarValor() 
+        public void ValidarValor()
         {
             ActualizacionPagos();
         }

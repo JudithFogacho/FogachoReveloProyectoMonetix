@@ -45,15 +45,19 @@ namespace FogachoReveloProyecto.Migrations
                     b.Property<DateTime>("FechaRegristo")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
                     b.Property<double?>("Valor")
                         .IsRequired()
                         .HasColumnType("float");
 
-                    b.Property<double?>("ValorPagado")
-                        .IsRequired()
+                    b.Property<double>("ValorPagado")
                         .HasColumnType("float");
 
                     b.HasKey("IdGasto");
+
+                    b.HasIndex("IdUsuario");
 
                     b.ToTable("Gasto");
                 });
@@ -85,6 +89,22 @@ namespace FogachoReveloProyecto.Migrations
                     b.HasKey("IdUsuario");
 
                     b.ToTable("Usuario");
+                });
+
+            modelBuilder.Entity("FogachoReveloProyecto.Models.Gasto", b =>
+                {
+                    b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuario")
+                        .WithMany("Gastos")
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("FogachoReveloProyecto.Models.Usuario", b =>
+                {
+                    b.Navigation("Gastos");
                 });
 #pragma warning restore 612, 618
         }

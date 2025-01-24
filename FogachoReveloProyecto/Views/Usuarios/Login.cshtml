@@ -6,27 +6,22 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Koulen&family=Kosugi+Maru&family=Lilita+One&display=swap" rel="stylesheet">
 
 <h1 class="koulen-regular">Monetix</h1>
 
 <div class="ImgLogo">
-    <img src="./img/LogoImg.png" alt="LogoImg" class="centrada" />
+    <img src="~/img/LogoImg.png" alt="LogoImg" class="centrada" />
 </div>
 
 <div class="row">
     <div class="col-md-4">
-        <div class="TituloIS">Iniciar Sesion</div>
+        <div class="TituloIS">Iniciar Sesión</div>
         <!-- Formulario de inicio de sesión -->
         <form asp-action="Login" method="post">
+            <!-- Antiforgery token -->
+            @Html.AntiForgeryToken()
+
             <!-- Resumen de errores de validación -->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -55,7 +50,6 @@
         </div>
     </div>
 </div>
-
 
 @section Scripts {
     <!-- Incluyendo scripts de validación para manejo de errores en el cliente -->

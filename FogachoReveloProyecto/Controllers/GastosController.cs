@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
 
 namespace FogachoReveloProyecto.Controllers
 {
@@ -19,53 +15,79 @@ namespace FogachoReveloProyecto.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-        // GET: Gasto
+
+        // GET: Gastos/PaginaInicial
         public async Task<IActionResult> PaginaInicial(string categoria)
         {
-            var nombreUsuario = User.Identity.IsAuthenticated ? User.Identity.Name : "Invitado";
-            ViewBag.NombreUsuario = nombreUsuario;
+            var userId = TempData["UserId"] as int?;
+            var nombreUsuario = TempData["NombreUsuario"] as string;
 
-            var gastos = from g in _context.Gasto select g;
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Usuarios");
+            }
+
+            var gastosQuery = _context.Gasto
+                .Include(g => g.Usuario)
+                .Where(g => g.IdUsuario == userId);
 
             if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, out var categoriaEnum))
             {
-                gastos = gastos.Where(g => g.Categorias == categoriaEnum);
+                gastosQuery = gastosQuery.Where(g => g.Categorias == categoriaEnum);
             }
 
-            var subtotalGastos = await gastos.SumAsync(g => g.Valor);
-            var subtotalValorPagado = await gastos.SumAsync(g => g.ValorPagado);
+            var subtotalGastos = await gastosQuery.SumAsync(g => g.Valor ?? 0);
+            var subtotalValorPagado = await gastosQuery.SumAsync(g => g.ValorPagado);
             var total = subtotalGastos - subtotalValorPagado;
 
             ViewBag.SubtotalGastos = subtotalGastos;
             ViewBag.SubtotalValorPagado = subtotalValorPagado;
             ViewBag.Total = total;
+            ViewBag.NombreUsuario = nombreUsuario;
+            ViewBag.UserId = userId; // Pasar el userId a la vista
 
-            return View(await gastos.ToListAsync());
+            return View(await gastosQuery.ToListAsync());
         }
 
+        // GET: Gastos/CrearGasto
         [HttpGet]
-        public IActionResult CrearGasto()
+        public IActionResult CrearGasto(int userId)
         {
-            return View(new Gasto { FechaRegristo = DateTime.Now });
+            if (userId == 0)
+            {
+                return RedirectToAction("Login", "Usuarios");
+            }
+
+            return View(new Gasto
+            {
+                FechaRegristo = DateTime.Now,
+                IdUsuario = userId
+            });
         }
 
+        // POST: Gastos/CrearGasto
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CrearGasto([Bind("FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
+        public async Task<IActionResult> CrearGasto([Bind("FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados,IdUsuario")] Gasto gasto)
         {
+            if (gasto.IdUsuario == 0)
+            {
+                return RedirectToAction("Login", "Usuarios");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(gasto);
+            }
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return View(gasto);
-                }
-
                 gasto.ValidarValor();
-                await _context.AddAsync(gasto);
+                _context.Add(gasto);
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Gasto creado exitosamente.";
-                return RedirectToAction(nameof(PaginaInicial));
+                return RedirectToAction(nameof(PaginaInicial), new { userId = gasto.IdUsuario });
             }
             catch (Exception ex)
             {
@@ -74,17 +96,17 @@ namespace FogachoReveloProyecto.Controllers
             }
         }
 
+        // GET: Gastos/Edit/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Edit(int? id, int userId)
         {
-            if (!id.HasValue)
+            if (!id.HasValue || userId == 0)
             {
-                return BadRequest("ID de gasto no proporcionado.");
+                return BadRequest("ID de gasto o usuario no proporcionado.");
             }
 
             var gasto = await _context.Gasto
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.IdGasto == id);
+                .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
 
             if (gasto == null)
             {
@@ -94,36 +116,14 @@ namespace FogachoReveloProyecto.Controllers
             return View(gasto);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (!id.HasValue)
-            {
-                return BadRequest("ID de gasto no proporcionado.");
-            }
-
-            var gasto = await _context.Gasto.FindAsync(id);
-
-            if (gasto == null)
-            {
-                return NotFound($"No se encontró el gasto con ID: {id}");
-            }
-
-            return View(gasto);
-        }
-
+        // POST: Gastos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdGasto,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdGasto,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados,IdUsuario")] Gasto gasto)
         {
-            if (id != gasto.IdGasto)
+            if (id != gasto.IdGasto || gasto.IdUsuario == 0)
             {
-                return BadRequest("ID de gasto no coincide.");
-            }
-
-            if (!await GastoExists(id))
-            {
-                return NotFound($"No se encontró el gasto con ID: {id}");
+                return BadRequest("ID de gasto o usuario no coincide.");
             }
 
             if (!ModelState.IsValid)
@@ -138,7 +138,10 @@ namespace FogachoReveloProyecto.Controllers
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Gasto actualizado exitosamente.";
-                return RedirectToAction(nameof(PaginaInicial));
+                TempData["UserId"] = gasto.IdUsuario; // Guardar el userId en TempData
+                TempData.Keep("UserId"); // Mantener el userId para la próxima solicitud
+
+                return RedirectToAction(nameof(PaginaInicial), new { userId = gasto.IdUsuario });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -152,17 +155,19 @@ namespace FogachoReveloProyecto.Controllers
             }
         }
 
+        // GET: Gastos/Delete/5
         [HttpGet]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, int userId)
         {
-            if (!id.HasValue)
+            if (!id.HasValue || userId == 0)
             {
-                return BadRequest("ID de gasto no proporcionado.");
+                return BadRequest("ID de gasto o usuario no proporcionado.");
             }
 
             var gasto = await _context.Gasto
+                .Include(g => g.Usuario)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.IdGasto == id);
+                .FirstOrDefaultAsync(m => m.IdGasto == id && m.IdUsuario == userId);
 
             if (gasto == null)
             {
@@ -172,12 +177,18 @@ namespace FogachoReveloProyecto.Controllers
             return View(gasto);
         }
 
-        [HttpPost]
-        [ActionName("Delete")]
+        // POST: Gastos/Delete/5
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int userId)
         {
-            var gasto = await _context.Gasto.FindAsync(id);
+            if (userId == 0)
+            {
+                return RedirectToAction("Login", "Usuarios");
+            }
+
+            var gasto = await _context.Gasto
+                .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
 
             if (gasto == null)
             {
@@ -190,24 +201,18 @@ namespace FogachoReveloProyecto.Controllers
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Gasto eliminado exitosamente.";
-                return RedirectToAction(nameof(PaginaInicial));
+                return RedirectToAction(nameof(PaginaInicial), new { userId = userId });
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error al eliminar el gasto: " + ex.Message;
-                return RedirectToAction(nameof(PaginaInicial));
+                return RedirectToAction(nameof(PaginaInicial), new { userId = userId });
             }
         }
 
-        private async Task<bool> GastoExists(int id)
+        private async Task<bool> GastoExists(int id, int userId)
         {
-            return await _context.Gasto.AnyAsync(e => e.IdGasto == id);
-        }
-
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync();
-            return RedirectToAction("Login", "Usuarios");
+            return await _context.Gasto.AnyAsync(e => e.IdGasto == id && e.IdUsuario == userId);
         }
     }
 }

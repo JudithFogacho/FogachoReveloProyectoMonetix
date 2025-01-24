@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FogachoReveloProyecto.Migrations
 {
     [DbContext(typeof(FogachoReveloDataBase))]
-    [Migration("20241016185254_CambiosDB")]
-    partial class CambiosDB
+    [Migration("20250121201613_BDD")]
+    partial class BDD
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,20 +48,19 @@ namespace FogachoReveloProyecto.Migrations
                     b.Property<DateTime>("FechaRegristo")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UsuariosIdUsuario")
+                    b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
                     b.Property<double?>("Valor")
                         .IsRequired()
                         .HasColumnType("float");
 
-                    b.Property<double?>("ValorPagado")
-                        .IsRequired()
+                    b.Property<double>("ValorPagado")
                         .HasColumnType("float");
 
                     b.HasKey("IdGasto");
 
-                    b.HasIndex("UsuariosIdUsuario");
+                    b.HasIndex("IdUsuario");
 
                     b.ToTable("Gasto");
                 });
@@ -97,13 +96,13 @@ namespace FogachoReveloProyecto.Migrations
 
             modelBuilder.Entity("FogachoReveloProyecto.Models.Gasto", b =>
                 {
-                    b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuarios")
+                    b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuario")
                         .WithMany("Gastos")
-                        .HasForeignKey("UsuariosIdUsuario")
+                        .HasForeignKey("IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Usuarios");
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("FogachoReveloProyecto.Models.Usuario", b =>

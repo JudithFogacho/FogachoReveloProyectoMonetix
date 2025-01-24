@@ -17,33 +17,42 @@ namespace MonetixProyectoAPP.Services
             BaseAddress = new Uri("https://localhost:7156/api/")
         };
 
-        public async Task<string> LoginAsync(string email, string password) {
-            var credenciales = new { Email = email, Password = password };
+        // Propiedad para almacenar el ID del usuario actual
+        public int CurrentUserId { get; private set; }
 
+        public async Task<(bool success, int userId)> LoginAsync(string email, string password)
+        {
+            var credenciales = new { Email = email, Password = password };
             try
             {
                 var respuesta = await _httpClient.PostAsJsonAsync("Usuario/login", credenciales);
-                if (respuesta.IsSuccessStatusCode) { 
+                if (respuesta.IsSuccessStatusCode)
+                {
                     var usuario = await respuesta.Content.ReadFromJsonAsync<Usuario>();
-
-                    if (usuario != null && usuario.Email == email && usuario.Password == password) {
-
+                    if (usuario != null && usuario.Email == email && usuario.Password == password)
+                    {
                         var token = "simulated-token";
-                        return token;
+                        // Guardar el token y el ID del usuario
+                        Preferences.Set("auth_token", token);
+                        Preferences.Set("user_id", usuario.IdUsuario);
+                        CurrentUserId = usuario.IdUsuario;
+                        return (true, usuario.IdUsuario);
                     }
                 }
-                return null;
+                return (false, 0);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Error en LoginAsync: {ex.Message}");
-                return null;
+                return (false, 0);
             }
-            
         }
 
-        public HttpClient GetAutheticatedHttpClient() {
+        public HttpClient GetAuthenticatedHttpClient()
+        {
             var token = Preferences.Get("auth_token", string.Empty);
-            if (token == null) {
+            if (!string.IsNullOrEmpty(token))
+            {
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             }
             return _httpClient;
@@ -51,18 +60,72 @@ namespace MonetixProyectoAPP.Services
 
         public async Task<List<Usuario>> GetUsuariosAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<Usuario>>("Usuario") ?? new List<Usuario>();
-
+            try
+            {
+                var httpClient = GetAuthenticatedHttpClient();
+                return await httpClient.GetFromJsonAsync<List<Usuario>>("Usuario") ?? new List<Usuario>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en GetUsuariosAsync: {ex.Message}");
+                return new List<Usuario>();
+            }
         }
-        public async Task CreateUsuarioAsync(Usuario nuevoUsuario)
+
+        public async Task<Usuario> GetUsuarioByIdAsync(int userId)
         {
-            await _httpClient.PostAsJsonAsync("Usuario", nuevoUsuario);
+            try
+            {
+                var httpClient = GetAuthenticatedHttpClient();
+                return await httpClient.GetFromJsonAsync<Usuario>($"Usuario/{userId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en GetUsuarioByIdAsync: {ex.Message}");
+                return null;
+            }
         }
-        public async Task DeleteUsuarioAsync(int idUsuario)
+
+        public async Task<bool> CreateUsuarioAsync(Usuario nuevoUsuario)
         {
-            await _httpClient.DeleteAsync($"Usuario/{idUsuario}");
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("Usuario", nuevoUsuario);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en CreateUsuarioAsync: {ex.Message}");
+                return false;
+            }
         }
 
+        public async Task<bool> DeleteUsuarioAsync(int idUsuario)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"Usuario/{idUsuario}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en DeleteUsuarioAsync: {ex.Message}");
+                return false;
+            }
+        }
 
+        public void Logout()
+        {
+            // Limpiar las preferencias y el ID del usuario actual
+            Preferences.Remove("auth_token");
+            Preferences.Remove("user_id");
+            CurrentUserId = 0;
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+        }
+
+        public int GetCurrentUserId()
+        {
+            return Preferences.Get("user_id", 0);
+        }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MonetixFogachoReveloAPI.Data.Models;
-
 public class Gasto
 {
-    //Atributos
     [Key]
     public int IdGasto { get; set; }
     [Required]
@@ -15,7 +14,7 @@ public class Gasto
     public DateTime FechaFinal { get; set; }
 
     [Required]
-    public Categoria Categorias { get; set; }
+    public Categoria? Categorias { get; set; }
     [Required]
     public string? Descripcion { get; set; }
     [Required]
@@ -25,6 +24,14 @@ public class Gasto
     [DataType(DataType.Currency)]
     public double ValorPagado { get; set; }
     public Estado Estados { get; set; }
+
+    // Clave foránea para la relación
+    [Required]
+    public int IdUsuario { get; set; }
+
+    // Propiedad de navegación para la relación
+    [ForeignKey("IdUsuario")]
+    public virtual Usuario? Usuario { get; set; }
 
 
     //Este metodo se utiliza para calcular el valor del gasto

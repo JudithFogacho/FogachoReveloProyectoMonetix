@@ -6,15 +6,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Koulen&family=Kosugi+Maru&family=Lilita+One&display=swap" rel="stylesheet">
 
 <div class="imagen-gasto">
     <div>
@@ -27,13 +19,13 @@
 
 <div class="row">
     <div class="col-md-4">
-       
         <h2 class="TituloCG">EDITAR GASTO</h2>
         <div class="TituloSG">Gasto</div>
 
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="IdGasto" />
+            <input type="hidden" asp-for="IdUsuario" /> <!-- Campo oculto para el IdUsuario -->
 
             <div class="form-group">
                 <label asp-for="FechaRegristo" class="control-label"></label>
@@ -75,7 +67,6 @@
         </form>
     </div>
 </div>
-
 
 @section Scripts {
     @{

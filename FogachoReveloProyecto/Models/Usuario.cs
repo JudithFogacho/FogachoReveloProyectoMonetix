@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 namespace FogachoReveloProyecto.Models
 {
     public class Usuario
@@ -17,5 +16,7 @@ namespace FogachoReveloProyecto.Models
         [Required]
         public string? Password { get; set; }
 
+        // Propiedad de navegación para la relación uno a muchos
+        public virtual ICollection<Gasto>? Gastos { get; set; }
     }
 }

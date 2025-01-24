@@ -11,8 +11,10 @@ namespace MonetixProyectoAPP.ViewModels
 {
     public class IngresarGastoViewModel : BaseViewModel
     {
-        private readonly GastoService _gastoService = new GastoService();
+        private readonly GastoService _gastoService;
+        private readonly UsuarioService _usuarioService;
         private readonly ApiPublicaService _apiPublicaService = new ApiPublicaService();
+        private readonly int _currentUserId;
 
         // Propiedades para enlazar con la vista
         public List<string> Categorias { get; set; }
@@ -80,11 +82,14 @@ namespace MonetixProyectoAPP.ViewModels
             set => SetProperty(ref _valor, value);
         }
 
-        // Comando para guardar el gasto
         public ICommand GuardarGastoCommand { get; }
 
-        public IngresarGastoViewModel()
+        public IngresarGastoViewModel(UsuarioService usuarioService)
         {
+            _usuarioService = usuarioService;
+            _gastoService = new GastoService(_usuarioService);
+            _currentUserId = _usuarioService.GetCurrentUserId();
+
             CargarCategorias();
             GuardarGastoCommand = new Command(async () => await GuardarGastoAsync());
         }
@@ -106,12 +111,18 @@ namespace MonetixProyectoAPP.ViewModels
             {
                 Empresas = new List<string> { "Otros" };
             }
-            MostrarCampoTexto = false; // Resetear el campo de texto
+            MostrarCampoTexto = false;
         }
 
         private async Task GuardarGastoAsync()
         {
-            // Validar que los campos no estén vacíos
+            if (_currentUserId == 0)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "Debe iniciar sesión para registrar gastos.", "OK");
+                await Shell.Current.GoToAsync("///Login");
+                return;
+            }
+
             if (string.IsNullOrEmpty(CategoriaSeleccionada) ||
                 string.IsNullOrEmpty(EmpresaSeleccionada) ||
                 Valor <= 0)
@@ -120,30 +131,35 @@ namespace MonetixProyectoAPP.ViewModels
                 return;
             }
 
-            // Crear el objeto Gasto
             var nuevoGasto = new Gasto
             {
+                IdUsuario = _currentUserId,
                 FechaRegristo = FechaRegistro,
                 FechaFinal = FechaFinal,
                 Categorias = Enum.TryParse(CategoriaSeleccionada, out Categoria categoria)
                     ? categoria
                     : Categoria.Otro,
-                Descripcion = EmpresaSeleccionada == "Otros" ? Descripcion : EmpresaSeleccionada, // Usar la empresa seleccionada o el texto ingresado
+                Descripcion = EmpresaSeleccionada == "Otros" ? Descripcion : EmpresaSeleccionada,
                 Valor = Valor,
                 ValorPagado = 0,
-                Estados = Estado.Pendiente // Inicializar el estado como Pendiente
+                Estados = Estado.Pendiente
             };
 
-            // Validar y actualizar el estado del gasto
-            nuevoGasto.ValidarValor();
-            nuevoGasto.AsignarColorEstado();
+            try
+            {
+                nuevoGasto.ValidarValor();
+                nuevoGasto.AsignarColorEstado();
 
-            // Enviar el gasto al servidor
-            await _gastoService.CreateGastoAsync(nuevoGasto);
+                await _gastoService.CreateGastoAsync(nuevoGasto);
 
-            // Mostrar mensaje de éxito y navegar a la página principal
-            await Application.Current.MainPage.DisplayAlert("Éxito", "El gasto se ha registrado correctamente.", "OK");
-            await Shell.Current.GoToAsync("///PaginaInicial");
+                await Application.Current.MainPage.DisplayAlert("Éxito", "El gasto se ha registrado correctamente.", "OK");
+                await Shell.Current.GoToAsync("///PaginaInicial");
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error",
+                    $"No se pudo registrar el gasto: {ex.Message}", "OK");
+            }
         }
     }
 }
