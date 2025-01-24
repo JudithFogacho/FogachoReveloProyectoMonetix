@@ -1,16 +1,14 @@
-using System.Net.Http.Json;
-using MonetixProyectoAPP.Models;
+using Microsoft.Maui.Controls;
 using MonetixProyectoAPP.ViewModels;
 
 namespace MonetixProyectoAPP.Views
 {
     public partial class Registro : ContentPage
     {
-
-        public Registro()
+        public Registro(RegistroViewModel viewModel)
         {
             InitializeComponent();
-            BindingContext = new RegistroViewModel();
+            BindingContext = viewModel;
         }
     }
 }

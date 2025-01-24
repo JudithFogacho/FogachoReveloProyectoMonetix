@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonetixProyectoAPP.Views.TiendasFavoritasGuardadas"
+             Title="Tiendas Favoritas"
+             BackgroundColor="#EFEDE5">
+
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="10">
+            <!-- Título -->
+            <Label Text="TIENDAS FAVORITAS"
+                   FontSize="26"
+                   FontFamily="Koulen"
+                   TextColor="#809671"
+                   HorizontalOptions="Center" />
+
+            <!-- Lista de Tiendas Favoritas -->
+            <Frame BackgroundColor="White" CornerRadius="10" Padding="10">
+                <ListView ItemsSource="{Binding TiendasFavoritas}" SeparatorVisibility="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid ColumnDefinitions="Auto, *, Auto" Padding="10">
+                                    <!-- Imagen de la Tienda -->
+                                    <Image Source="{Binding Imagen}"
+                                           WidthRequest="50"
+                                           HeightRequest="50"
+                                           Aspect="AspectFill"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Nombre de la Tienda -->
+                                    <Label Text="{Binding Nombre}"
+                                           FontSize="16"
+                                           TextColor="Black"
+                                           FontFamily="Koulen"
+                                           VerticalOptions="Center"
+                                           Grid.Column="1"
+                                           Margin="10,0" />
+
+                                    <!-- Botón para Eliminar (opcional) -->
+                                    <Button Text="Eliminar"
+                                            BackgroundColor="#E57373"
+                                            TextColor="White"
+                                            FontFamily="Koulen"
+                                            CornerRadius="20"
+                                            Padding="10,0"
+                                            VerticalOptions="Center"
+                                            Grid.Column="2"
+                                            Command="{Binding Source={x:Reference Page}, Path=BindingContext.EliminarTiendaCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Frame>
+
+            <!-- Botón para Añadir Más Tiendas -->
+            <Button Text="Añadir Más Tiendas"
+                    FontSize="18"
+                    BackgroundColor="#849671"
+                    TextColor="White"
+                    FontFamily="Koulen"
+                    CornerRadius="25"
+                    HeightRequest="45"
+                    Clicked="OnAñadirMasTiendasClicked" />
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

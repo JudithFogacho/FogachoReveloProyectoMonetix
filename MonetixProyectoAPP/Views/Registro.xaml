@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewModels="clr-namespace:MonetixProyectoAPP.ViewModels"
              x:Class="MonetixProyectoAPP.Views.Registro"
              Title="Registro"
              BackgroundColor="#E5E0D8">
 
-    <ContentPage.BindingContext>
-        <viewModels:RegistroViewModel />
-    </ContentPage.BindingContext>
-    
     <Grid RowDefinitions="Auto,*">
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="20" 
                                 Padding="20"
                                 VerticalOptions="FillAndExpand">
+
                 <Label Text="MONETIX"
                        FontSize="48"
                        TextColor="#809671"
                        FontFamily="Koulen"
                        HorizontalOptions="Center"/>
+
                 <Image Source="cerdito.png"
                        HeightRequest="180"
                        WidthRequest="180"
                        HorizontalOptions="Center"/>
+
                 <Label Text="Crear Cuenta"
                        FontSize="32"
                        TextColor="Black"
                        FontFamily="Koulen"
                        HorizontalOptions="Center"/>
+
                 <Frame BackgroundColor="White"
                        CornerRadius="25"
                        Padding="20"
                        HasShadow="True"
                        BorderColor="#E5E0D8">
+
                     <VerticalStackLayout Spacing="15">
+                        <!-- Nombre -->
                         <Label Text="Nombre"
                                FontSize="18"
                                TextColor="Black"
@@ -48,6 +49,8 @@
                                    FontSize="16"
                                    TextColor="Black"/>
                         </Border>
+
+                        <!-- Apellido -->
                         <Label Text="Apellido"
                                FontSize="18"
                                TextColor="Black"
@@ -61,6 +64,8 @@
                                    FontSize="16"
                                    TextColor="Black"/>
                         </Border>
+
+                        <!-- Email -->
                         <Label Text="Email"
                                FontSize="18"
                                TextColor="Black"
@@ -72,8 +77,11 @@
                             <Entry Text="{Binding Email}"
                                    Placeholder="Escribe tu email"
                                    FontSize="16"
-                                   TextColor="Black"/>
+                                   TextColor="Black"
+                                   Keyboard="Email"/>
                         </Border>
+
+                        <!-- Contraseña -->
                         <Label Text="CONTRASENA"
                                FontSize="18"
                                TextColor="Black"
@@ -88,6 +96,8 @@
                                    IsPassword="True"
                                    TextColor="Black"/>
                         </Border>
+
+                        <!-- Botón Registrar -->
                         <Button Command="{Binding RegisterCommand}"
                                 Text="Registrar"
                                 FontSize="18"
@@ -100,6 +110,8 @@
                                 FontFamily="Koulen"/>
                     </VerticalStackLayout>
                 </Frame>
+
+                <!-- Enlace para login -->
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                     <Label Text="¿Ya tienes cuenta?"
                            FontSize="16"
@@ -116,6 +128,7 @@
                         </Label.GestureRecognizers>
                     </Label>
                 </HorizontalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

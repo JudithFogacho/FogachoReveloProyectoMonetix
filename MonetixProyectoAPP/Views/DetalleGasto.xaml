@@ -7,132 +7,140 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Atrás" 
-                 IconImageSource="back_icon.png" 
-                 Clicked="OnBackClicked"/>
+                     IconImageSource="back_icon.png" 
+                     Clicked="OnBackClicked"/>
     </ContentPage.ToolbarItems>
-    <Grid>
-        <!-- Contenido Principal -->
-        <ScrollView>
-            <StackLayout Padding="20" Spacing="10">
-                <Image Source="chevronforward_outline.png"
-                       HeightRequest="30"
-                       HorizontalOptions="End">
-                    <Image.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnBackClicked" />
-                    </Image.GestureRecognizers>
-                </Image>
-                <Label Text="MONETIX"
-                           FontSize="26"
-                           FontAttributes="Bold"
-                           FontFamily="Koulen"
+
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="10">
+            <Image Source="chevronforward_outline.png"
+                   HeightRequest="30"
+                   HorizontalOptions="End">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackClicked" />
+                </Image.GestureRecognizers>
+            </Image>
+
+            <Label Text="MONETIX"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   FontFamily="Koulen"
+                   HorizontalOptions="Center"
+                   TextColor="#809671" />
+
+            <HorizontalStackLayout HorizontalOptions="Center">
+                <Label Text="Detalles"
+                       FontSize="36"
+                       FontAttributes="Bold"
+                       FontFamily="Koulen"
+                       TextColor="#000000" />
+                <Image Source="cerdito.png"
+                       HeightRequest="35"
+                       WidthRequest="35" />
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout HorizontalOptions="End">
+                <Label Text="{Binding Gasto.Estado}"
+                       FontSize="16"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <Label Text="Fecha Inicial"
+                       FontAttributes="Bold" 
+                       FontSize="18" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding Gasto.FechaRegistro, StringFormat='{0:dd/MMM/yyyy}'}" 
+                       FontSize="16"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <Label Text="Fecha Final"
+                       FontAttributes="Bold" 
+                       FontSize="18" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding Gasto.FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}" 
+                       FontSize="16"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <Label Text="Categoria"
+                       FontAttributes="Bold" 
+                       FontSize="18" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding Gasto.Categoria}" 
+                       FontSize="16"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <Label Text="Descripcion"
+                       FontAttributes="Bold" 
+                       FontSize="18" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding Gasto.Descripcion}" 
+                       FontSize="16"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <Label Text="Valor Total"
+                       FontAttributes="Bold" 
+                       FontSize="18" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding Gasto.Valor, StringFormat='${0:F2}'}" 
+                       FontSize="16" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <Label Text="Valor Pagado"
+                       FontAttributes="Bold" 
+                       FontSize="18" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding Gasto.ValorPagado, StringFormat='${0:F2}'}" 
+                       FontSize="16" 
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <Label Text="Valor Pendiente"
+                       FontAttributes="Bold"
+                       FontSize="18"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+                <Label Text="{Binding ValorPendiente, StringFormat='${0:F2}'}"
+                       FontSize="16"
+                       FontFamily="Koulen"
+                       TextColor="Black" />
+
+                <StackLayout Orientation="Horizontal" 
+                           Spacing="20" 
                            HorizontalOptions="Center"
-                           TextColor="#809671" />
-
-
-                <HorizontalStackLayout HorizontalOptions="Center">
-                    <Label Text="Detalles"
-                           FontSize="36"
-                           FontAttributes="Bold"
-                           FontFamily="Koulen"
-                           HorizontalOptions="Center"
-                           TextColor="#000000" />
-                    <Image Source="cerdito.png"
-                           HeightRequest="35"
-                           WidthRequest="35" />
-                </HorizontalStackLayout>
-
-                <Image Source="{Binding LogoSource}"
-                       HeightRequest="100"
-                       WidthRequest="100"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Center" />
-
-                <HorizontalStackLayout HorizontalOptions="End">
-                    <Label Text="{Binding Estado}"
-                           FontSize="16"
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-                </HorizontalStackLayout>
-
-                <VerticalStackLayout Padding="20">
-                    <Label Text="Fecha Inicial"
-                           FontAttributes="Bold" 
-                           FontSize="18" 
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-                    <Label Text="{Binding Gasto.FechaRegristo, StringFormat='{0:dd/MMM/yyyy}'}" 
-                           FontSize="16"
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-
-                    <Label Text="Fecha Final"
-                           FontAttributes="Bold" 
-                           FontSize="18" 
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-                    <Label Text="{Binding Gasto.FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}" 
-                           FontSize="16"
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-
-                    <Label Text="Categoria"
-                           FontAttributes="Bold" 
-                           FontSize="18" 
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-                    <Label Text="{Binding Gasto.Categorias}" 
-                           FontSize="16"
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-
-                    <Label Text="Descripcion"
-                            FontAttributes="Bold" 
-                            FontSize="18" 
+                           Margin="0,20,0,0">
+                    <Button Text="ELIMINAR"
+                            TextColor="#FFFFFF"
                             FontFamily="Koulen"
-                            TextColor="Black" />
-                    <Label Text="{Binding Gasto.Descripcion}" 
-                            FontSize="16"
+                            FontSize="22"
+                            BackgroundColor="#BF7373"
+                            CornerRadius="25"
+                            HeightRequest="50"
+                            WidthRequest="120"
+                            Command="{Binding EliminarGastoCommand}" />
+                    <Button Text="PAGAR"
+                            FontSize="22"
+                            TextColor="#FFFFFF"
                             FontFamily="Koulen"
-                            TextColor="Black" />
-
-                    <Label Text="Valor"
-                           FontAttributes="Bold" 
-                           FontSize="18" 
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-                    <Label Text="{Binding Gasto.Valor, StringFormat='${0:F2}'}" 
-                           FontSize="16" 
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-
-                    <Label Text="Valor Pendiente"
-                           FontAttributes="Bold"
-                           FontSize="18"
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-                    <Label Text="{Binding ValorPendiente, StringFormat='${0:F2}'}"
-                           FontSize="16"
-                           FontFamily="Koulen"
-                           TextColor="Black" />
-
-                    <StackLayout Orientation="Horizontal" Spacing="20" HorizontalOptions="Center">
-                        <Button Text="ELIMINAR"
-                                TextColor="#FFFFFF"
-                                FontFamily="Koulen"
-                                FontSize="22"
-                                BackgroundColor="#BF7373"
-                                CornerRadius="25"
-                                Command="{Binding EliminarGastoCommand}" />
-                        <Button Text="PAGAR"
-                                FontSize="22"
-                                TextColor="#FFFFFF"
-                                FontFamily="Koulen"
-                                BackgroundColor="#849671"
-                                CornerRadius="25"
-                                Command="{Binding PagarGastoCommand}" />
-                    </StackLayout>
-                </VerticalStackLayout>
-            </StackLayout>
-        </ScrollView>
-    </Grid>
+                            BackgroundColor="#849671"
+                            CornerRadius="25"
+                            HeightRequest="50"
+                            WidthRequest="120"
+                            Command="{Binding PagarGastoCommand}" />
+                </StackLayout>
+            </VerticalStackLayout>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

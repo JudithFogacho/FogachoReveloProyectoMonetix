@@ -1,13 +1,22 @@
-﻿namespace MonetixProyectoAPP
+﻿using Microsoft.Maui.Controls;
+using MonetixProyectoAPP.Views;
+
+namespace MonetixProyectoAPP
 {
     public partial class AppShell : Shell
     {
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute("Login", typeof(MonetixProyectoAPP.Views.Login));
-            Routing.RegisterRoute("Registro", typeof(MonetixProyectoAPP.Views.Registro));
-            Routing.RegisterRoute("PaginaInicial", typeof(MonetixProyectoAPP.Views.PaginaInicial));
+
+            // Registrar las rutas de navegación
+            Routing.RegisterRoute("Login", typeof(Views.Login));
+            Routing.RegisterRoute("Registro", typeof(Views.Registro));
+            Routing.RegisterRoute("PaginaInicial", typeof(Views.PaginaInicial));
+            Routing.RegisterRoute("IngresarGasto", typeof(Views.IngresarGasto));
+            Routing.RegisterRoute("DetalleGasto", typeof(Views.DetalleGasto));
+            Routing.RegisterRoute("TiendasFavoritas", typeof(Views.TiendasFavoritas)); // Nueva ruta
+            Routing.RegisterRoute("TiendasFavoritasGuardadas", typeof(Views.TiendasFavoritasGuardadas)); // Nueva ruta
         }
     }
 }

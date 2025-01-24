@@ -2,9 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace MonetixProyectoAPP.Services
@@ -15,52 +13,25 @@ namespace MonetixProyectoAPP.Services
 
         public ApiPublicaService()
         {
-            _httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("https://www.jsondataai.com/api/QgGIPpU")
-            };
+            _httpClient = new HttpClient();
         }
 
-        public async Task<List<Local>> GetLocalesPorCategoriaAsync(string categoria)
+        public async Task<List<Tienda>> GetTiendasAsync()
         {
-            try
+            var client = new HttpClient();
+            var response = await client.GetAsync("https://67931d7f5eae7e5c4d8d994e.mockapi.io/Categorias");
+            if (response.IsSuccessStatusCode)
             {
-                // Obtener todos los locales desde la API
-                var response = await _httpClient.GetAsync("");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var locales = JsonConvert.DeserializeObject<List<Local>>(json);
-
-                    // Filtrar los locales por la categoría seleccionada
-                    var localesFiltrados = locales?
-                        .Where(l => l.Categoria.Equals(categoria, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-
-                    return localesFiltrados ?? new List<Local>();
-                }
-                else
-                {
-                    // Manejar errores de respuesta no exitosa
-                    Console.WriteLine($"Error al obtener locales: {response.StatusCode}");
-                    return new List<Local>();
-                }
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<List<Tienda>>(content);
             }
-            catch (Exception ex)
-            {
-                // Manejar errores de conexión o datos aquí
-                Console.WriteLine($"Error al obtener locales: {ex.Message}");
-                return new List<Local>();
-            }
+            return new List<Tienda>();
         }
-    }
 
-    public class Local
-    {
-        public string Nombre { get; set; }
-        public string Descripcion { get; set; }
-        public string Logo { get; set; }
-        public string Categoria { get; set; }
+        public async Task<List<Tienda>> GetLocalesPorCategoriaAsync(string categoria)
+        {
+            var tiendas = await GetTiendasAsync();
+            return tiendas.Where(t => t.Categoria.Equals(categoria, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
     }
 }

@@ -1,22 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http.Json;
 using Microsoft.Maui.Controls;
-using MonetixProyectoAPP.Models;
+using MonetixProyectoAPP.Services;
+using MonetixProyectoAPP.ViewModels;
 
 namespace MonetixProyectoAPP.Views
 {
     public partial class IngresarGasto : ContentPage
     {
-
-        public IngresarGasto()
+        public IngresarGasto(GastoService gastoService)
         {
             InitializeComponent();
+            BindingContext = new IngresarGastoViewModel(gastoService);
         }
 
         private async void OnCancelarClicked(object sender, EventArgs e)
         {
-            await Navigation.PopAsync();
+            await Shell.Current.GoToAsync("..");
         }
     }
 }

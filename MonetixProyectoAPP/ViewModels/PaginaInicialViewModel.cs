@@ -15,19 +15,17 @@ namespace MonetixProyectoAPP.ViewModels
     public class PaginaInicialViewModel : BaseViewModel
     {
         private readonly GastoService _gastoService;
-        private readonly UsuarioService _usuarioService;
-        private ObservableCollection<Gasto> _gastos = new ObservableCollection<Gasto>();
-        private ObservableCollection<Gasto> _gastosFiltrados = new ObservableCollection<Gasto>();
+        private ObservableCollection<GastoResponse> _gastos = new();
+        private ObservableCollection<GastoResponse> _gastosFiltrados = new();
         private string _textoBusqueda;
-        private int _currentUserId;
 
-        public ObservableCollection<Gasto> Gastos
+        public ObservableCollection<GastoResponse> Gastos
         {
             get => _gastos;
             set => SetProperty(ref _gastos, value);
         }
 
-        public ObservableCollection<Gasto> GastosFiltrados
+        public ObservableCollection<GastoResponse> GastosFiltrados
         {
             get => _gastosFiltrados;
             set
@@ -53,49 +51,19 @@ namespace MonetixProyectoAPP.ViewModels
         public decimal SubtotalValorPagado => (decimal)(GastosFiltrados?.Sum(g => g.ValorPagado) ?? 0);
         public decimal TotalGastos => SubtotalGastos - SubtotalValorPagado;
 
-        public PaginaInicialViewModel(UsuarioService usuarioService)
+        public PaginaInicialViewModel(GastoService gastoService)
         {
-            _usuarioService = usuarioService;
-            _gastoService = new GastoService(_usuarioService);
-            _currentUserId = _usuarioService.GetCurrentUserId();
-
-            MessagingCenter.Subscribe<LoginViewModel, int>(this, "UserLoggedIn", (sender, userId) =>
-            {
-                _currentUserId = userId;
-                CargarGastos();
-            });
-
-            MessagingCenter.Subscribe<LoginViewModel>(this, "UserLoggedOut", (sender) =>
-            {
-                _currentUserId = 0;
-                Gastos.Clear();
-                GastosFiltrados.Clear();
-            });
-
+            _gastoService = gastoService;
             CargarGastos();
         }
 
         public async Task CargarGastos()
         {
-            if (_currentUserId == 0)
-            {
-                await Shell.Current.GoToAsync("///Login");
-                return;
-            }
-
             await ExecuteAsync(async () =>
             {
                 var gastos = await _gastoService.GetGastosAsync();
-                if (gastos != null)
-                {
-                    Gastos.Clear();
-                    foreach (var gasto in gastos)
-                    {
-                        gasto.AsignarColorEstado();
-                        Gastos.Add(gasto);
-                    }
-                    GastosFiltrados = new ObservableCollection<Gasto>(Gastos);
-                }
+                Gastos = new ObservableCollection<GastoResponse>(gastos);
+                GastosFiltrados = new ObservableCollection<GastoResponse>(gastos);
             });
         }
 
@@ -103,32 +71,25 @@ namespace MonetixProyectoAPP.ViewModels
         {
             if (string.IsNullOrWhiteSpace(TextoBusqueda))
             {
-                GastosFiltrados = new ObservableCollection<Gasto>(Gastos);
+                GastosFiltrados = new ObservableCollection<GastoResponse>(Gastos);
+                return;
             }
-            else
-            {
-                var textoBusquedaLower = TextoBusqueda.ToLower();
-                GastosFiltrados = new ObservableCollection<Gasto>(
-                    Gastos.Where(g =>
-                        g.Categorias.ToString().ToLower().Contains(textoBusquedaLower) ||
-                        g.Descripcion.ToLower().Contains(textoBusquedaLower)
-                    )
-                );
-            }
+
+            var textoBusquedaLower = TextoBusqueda.ToLower();
+            GastosFiltrados = new ObservableCollection<GastoResponse>(
+                Gastos.Where(g =>
+                    g.Categoria.ToLower().Contains(textoBusquedaLower) ||
+                    g.Descripcion.ToLower().Contains(textoBusquedaLower)
+                )
+            );
         }
 
-        public async Task NavegarADetalleGasto(Gasto gasto)
+        public async Task NavegarADetalleGasto(GastoResponse gasto)
         {
-            if (gasto != null && gasto.IdUsuario == _currentUserId)
+            if (gasto != null)
             {
                 await Shell.Current.GoToAsync($"DetalleGasto?gastoId={gasto.IdGasto}");
             }
-        }
-
-        public void Dispose()
-        {
-            MessagingCenter.Unsubscribe<LoginViewModel>(this, "UserLoggedOut");
-            MessagingCenter.Unsubscribe<LoginViewModel, int>(this, "UserLoggedIn");
         }
     }
 }

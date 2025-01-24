@@ -24,8 +24,8 @@ namespace MonetixFogachoReveloAPI.Controllers
                 ClaimsPrincipal user,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                if (userId == 0) return TypedResults.Unauthorized();
 
                 var gastos = await db.Gastos
                     .Where(g => g.IdUsuario == userId)
@@ -46,8 +46,8 @@ namespace MonetixFogachoReveloAPI.Controllers
                 ClaimsPrincipal user,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                if (userId == 0) return TypedResults.Unauthorized();
 
                 var gasto = await db.Gastos
                     .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
@@ -63,47 +63,45 @@ namespace MonetixFogachoReveloAPI.Controllers
             .Produces(401);
 
             // POST: Crear nuevo gasto
-            group.MapPost("/", async Task<Results<Created<GastoResponse>, BadRequest<string>, UnauthorizedHttpResult>> (
-                ClaimsPrincipal user,
+            // POST: Crear nuevo gasto
+            group.MapPost("/", async Task<Results<Created<GastoResponse>, BadRequest<string>>> (
                 CreateGastoRequest request,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                // Validaciones
+                if (request.UserId <= 0)
+                    return TypedResults.BadRequest("UserId inválido");
 
-                if (!ValidateCreateRequest(request, out var errorMessage))
-                    return TypedResults.BadRequest(errorMessage);
+                if (!Enum.TryParse<Categoria>(request.Categoria, out var categoriaEnum))
+                    return TypedResults.BadRequest("Categoría inválida");
+
+                var usuario = await db.Usuarios.FindAsync(request.UserId);
+                if (usuario == null)
+                    return TypedResults.BadRequest("Usuario no existe");
 
                 var gasto = new Gasto
                 {
+                    IdUsuario = request.UserId,
                     FechaRegristo = DateTime.UtcNow,
                     FechaFinal = request.FechaFinal,
-                    Categorias = Enum.Parse<Categoria>(request.Categoria),
+                    Categorias = categoriaEnum,
                     Descripcion = request.Descripcion,
                     Valor = request.Valor,
                     ValorPagado = 0,
-                    Estados = Estado.Pendiente,
-                    IdUsuario = userId.Value
+                    Estados = Estado.Pendiente
                 };
 
                 try
                 {
                     db.Gastos.Add(gasto);
                     await db.SaveChangesAsync();
-
-                    var response = MapToResponse(gasto);
-                    return TypedResults.Created($"/api/gastos/{gasto.IdGasto}", response);
+                    return TypedResults.Created($"/api/gastos/{gasto.IdGasto}", MapToResponse(gasto));
                 }
                 catch (Exception ex)
                 {
-                    return TypedResults.BadRequest($"Error al crear el gasto: {ex.Message}");
+                    return TypedResults.BadRequest($"Error: {ex.Message}");
                 }
-            })
-            .WithName("CreateGasto")
-            .WithSummary("Crea un nuevo gasto")
-            .Produces<GastoResponse>(201)
-            .Produces<string>(400)
-            .Produces(401);
+            });
 
             // PUT: Actualizar gasto
             group.MapPut("/{id}", async Task<Results<Ok<GastoResponse>, NotFound, BadRequest<string>, UnauthorizedHttpResult>> (
@@ -112,8 +110,8 @@ namespace MonetixFogachoReveloAPI.Controllers
                 UpdateGastoRequest request,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                if (userId == 0) return TypedResults.Unauthorized();
 
                 var gasto = await db.Gastos
                     .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
@@ -147,8 +145,8 @@ namespace MonetixFogachoReveloAPI.Controllers
                 ClaimsPrincipal user,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                if (userId == 0) return TypedResults.Unauthorized();
 
                 var gasto = await db.Gastos
                     .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
@@ -172,8 +170,8 @@ namespace MonetixFogachoReveloAPI.Controllers
                 PagoRequest request,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                if (userId == 0) return TypedResults.Unauthorized();
 
                 var gasto = await db.Gastos
                     .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
@@ -210,8 +208,8 @@ namespace MonetixFogachoReveloAPI.Controllers
                 ClaimsPrincipal user,
                 FogachoReveloDataContext db) =>
             {
-                var userId = GetUserId(user);
-                if (userId == null) return TypedResults.Unauthorized();
+                var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                if (userId == 0) return TypedResults.Unauthorized();
 
                 var gastos = await db.Gastos
                     .Where(g => g.IdUsuario == userId)
@@ -245,12 +243,6 @@ namespace MonetixFogachoReveloAPI.Controllers
             gasto.Valor ?? 0,
             gasto.ValorPagado,
             gasto.Estados.ToString());
-
-        private static int? GetUserId(ClaimsPrincipal user)
-        {
-            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.TryParse(userIdClaim, out var id) ? id : null;
-        }
 
         private static void ActualizarEstado(Gasto gasto)
         {
@@ -340,6 +332,7 @@ namespace MonetixFogachoReveloAPI.Controllers
 
         // DTOs
         public record CreateGastoRequest(
+            int UserId,
             DateTime FechaFinal,
             string Categoria,
             string Descripcion,

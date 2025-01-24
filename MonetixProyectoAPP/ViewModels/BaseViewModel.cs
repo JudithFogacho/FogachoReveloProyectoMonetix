@@ -1,60 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonetixProyectoAPP.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
-
     {
-        private bool _estaOcupado;
+        private bool _isBusy;
 
-        public bool EstaOcupado {
-            get => _estaOcupado; 
-            set {
-                if (_estaOcupado != value)
-                {
-                    _estaOcupado = value;
-                    OnPropertyChanged();
-                }
-            } 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => SetProperty(ref _isBusy, value);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected bool SetProperty<T> (ref T backingStore, T value, [CallerMemberName] string propertyName = "")
+        protected bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "")
         {
             if (EqualityComparer<T>.Default.Equals(backingStore, value))
                 return false;
+
             backingStore = value;
             OnPropertyChanged(propertyName);
             return true;
-
         }
 
-        protected async Task ExecuteAsync(Func<Task> task) {
+        protected async Task ExecuteAsync(Func<Task> action)
+        {
+            if (IsBusy) return;
+
             try
             {
-                EstaOcupado = true;
-                await task();
+                IsBusy = true;
+                await action();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                await HandleException(ex);
             }
-            finally { 
-                EstaOcupado = false;
+            finally
+            {
+                IsBusy = false;
             }
         }
 
+        private async Task HandleException(Exception ex)
+        {
+            // Implementación específica para diferentes tipos de excepciones
+            await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+        }
     }
 }

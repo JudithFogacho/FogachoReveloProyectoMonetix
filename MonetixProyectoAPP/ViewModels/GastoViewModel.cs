@@ -1,141 +1,85 @@
-﻿using MonetixProyectoAPP.Models;
-using MonetixProyectoAPP.Services;
-using System;
-using System.Collections.Generic;
+﻿using MonetixProyectoAPP.Services;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonetixProyectoAPP.ViewModels
 {
     public class GastoViewModel : BaseViewModel
     {
         private readonly GastoService _gastoService;
-        private readonly UsuarioService _usuarioService;
-        private readonly ApiPublicaService _apiPublicaService = new ApiPublicaService();
+        private ObservableCollection<GastoResponse> _gastos = new();
+        private ResumenGastos _resumen;
 
-        private ObservableCollection<Local> _locales = new ObservableCollection<Local>();
-        private ObservableCollection<Gasto> _gastos = new ObservableCollection<Gasto>();
-        private int _currentUserId;
-
-        public ObservableCollection<Gasto> Gastos
+        public ObservableCollection<GastoResponse> Gastos
         {
             get => _gastos;
             set => SetProperty(ref _gastos, value);
         }
 
-        public ObservableCollection<Local> Locales
+        public ResumenGastos Resumen
         {
-            get => _locales;
-            set => SetProperty(ref _locales, value);
+            get => _resumen;
+            set => SetProperty(ref _resumen, value);
         }
 
-        public GastoViewModel(UsuarioService usuarioService)
+        public GastoViewModel(GastoService gastoService)
         {
-            _usuarioService = usuarioService;
-            _gastoService = new GastoService(_usuarioService);
-            _currentUserId = _usuarioService.GetCurrentUserId();
+            _gastoService = gastoService;
             LoadGastos();
         }
 
         private async Task LoadGastos()
         {
-            if (_currentUserId == 0)
+            await ExecuteAsync(async () =>
             {
-                // Si no hay usuario autenticado, limpiar la lista
-                Gastos.Clear();
-                return;
-            }
-
-            await ExecuteAsync(async () => {
                 var gastos = await _gastoService.GetGastosAsync();
-                Gastos.Clear();
-                foreach (var gasto in gastos)
-                {
-                    gasto.AsignarColorEstado();
-                    Gastos.Add(gasto);
-                }
+                Gastos = new ObservableCollection<GastoResponse>(gastos);
+                Resumen = await _gastoService.GetResumenGastosAsync();
             });
         }
 
-        public async Task CargarLocalesPorCategoria(string categoria)
+        public async Task CreateGastoAsync(
+            DateTime fechaFinal,
+            string categoria,
+            string descripcion,
+            double valor)
         {
             await ExecuteAsync(async () =>
             {
-                var locales = await _apiPublicaService.GetLocalesPorCategoriaAsync(categoria);
-                Locales.Clear();
-                foreach (var local in locales)
-                {
-                    Locales.Add(local);
-                }
-            });
-        }
-
-        public async Task IngresarGasto(Gasto nuevoGasto)
-        {
-            if (_currentUserId == 0)
-            {
-                // Manejar el caso de usuario no autenticado
-                return;
-            }
-
-            await ExecuteAsync(async () => {
-                nuevoGasto.IdUsuario = _currentUserId;
-                await _gastoService.CreateGastoAsync(nuevoGasto);
+                await _gastoService.CreateGastoAsync(fechaFinal, categoria, descripcion, valor);
                 await LoadGastos();
             });
         }
 
-        public async Task EliminarGasto(int idGasto)
+        public async Task DeleteGastoAsync(int idGasto)
         {
-            if (_currentUserId == 0)
+            await ExecuteAsync(async () =>
             {
-                return;
-            }
-
-            await ExecuteAsync(async () => {
                 await _gastoService.DeleteGastoAsync(idGasto);
                 await LoadGastos();
             });
         }
 
-        public async Task PagarGasto(int idGasto, double valorPago)
+        public async Task PagarGastoAsync(int idGasto, double valorPago)
         {
-            if (_currentUserId == 0)
+            await ExecuteAsync(async () =>
             {
-                return;
-            }
-
-            await ExecuteAsync(async () => {
-                var response = await _gastoService.PagarGastoAsync(idGasto, valorPago);
-                if (response.IsSuccessStatusCode)
-                {
-                    await LoadGastos();
-                }
-            });
-        }
-
-        public async Task ActualizarGasto(Gasto gasto)
-        {
-            if (_currentUserId == 0)
-            {
-                return;
-            }
-
-            await ExecuteAsync(async () => {
-                gasto.IdUsuario = _currentUserId;
-                await _gastoService.UpdateGastoAsync(gasto);
+                await _gastoService.PagarGastoAsync(idGasto, valorPago);
                 await LoadGastos();
             });
         }
 
-        public void ActualizarUsuarioActual()
+        public async Task UpdateGastoAsync(
+            int idGasto,
+            DateTime? fechaFinal = null,
+            string? categoria = null,
+            string? descripcion = null,
+            double? valor = null)
         {
-            _currentUserId = _usuarioService.GetCurrentUserId();
-            LoadGastos();
+            await ExecuteAsync(async () =>
+            {
+                await _gastoService.UpdateGastoAsync(idGasto, fechaFinal, categoria, descripcion, valor);
+                await LoadGastos();
+            });
         }
     }
 }

@@ -1,21 +1,13 @@
 ﻿using MonetixProyectoAPP.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using MonetixProyectoAPP.Models;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
-using MonetixProyectoAPP.Views;
+using System.Windows.Input;
 
 namespace MonetixProyectoAPP.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
-        private readonly UsuarioService _service = new UsuarioService();
+        private readonly UsuarioService _usuarioService;
         private string _email;
         private string _password;
 
@@ -34,76 +26,78 @@ namespace MonetixProyectoAPP.ViewModels
         public ICommand LoginCommand { get; }
         public ICommand RegisterCommand { get; }
 
-        public LoginViewModel()
+        public LoginViewModel(UsuarioService usuarioService)
         {
+            _usuarioService = usuarioService;
             LoginCommand = new Command(async () => await LoginAsync());
-            RegisterCommand = new Command(async () => await GoToRegister());
+            RegisterCommand = new Command(async () => await GoToRegisterAsync());
         }
 
         private async Task LoginAsync()
         {
-            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
             {
-                await Application.Current.MainPage.DisplayAlert("ERROR", "Por favor ingrese email y contraseña", "OK");
+                await Shell.Current.DisplayAlert("Error", "Debe ingresar email y contraseña", "OK");
                 return;
             }
 
+            IsBusy = true;
+
             try
             {
-                await ExecuteAsync(async () =>
+                var (success, message, userId) = await _usuarioService.LoginAsync(Email, Password);
+
+                if (success)
                 {
-                    var (success, userId) = await _service.LoginAsync(Email, Password);
-                    if (success && userId > 0)
-                    {
-                        // Guardar tanto el token como el ID del usuario
-                        Preferences.Set("auth_token", "simulated-token");
-                        Preferences.Set("user_id", userId);
-
-                        // Notificar al GastoViewModel del cambio de usuario
-                        MessagingCenter.Send(this, "UserLoggedIn", userId);
-
-                        await Shell.Current.GoToAsync("///PaginaInicial");
-                    }
-                    else
-                    {
-                        await Application.Current.MainPage.DisplayAlert("ERROR", "Credenciales Incorrectas", "OK");
-                    }
-                });
+                    await HandleSuccessfulLogin();
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Error de autenticación", message, "OK");
+                }
             }
-            catch (System.Net.Http.HttpRequestException ex)
+            finally
             {
-                await Application.Current.MainPage.DisplayAlert("Error",
-                    "No se pudo conectar al servidor. Verifica tu conexión a internet.", "OK");
-                Console.WriteLine($"Error de conexión: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert("Error",
-                    "Ocurrió un error inesperado. Inténtalo más tarde.", "OK");
-                Console.WriteLine($"Error inesperado: {ex.Message}");
+                IsBusy = false;
             }
         }
 
-        private async Task GoToRegister()
+        private async Task HandleSuccessfulLogin()
         {
-            await Shell.Current.GoToAsync("///Registro");
+            // Obtener datos directamente del servicio
+            var nombreCompleto = _usuarioService.CurrentUserName;
+            var email = _usuarioService.CurrentUserEmail;
+
+            if (!string.IsNullOrEmpty(nombreCompleto))
+            {
+                Preferences.Set("user_name", nombreCompleto);
+            }
+
+            // Actualizar estado de la aplicación
+            MessagingCenter.Send(this, "UserLoggedIn");
+
+            // Navegar a página principal
+            await Shell.Current.GoToAsync("///PaginaInicial");
+        }
+
+        private async Task GoToRegisterAsync()
+        {
+            await Shell.Current.GoToAsync("//Registro");
         }
 
         public void Logout()
         {
-            // Limpiar las preferencias
-            Preferences.Remove("auth_token");
-            Preferences.Remove("user_id");
+            _usuarioService.Logout();
+            ResetUserData();
+            Shell.Current.GoToAsync("//Login");
+        }
 
-            // Notificar a otros ViewModels del logout
-            MessagingCenter.Send(this, "UserLoggedOut");
-
-            // Limpiar campos
+        private void ResetUserData()
+        {
             Email = string.Empty;
             Password = string.Empty;
-
-            // Redirigir al login
-            Shell.Current.GoToAsync("///Login");
+            Preferences.Remove("user_name");
+            MessagingCenter.Send(this, "UserLoggedOut");
         }
     }
 }

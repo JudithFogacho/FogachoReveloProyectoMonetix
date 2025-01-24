@@ -1,20 +1,14 @@
-using System.Net.Http.Json;
-using MonetixProyectoAPP.Models;
+using Microsoft.Maui.Controls;
 using MonetixProyectoAPP.ViewModels;
-namespace MonetixProyectoAPP.Views;
 
-
-public partial class Login : ContentPage
+namespace MonetixProyectoAPP.Views
 {
-
-    public Login()
+    public partial class Login : ContentPage
     {
-        InitializeComponent();
-        BindingContext = new LoginViewModel();
-    }
-
-    private async void OnRegisterTapped(object sender, TappedEventArgs e)
-    {
-        await Shell.Current.GoToAsync("Registro");
+        public Login(LoginViewModel viewModel)
+        {
+            InitializeComponent();
+            BindingContext = viewModel;
+        }
     }
 }

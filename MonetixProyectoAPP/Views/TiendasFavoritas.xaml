@@ -1,0 +1,54 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            x:Class="MonetixProyectoAPP.Views.TiendasFavoritas"
+            Title="Añadir Tiendas"
+            BackgroundColor="#EFEDE5">
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="10">
+            <Label Text="AÑADIR TIENDAS"
+                  FontSize="26"
+                  FontFamily="Koulen"
+                  TextColor="#809671"
+                  HorizontalOptions="Center" />
+            <Label Text="{Binding ErrorMessage}"
+                  FontSize="14"
+                  TextColor="Red"
+                  HorizontalOptions="Center"
+                  IsVisible="{Binding HasError}" />
+            <Frame BackgroundColor="White" CornerRadius="10" Padding="10">
+                <ListView ItemsSource="{Binding Tiendas}" SeparatorVisibility="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid ColumnDefinitions="Auto, *, Auto" Padding="10">
+                                    <Image Source="{Binding Imagen}"
+                                          WidthRequest="50"
+                                          HeightRequest="50"
+                                          Aspect="AspectFill"
+                                          VerticalOptions="Center" />
+                                    <Label Text="{Binding Nombre}"
+                                          FontSize="16"
+                                          TextColor="Black"
+                                          FontFamily="Koulen"
+                                          VerticalOptions="Center"
+                                          Grid.Column="1"
+                                          Margin="10,0" />
+                                    <Button Text="Añadir"
+        BackgroundColor="#849671"
+        TextColor="White"
+        FontFamily="Koulen"
+        CornerRadius="20"
+        Padding="10,0"
+        VerticalOptions="Center"
+        Grid.Column="2"
+        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AddTiendaFavoritaCommand}"
+        CommandParameter="{Binding .}" />
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Frame>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

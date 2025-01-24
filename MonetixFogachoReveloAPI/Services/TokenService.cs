@@ -11,31 +11,29 @@ namespace MonetixFogachoReveloAPI.Services
     {
         private readonly IConfiguration _configuration;
 
-        public TokenService(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        public TokenService(IConfiguration configuration) => _configuration = configuration;
 
         public string GenerateJwtToken(Usuario usuario)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, usuario.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString())
-        };
+           new Claim(JwtRegisteredClaimNames.Sub, usuario.Email),
+           new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+           new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString())
+       };
+            return GenerateJwtToken(claims);
+        }
 
+        public string GenerateJwtToken(Claim[] claims)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpireMinutes"])),
-                signingCredentials: credentials
+                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
-
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

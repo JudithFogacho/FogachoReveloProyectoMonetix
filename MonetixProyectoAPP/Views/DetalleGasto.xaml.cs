@@ -1,25 +1,39 @@
 using Microsoft.Maui.Controls;
-using MonetixProyectoAPP.Models;
+using MonetixProyectoAPP.Services;
 using MonetixProyectoAPP.ViewModels;
 
 namespace MonetixProyectoAPP.Views
 {
-    
-
+    [QueryProperty(nameof(GastoId), "gastoId")]
     public partial class DetalleGasto : ContentPage
     {
-        public DetalleGasto(Gasto gasto)
+        private int gastoId;
+        public int GastoId
         {
-            InitializeComponent();
-
-            BindingContext = new DetalleGastoViewModel(gasto);
-
+            get => gastoId;
+            set
+            {
+                gastoId = value;
+                LoadGasto(value);
+            }
         }
 
+        private readonly GastoService _gastoService;
+
+        public DetalleGasto(GastoService gastoService)
+        {
+            InitializeComponent();
+            _gastoService = gastoService;
+        }
+
+        private void LoadGasto(int gastoId)
+        {
+            BindingContext = new DetalleGastoViewModel(_gastoService, gastoId);
+        }
 
         private async void OnBackClicked(object sender, EventArgs e)
         {
-            await Navigation.PopAsync();
+            await Shell.Current.GoToAsync("..");
         }
     }
 }

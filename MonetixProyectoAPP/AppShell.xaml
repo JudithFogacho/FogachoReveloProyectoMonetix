@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="MonetixProyectoAPP.AppShell"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:MonetixProyectoAPP.Views"
-    Shell.FlyoutBehavior="Disabled"
-    Title="MonetixProyectoAPP">
+   x:Class="MonetixProyectoAPP.AppShell"
+   xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+   xmlns:local="clr-namespace:MonetixProyectoAPP.Views"
+   Shell.FlyoutBehavior="Disabled">
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:Login}"
-        Route="Login" />
-    
-    <ShellContent Title="Registro" 
-                  Route="Registro" 
-                  ContentTemplate="{DataTemplate local:Registro}" />
-    
-    <ShellContent Title="PaginaInicial" 
-                  Route="PaginaInicial" 
-                  ContentTemplate="{DataTemplate local:PaginaInicial}" />
-    <ShellContent Title="Detalle Gasto" 
-                  Route="DetalleGasto" 
-                  ContentTemplate="{DataTemplate local:DetalleGasto}" />
+       Title="Login"
+       ContentTemplate="{DataTemplate local:Login}"
+       Route="Login" />
+
+    <ShellContent 
+       Title="Registro"
+       ContentTemplate="{DataTemplate local:Registro}"
+       Route="Registro" />
+
+    <ShellContent 
+       Title="PaginaInicial"
+       ContentTemplate="{DataTemplate local:PaginaInicial}"
+       Route="PaginaInicial" />
+
+    <ShellContent 
+       Title="IngresarGasto"
+       ContentTemplate="{DataTemplate local:IngresarGasto}"
+       Route="IngresarGasto" />
+
+    <ShellContent 
+       Title="DetalleGasto"
+       ContentTemplate="{DataTemplate local:DetalleGasto}"
+       Route="DetalleGasto" />
+
+    <!-- Nueva entrada para Tiendas Favoritas -->
+    <ShellContent 
+   Title="Tiendas Favoritas"
+   ContentTemplate="{DataTemplate local:TiendasFavoritasGuardadas}"
+   Route="TiendasFavoritasGuardadas" />
+
+    <ShellContent 
+   Title="Añadir Tiendas"
+   ContentTemplate="{DataTemplate local:TiendasFavoritas}"
+   Route="TiendasFavoritas" />
 </Shell>

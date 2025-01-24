@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Microsoft.Maui.Storage;
 using MonetixProyectoAPP.Models;
 
@@ -14,118 +8,125 @@ namespace MonetixProyectoAPP.Services
     {
         private readonly HttpClient _httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7156/api/")
+            BaseAddress = new Uri("https://localhost:7156/api/usuarios/")
         };
 
-        // Propiedad para almacenar el ID del usuario actual
-        public int CurrentUserId { get; private set; }
+        // Propiedades para acceder a los datos del usuario
+        public int CurrentUserId => Preferences.Get("user_id", 0);
+        public string CurrentUserEmail => Preferences.Get("user_email", string.Empty);
+        public string CurrentUserName => $"{Preferences.Get("user_nombre", "")} {Preferences.Get("user_apellido", "")}";
 
-        public async Task<(bool success, int userId)> LoginAsync(string email, string password)
+        public async Task<(bool success, string message, int userId)> LoginAsync(string email, string password)
         {
-            var credenciales = new { Email = email, Password = password };
             try
             {
-                var respuesta = await _httpClient.PostAsJsonAsync("Usuario/login", credenciales);
-                if (respuesta.IsSuccessStatusCode)
+                var response = await _httpClient.PostAsJsonAsync("login", new
                 {
-                    var usuario = await respuesta.Content.ReadFromJsonAsync<Usuario>();
-                    if (usuario != null && usuario.Email == email && usuario.Password == password)
+                    Email = email,
+                    Password = password
+                });
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    return (false, error?.Message ?? "Error desconocido", 0);
+                }
+
+                var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+                // Almacenar datos del usuario
+                Preferences.Set("user_id", loginResponse.IdUsuario);
+                Preferences.Set("user_email", loginResponse.Email);
+                Preferences.Set("user_nombre", loginResponse.Nombre);
+                Preferences.Set("user_apellido", loginResponse.Apellido);
+
+                return (true, "Login exitoso", loginResponse.IdUsuario);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error de conexión: {ex.Message}", 0);
+            }
+        }
+
+        public async Task<(bool success, string message)> RegisterAsync(string nombre, string apellido, string email, string password)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("register", new
+                {
+                    Nombre = nombre,
+                    Apellido = apellido,
+                    Email = email,
+                    Password = password
+                });
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    return (false, error?.Message ?? "Error en el registro");
+                }
+
+                // Opcional: Auto-login después del registro
+                if (response.IsSuccessStatusCode)
+                {
+                    var usuarioRegistrado = await response.Content.ReadFromJsonAsync<UsuarioResponse>();
+                    if (usuarioRegistrado != null)
                     {
-                        var token = "simulated-token";
-                        // Guardar el token y el ID del usuario
-                        Preferences.Set("auth_token", token);
-                        Preferences.Set("user_id", usuario.IdUsuario);
-                        CurrentUserId = usuario.IdUsuario;
-                        return (true, usuario.IdUsuario);
+                        Preferences.Set("user_id", usuarioRegistrado.IdUsuario);
+                        Preferences.Set("user_email", usuarioRegistrado.Email);
+                        Preferences.Set("user_nombre", usuarioRegistrado.Nombre);
+                        Preferences.Set("user_apellido", usuarioRegistrado.Apellido);
                     }
                 }
-                return (false, 0);
+
+                return (true, "Registro exitoso");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en LoginAsync: {ex.Message}");
-                return (false, 0);
+                return (false, $"Error de conexión: {ex.Message}");
             }
         }
 
-        public HttpClient GetAuthenticatedHttpClient()
+        public UsuarioResponse GetUserProfile()
         {
-            var token = Preferences.Get("auth_token", string.Empty);
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
-            return _httpClient;
-        }
+            if (CurrentUserId == 0) return null;
 
-        public async Task<List<Usuario>> GetUsuariosAsync()
-        {
-            try
-            {
-                var httpClient = GetAuthenticatedHttpClient();
-                return await httpClient.GetFromJsonAsync<List<Usuario>>("Usuario") ?? new List<Usuario>();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en GetUsuariosAsync: {ex.Message}");
-                return new List<Usuario>();
-            }
-        }
-
-        public async Task<Usuario> GetUsuarioByIdAsync(int userId)
-        {
-            try
-            {
-                var httpClient = GetAuthenticatedHttpClient();
-                return await httpClient.GetFromJsonAsync<Usuario>($"Usuario/{userId}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en GetUsuarioByIdAsync: {ex.Message}");
-                return null;
-            }
-        }
-
-        public async Task<bool> CreateUsuarioAsync(Usuario nuevoUsuario)
-        {
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("Usuario", nuevoUsuario);
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en CreateUsuarioAsync: {ex.Message}");
-                return false;
-            }
-        }
-
-        public async Task<bool> DeleteUsuarioAsync(int idUsuario)
-        {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"Usuario/{idUsuario}");
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en DeleteUsuarioAsync: {ex.Message}");
-                return false;
-            }
+            return new UsuarioResponse(
+                CurrentUserId,
+                Preferences.Get("user_nombre", string.Empty),
+                Preferences.Get("user_apellido", string.Empty),
+                CurrentUserEmail);
         }
 
         public void Logout()
         {
-            // Limpiar las preferencias y el ID del usuario actual
-            Preferences.Remove("auth_token");
+            // Limpiar todos los datos de usuario
             Preferences.Remove("user_id");
-            CurrentUserId = 0;
-            _httpClient.DefaultRequestHeaders.Authorization = null;
+            Preferences.Remove("user_email");
+            Preferences.Remove("user_nombre");
+            Preferences.Remove("user_apellido");
         }
 
-        public int GetCurrentUserId()
+        // Método para actualizar datos locales
+        public void UpdateLocalProfile(string nombre, string apellido)
         {
-            return Preferences.Get("user_id", 0);
+            Preferences.Set("user_nombre", nombre);
+            Preferences.Set("user_apellido", apellido);
         }
     }
+
+    // Modelos actualizados
+    public record UsuarioResponse(
+        int IdUsuario,
+        string Nombre,
+        string Apellido,
+        string Email);
+
+    public record LoginResponse(
+        int IdUsuario,
+        string Nombre,
+        string Apellido,
+        string Email);
+
+    public record ErrorResponse(string Message);
 }

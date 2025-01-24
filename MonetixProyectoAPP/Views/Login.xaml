@@ -6,10 +6,6 @@
              Title="Login"
              BackgroundColor="#E5E0D8">
 
-    <ContentPage.BindingContext>
-        <viewModels:LoginViewModel/>
-    </ContentPage.BindingContext>
-    
     <Grid RowDefinitions="Auto,*">
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="20" 
@@ -62,10 +58,9 @@
                                    FontSize="16"
                                    IsPassword="True"
                                    TextColor="Black"
-                                   Text="{Binding Password}"
-                                   />
+                                   Text="{Binding Password}"/>
                         </Border>
-                        <Button Command="{Binding loginCommand}"
+                        <Button Command="{Binding LoginCommand}"
                                 Text="Entrar"
                                 FontSize="18"
                                 BackgroundColor="#849671"
@@ -89,7 +84,7 @@
                            FontFamily="Koulen"
                            VerticalOptions="Center">
                         <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnRegisterTapped" />
+                            <TapGestureRecognizer Command="{Binding RegisterCommand}" />
                         </Label.GestureRecognizers>
                     </Label>
                 </HorizontalStackLayout>
