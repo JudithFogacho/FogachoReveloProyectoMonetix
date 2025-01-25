@@ -1,95 +1,100 @@
-﻿using MonetixProyectoAPP.Models;
+﻿using System.Collections.ObjectModel;
 using MonetixProyectoAPP.Services;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
 
-namespace MonetixProyectoAPP.ViewModels
+namespace MonetixProyectoAPP.ViewModels;
+
+public class PaginaInicialViewModel : BaseViewModel
 {
-    public class PaginaInicialViewModel : BaseViewModel
+    private readonly GastoService _gastoService;
+    private ObservableCollection<GastoResponse> _gastos = new();
+    private ObservableCollection<GastoResponse> _gastosFiltrados = new();
+    private string _textoBusqueda;
+    private bool _isLoading;
+
+    public bool IsLoading
     {
-        private readonly GastoService _gastoService;
-        private ObservableCollection<GastoResponse> _gastos = new();
-        private ObservableCollection<GastoResponse> _gastosFiltrados = new();
-        private string _textoBusqueda;
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
 
-        public ObservableCollection<GastoResponse> Gastos
+    public ObservableCollection<GastoResponse> GastosFiltrados
+    {
+        get => _gastosFiltrados;
+        set
         {
-            get => _gastos;
-            set => SetProperty(ref _gastos, value);
+            SetProperty(ref _gastosFiltrados, value);
+            OnPropertyChanged(nameof(GastosAtrasados));
+            OnPropertyChanged(nameof(GastosPendientes));
+            OnPropertyChanged(nameof(GastosFinalizados));
+            OnPropertyChanged(nameof(ResumenGastos));
+            OnPropertyChanged(nameof(ResumenPagado));
+            OnPropertyChanged(nameof(ResumenPendiente));
+        }
+    }
+
+    public string TextoBusqueda
+    {
+        get => _textoBusqueda;
+        set
+        {
+            if (SetProperty(ref _textoBusqueda, value))
+                AplicarFiltros();
+        }
+    }
+
+    public int GastosAtrasados => GastosFiltrados.Count(g => g.Estado == "Atrasado");
+    public int GastosPendientes => GastosFiltrados.Count(g => g.Estado == "Pendiente");
+    public int GastosFinalizados => GastosFiltrados.Count(g => g.Estado == "Finalizado");
+
+    public double ResumenGastos => GastosFiltrados.Sum(g => g.Valor);
+    public double ResumenPagado => GastosFiltrados.Sum(g => g.ValorPagado);
+    public double ResumenPendiente => ResumenGastos - ResumenPagado;
+
+    public Command RefreshCommand { get; }
+
+    public PaginaInicialViewModel(GastoService gastoService)
+    {
+        _gastoService = gastoService;
+        RefreshCommand = new Command(async () => await CargarGastos());
+
+        Task.Run(CargarGastos);
+    }
+
+    private async Task CargarGastos()
+    {
+        if (IsLoading) return;
+
+        try
+        {
+            IsLoading = true;
+            var gastos = await _gastoService.GetGastosAsync();
+            GastosFiltrados = new ObservableCollection<GastoResponse>(gastos);
+            _gastos = new ObservableCollection<GastoResponse>(gastos);
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error",
+                $"Error al cargar gastos: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void AplicarFiltros()
+    {
+        if (string.IsNullOrWhiteSpace(TextoBusqueda))
+        {
+            GastosFiltrados = new ObservableCollection<GastoResponse>(_gastos);
+            return;
         }
 
-        public ObservableCollection<GastoResponse> GastosFiltrados
-        {
-            get => _gastosFiltrados;
-            set
-            {
-                SetProperty(ref _gastosFiltrados, value);
-                OnPropertyChanged(nameof(SubtotalGastos));
-                OnPropertyChanged(nameof(SubtotalValorPagado));
-                OnPropertyChanged(nameof(TotalGastos));
-            }
-        }
+        var busqueda = TextoBusqueda.Trim().ToLower();
+        var filtrados = _gastos.Where(g =>
+            g.Descripcion.ToLower().Contains(busqueda) ||
+            g.Categoria.ToLower().Contains(busqueda));
 
-        public string TextoBusqueda
-        {
-            get => _textoBusqueda;
-            set
-            {
-                SetProperty(ref _textoBusqueda, value);
-                FiltrarGastos();
-            }
-        }
-
-        public decimal SubtotalGastos => (decimal)(GastosFiltrados?.Sum(g => g.Valor) ?? 0);
-        public decimal SubtotalValorPagado => (decimal)(GastosFiltrados?.Sum(g => g.ValorPagado) ?? 0);
-        public decimal TotalGastos => SubtotalGastos - SubtotalValorPagado;
-
-        public PaginaInicialViewModel(GastoService gastoService)
-        {
-            _gastoService = gastoService;
-            CargarGastos();
-        }
-
-        public async Task CargarGastos()
-        {
-            await ExecuteAsync(async () =>
-            {
-                var gastos = await _gastoService.GetGastosAsync();
-                Gastos = new ObservableCollection<GastoResponse>(gastos);
-                GastosFiltrados = new ObservableCollection<GastoResponse>(gastos);
-            });
-        }
-
-        private void FiltrarGastos()
-        {
-            if (string.IsNullOrWhiteSpace(TextoBusqueda))
-            {
-                GastosFiltrados = new ObservableCollection<GastoResponse>(Gastos);
-                return;
-            }
-
-            var textoBusquedaLower = TextoBusqueda.ToLower();
-            GastosFiltrados = new ObservableCollection<GastoResponse>(
-                Gastos.Where(g =>
-                    g.Categoria.ToLower().Contains(textoBusquedaLower) ||
-                    g.Descripcion.ToLower().Contains(textoBusquedaLower)
-                )
-            );
-        }
-
-        public async Task NavegarADetalleGasto(GastoResponse gasto)
-        {
-            if (gasto != null)
-            {
-                await Shell.Current.GoToAsync($"DetalleGasto?gastoId={gasto.IdGasto}");
-            }
-        }
+        GastosFiltrados = new ObservableCollection<GastoResponse>(filtrados);
     }
 }

@@ -59,5 +59,6 @@ namespace MonetixProyectoAPP.ViewModels
                 Console.WriteLine($"Error: {ex.Message}");
             }
         }
+        
     }
 }

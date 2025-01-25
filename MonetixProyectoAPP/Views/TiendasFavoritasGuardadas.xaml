@@ -5,14 +5,29 @@
              Title="Tiendas Favoritas"
              BackgroundColor="#EFEDE5">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Atrás" 
+                 IconImageSource="back_icon.png" 
+                 Clicked="OnBackClicked"/>
+    </ContentPage.ToolbarItems>
+
     <ScrollView>
         <StackLayout Padding="20" Spacing="10">
+            <Image Source="chevronforward_outline.png"
+                   HeightRequest="30"
+                   HorizontalOptions="End">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackClicked" />
+                </Image.GestureRecognizers>
+            </Image>
             <!-- Título -->
             <Label Text="TIENDAS FAVORITAS"
                    FontSize="26"
                    FontFamily="Koulen"
                    TextColor="#809671"
                    HorizontalOptions="Center" />
+            
+            
 
             <!-- Lista de Tiendas Favoritas -->
             <Frame BackgroundColor="White" CornerRadius="10" Padding="10">

@@ -3,6 +3,11 @@
             x:Class="MonetixProyectoAPP.Views.TiendasFavoritas"
             Title="Añadir Tiendas"
             BackgroundColor="#EFEDE5">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Atrás" 
+                     IconImageSource="back_icon.png" 
+                     Clicked="OnBackClicked"/>
+    </ContentPage.ToolbarItems>
     <ScrollView>
         <StackLayout Padding="20" Spacing="10">
             <Label Text="AÑADIR TIENDAS"
