@@ -10,6 +10,7 @@ public class DetalleGastoViewModel : BaseViewModel
     private GastoResponse _gasto;
     private bool _isLoading;
 
+
     public GastoResponse Gasto
     {
         get => _gasto;
@@ -29,11 +30,13 @@ public class DetalleGastoViewModel : BaseViewModel
     public double ValorPendiente => Gasto?.Valor - Gasto?.ValorPagado ?? 0;
 
     public ICommand PagarGastoCommand { get; }
+    public ICommand EliminarGastoCommand { get; }
 
     public DetalleGastoViewModel(GastoService gastoService, int gastoId)
     {
         _gastoService = gastoService;
         PagarGastoCommand = new Command(async () => await PagarGastoAsync());
+        EliminarGastoCommand = new Command(async () => await EliminarGastoAsync());
 
         Task.Run(async () => await CargarGasto(gastoId));
     }
@@ -125,6 +128,46 @@ public class DetalleGastoViewModel : BaseViewModel
         finally
         {
             IsLoading = false;
+        }
+    }
+    private async Task EliminarGastoAsync()
+    {
+        bool confirmar = await Application.Current.MainPage.DisplayAlert(
+            "Confirmar Eliminación",
+            "¿Está seguro de eliminar este gasto?",
+            "Sí",
+            "No"
+        );
+
+        if (confirmar)
+        {
+            try
+            {
+                IsLoading = true;  // Mostrar un indicador de carga, si es necesario
+
+                // Llamar al servicio de eliminación
+                bool eliminado = await _gastoService.DeleteGastoAsync(Gasto.IdGasto);
+
+                if (eliminado)
+                {
+                    // Si la eliminación fue exitosa
+                    await Application.Current.MainPage.DisplayAlert("Éxito", "Gasto eliminado correctamente", "OK");
+                    await Shell.Current.GoToAsync("///PaginaInicial");  // Redirigir a la página inicial
+                }
+                else
+                {
+                    // Si no se pudo eliminar
+                    await Application.Current.MainPage.DisplayAlert("Error", "No se pudo eliminar el gasto", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al eliminar el gasto: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsLoading = false;  // Ocultar el indicador de carga
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using MonetixProyectoAPP.Models;
+using System.Net.Http.Json;
 
 namespace MonetixProyectoAPP.Services;
 
@@ -30,11 +31,12 @@ public class GastoService
         }
     }
 
-    public async Task<GastoResponse?> CreateGastoAsync(DateTime fechaFinal, string categoria,
+    public async Task<GastoResponse?> CreateGastoAsync(DateTime fechaRegistro, DateTime fechaFinal, string categoria,
         string descripcion, double valor)
     {
         var request = new CreateGastoRequest(
             _usuarioService.CurrentUserId,
+            fechaRegistro,
             fechaFinal,
             categoria,
             descripcion,
@@ -46,10 +48,10 @@ public class GastoService
             : null;
     }
 
-    public async Task<GastoResponse?> UpdateGastoAsync(int idGasto, DateTime? fechaFinal = null,
-        string? categoria = null, string? descripcion = null, double? valor = null)
+    public async Task<GastoResponse?> UpdateGastoAsync(int idGasto, DateTime? fechaRegistro = null, DateTime? fechaFinal = null,
+        Categoria? categoria = null, string? descripcion = null, double? valor = null)
     {
-        var request = new UpdateGastoRequest(fechaFinal, categoria, descripcion, valor);
+        var request = new UpdateGastoRequest(fechaRegistro, fechaFinal, categoria, descripcion, valor);
         var response = await _httpClient.PutAsJsonAsync(
             $"gastos/{idGasto}?userId={_usuarioService.CurrentUserId}", request);
 
@@ -89,29 +91,36 @@ public class GastoService
             var response = await _httpClient.DeleteAsync($"gastos/{idGasto}?userId={userId}");
             return response.IsSuccessStatusCode;
         }
-        catch
+        catch (Exception ex)
         {
+            // Manejo de errores
+            Console.WriteLine($"Error al eliminar el gasto: {ex.Message}");
             return false;
         }
     }
 }
 
-public record CreateGastoRequest(int UserId, DateTime FechaFinal, string Categoria,
+public record CreateGastoRequest(int UserId, DateTime FechaRegistro, DateTime FechaFinal, string Categoria,
     string Descripcion, double Valor);
-public record UpdateGastoRequest(DateTime? FechaFinal, string? Categoria, string? Descripcion,
+public record UpdateGastoRequest(DateTime? FechaRegistro, DateTime? FechaFinal, Categoria? Categoria, string? Descripcion,
     double? Valor);
-public record GastoResponse(int IdGasto, DateTime FechaRegistro, DateTime FechaFinal,
-    string Categoria, string Descripcion, double Valor, double ValorPagado, string Estado)
+public record GastoResponse( int IdGasto, DateTime FechaRegistro, DateTime FechaFinal, Categoria? Categoria, 
+    string Descripcion, double Valor, double ValorPagado, Estado Estado)
 {
-    public string ConvertirEstado(string estado)
+    // Propiedad calculada que devuelve el color correspondiente al estado
+    public string ColorEstado
     {
-        return estado.ToLower() switch
+        get
         {
-            "atrasado" => "Gasto atrasado",
-            "pendiente" => "Gasto pendiente",
-            "finalizado" => "Gasto finalizado",
-            _ => "Estado desconocido"
-        };
+            return Estado switch
+            {
+                Estado.Finalizado => "#81C784",
+                Estado.Atrasado => "#E57373", // Rojo
+                Estado.Pendiente => "#FFD54F", // Amarillo
+                 // Verde
+                _ => "#FFFFFF" // Blanco por defecto
+            };
+        }
     }
 }
 public record PagoRequest(double Valor);

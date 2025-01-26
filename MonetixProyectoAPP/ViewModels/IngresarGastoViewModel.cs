@@ -23,6 +23,14 @@ namespace MonetixProyectoAPP.ViewModels
             set => SetProperty(ref _empresas, value);
         }
 
+        private DateTime _fechaRegistro = DateTime.Now;
+
+        public DateTime FechaRegistro
+        {
+            get => _fechaRegistro;
+            set=> SetProperty(ref _fechaRegistro, value);
+        }
+
         private DateTime _fechaFinal = DateTime.Now;
         public DateTime FechaFinal
         {
@@ -93,6 +101,7 @@ namespace MonetixProyectoAPP.ViewModels
             await ExecuteAsync(async () =>
             {
                 await _gastoService.CreateGastoAsync(
+                    fechaRegistro: FechaRegistro,
                     fechaFinal: FechaFinal,
                     categoria: CategoriaSeleccionada,
                     descripcion: Descripcion,

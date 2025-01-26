@@ -24,7 +24,7 @@ namespace MonetixProyectoAPP.Models
         [DataType(DataType.Currency)]
         public double ValorPagado { get; set; }
         public Estado Estados { get; set; }
-        public string ColorEstado { get; private set; }
+        public string? ColorEstado { get; private set; }
 
         // Nuevas propiedades para la relación con Usuario
         [Required]
@@ -72,18 +72,21 @@ namespace MonetixProyectoAPP.Models
             DateTime fechaActual = DateTime.Today;
             DateTime fechaFinalSinHora = FechaFinal.Date;
 
+            // Verifica el estado en función de la fecha y el valor pagado
             if (Valor != null && ValorPagado == Valor)
             {
-                Estados = Estado.Finalizado;
+                Estados = Estado.Finalizado;  // El gasto se marca como finalizado
             }
             else if (fechaActual > fechaFinalSinHora && Valor > 0)
             {
-                Estados = Estado.Atrasado;
+                Estados = Estado.Atrasado;  // El gasto está atrasado
             }
             else if (fechaActual <= fechaFinalSinHora && Valor > 0)
             {
-                Estados = Estado.Pendiente;
+                Estados = Estado.Pendiente;  // El gasto está pendiente
             }
+
+            AsignarColorEstado();  // Actualiza el color de estado
         }
 
         public void ValidarValor()

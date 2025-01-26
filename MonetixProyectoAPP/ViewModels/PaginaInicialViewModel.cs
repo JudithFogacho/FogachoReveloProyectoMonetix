@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using MonetixProyectoAPP.Models;
 using MonetixProyectoAPP.Services;
 
 namespace MonetixProyectoAPP.ViewModels;
@@ -42,9 +43,10 @@ public class PaginaInicialViewModel : BaseViewModel
         }
     }
 
-    public int GastosAtrasados => GastosFiltrados.Count(g => g.Estado == "Atrasado");
-    public int GastosPendientes => GastosFiltrados.Count(g => g.Estado == "Pendiente");
-    public int GastosFinalizados => GastosFiltrados.Count(g => g.Estado == "Finalizado");
+    public int GastosAtrasados => GastosFiltrados.Count(g => g.Estado == Estado.Atrasado);
+    public int GastosPendientes => GastosFiltrados.Count(g => g.Estado == Estado.Pendiente);
+    public int GastosFinalizados => GastosFiltrados.Count(g => g.Estado == Estado.Finalizado);
+
 
     public double ResumenGastos => GastosFiltrados.Sum(g => g.Valor);
     public double ResumenPagado => GastosFiltrados.Sum(g => g.ValorPagado);
@@ -92,8 +94,8 @@ public class PaginaInicialViewModel : BaseViewModel
 
         var busqueda = TextoBusqueda.Trim().ToLower();
         var filtrados = _gastos.Where(g =>
-            g.Descripcion.ToLower().Contains(busqueda) ||
-            g.Categoria.ToLower().Contains(busqueda));
+             g.Descripcion.ToLower().Contains(busqueda) ||
+             (g.Categoria.HasValue && Enum.GetName(typeof(Categoria), g.Categoria.Value)?.ToLower().Contains(busqueda) == true));
 
         GastosFiltrados = new ObservableCollection<GastoResponse>(filtrados);
     }

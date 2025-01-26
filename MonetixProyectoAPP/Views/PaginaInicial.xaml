@@ -9,12 +9,6 @@
              Title="MONETIX"
              BackgroundColor="#EFEDE5">
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <views:EstadoColorConverter x:Key="EstadoColorConverter"/>
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
     <Grid RowDefinitions="Auto,*,Auto">
         <RefreshView Grid.Row="1" 
                      Command="{Binding RefreshCommand}"
@@ -69,7 +63,7 @@
                         </Frame>
                     </HorizontalStackLayout>
 
-                    <Frame BackgroundColor="#EFEDE5" BorderColor="#EFEDE5">
+                    <Frame BackgroundColor="#EFEDE5" BorderColor="#EFEDE5" >
                         <CollectionView ItemsSource="{Binding GastosFiltrados}"
                                       HeightRequest="400"
                                       SelectionMode="Single"
@@ -82,9 +76,7 @@
                                            Margin="0,5"
                                            HasShadow="True">
                                         <Grid ColumnDefinitions="Auto,4*,1*">
-                                            <BoxView Grid.Column="0"
-                                                    Color="{Binding Estado, Converter={StaticResource EstadoColorConverter}}"
-                                                    WidthRequest="15"/>
+                                            <Frame Padding="10" Margin="5" BackgroundColor="{Binding ColorEstado}" CornerRadius="10" WidthRequest="20" BorderColor="#E57373"/>
 
                                             <VerticalStackLayout Grid.Column="1" Spacing="2" Padding="6">
                                                 <Label Text="{Binding Categoria}"
@@ -126,17 +118,17 @@
 
                         <Label Grid.Row="0" Text="Subtotal Gastos:" 
                                FontSize="16" FontAttributes="Bold" TextColor="Black"/>
-                        <Label Grid.Row="0" Text="{Binding ResumenGastos, StringFormat='${0:F2}'}" 
+                        <Label Grid.Row="0" TextColor="Black" Text="{Binding ResumenGastos, StringFormat='${0:F2}'}" 
                                HorizontalOptions="End"/>
 
                         <Label Grid.Row="1" Text="Total Pagado:" 
                                FontSize="16" FontAttributes="Bold" TextColor="Black"/>
-                        <Label Grid.Row="1" Text="{Binding ResumenPagado, StringFormat='${0:F2}'}" 
+                        <Label Grid.Row="1" TextColor="Black" Text="{Binding ResumenPagado, StringFormat='${0:F2}'}" 
                                HorizontalOptions="End"/>
 
                         <Label Grid.Row="2" Text="Total Pendiente:" 
                                FontSize="18" FontAttributes="Bold" TextColor="Black"/>
-                        <Label Grid.Row="2" Text="{Binding ResumenPendiente, StringFormat='${0:F2}'}" 
+                        <Label Grid.Row="2" TextColor="Black" Text="{Binding ResumenPendiente, StringFormat='${0:F2}'}" 
                                HorizontalOptions="End"/>
                     </Grid>
 

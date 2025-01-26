@@ -25,6 +25,15 @@
                        WidthRequest="38" />
             </HorizontalStackLayout>
 
+            <Label Text="Fecha Inicial"
+                   FontSize="26"
+                   FontFamily="Koulen"
+                   FontAttributes="Bold"
+                   TextColor="Black"/>
+            <DatePicker Date="{Binding FechaRegistro}"
+                       TextColor="#000000"
+                       BackgroundColor="#FFFFFF" />
+
             <Label Text="Fecha Final"
                    FontSize="26"
                    FontFamily="Koulen"
