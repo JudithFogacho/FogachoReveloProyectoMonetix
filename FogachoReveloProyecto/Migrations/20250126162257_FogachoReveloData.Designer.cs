@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FogachoReveloProyecto.Migrations
 {
     [DbContext(typeof(FogachoReveloDataBase))]
-    [Migration("20250126155510_FogachoReveloData")]
+    [Migration("20250126162257_FogachoReveloData")]
     partial class FogachoReveloData
     {
         /// <inheritdoc />

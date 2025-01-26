@@ -12,7 +12,7 @@
 <div class="bienvenida">
     <div class="imagen-bienvenida">
         <img src="~/img/LogoImg.png" alt="LogoImg" asp-append-version="true" class="logopi" />
-        <div>
+        <div class="bienvenida-texto">
             <p>Bienvenido, @ViewBag.NombreUsuario</p>
         </div>
         <div class="cerrar-sesion">
@@ -26,37 +26,42 @@
     </div>
 </div>
 
+<!-- Título de la página -->
 <h2 class="TituloIS">PÁGINA INICIAL</h2>
 
-<!-- Filtro por categoría -->
-<form asp-action="PaginaInicial" method="get" class="mb-4">
-    <div class="row g-3 align-items-center">
-        <div class="col-md-4">
-            <label for="categoria" class="form-label">Buscar por Categoría:</label>
-            <select id="categoria" name="categoria" class="form-select">
-                <option value="">-- Todas --</option>
-                @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
-                {
-                    <option value="@categoria">@categoria</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100 mt-4">
-                <i class="bi bi-search"></i> Buscar
-            </button>
-        </div>
+<!-- Filtro por categoría y botón "Ingresar Gasto" -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <form asp-action="PaginaInicial" method="get" class="mb-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-2">
+                   
+                    <label for="categoria" class="form-label">Buscar por Categoría:</label>
+                    <select id="categoria" name="categoria" class="form-select form-select-sm">
+                        <option value="">-- Todas --</option>
+                        @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
+                        {
+                            <option value="@categoria">@categoria</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
 
-<!-- Botón para agregar gasto -->
-<p>
-    <a asp-action="CrearGasto" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Ingresar Gasto
-    </a>
-</p>
+    <div class="col-md-2">
+        <a asp-action="CrearGasto" class="btn btn-success w-100">
+            <i class="bi bi-plus-circle"></i> Ingresar Gasto
+        </a>
+    </div>
+</div>
 
-<!-- Tabla de gastos -->
+<!-- Tabla de gastos y otros contenidos -->
 <div class="table-responsive">
     <table class="table table-hover">
         <thead class="table-light">
@@ -132,7 +137,7 @@
 </div>
 
 @section Scripts {
-    
+    <!-- Scripts si los tienes -->
 }
 
 @functions {
@@ -166,17 +171,14 @@
         gap: 1rem;
     }
 
+    .bienvenida-texto {
+        white-space: nowrap;
+    }
+
     .logopi {
         width: 100px;
         height: auto;
         filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
-    }
-
-    .koulen-regular {
-        font-family: 'Koulen', sans-serif;
-        font-size: 2.5rem;
-        color: #2c3e50;
-        letter-spacing: 1.5px;
     }
 
     .TituloIS {
@@ -199,5 +201,9 @@
     .btn-sm {
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
+    }
+
+    .cerrar-sesion {
+        white-space: nowrap;
     }
 </style>
