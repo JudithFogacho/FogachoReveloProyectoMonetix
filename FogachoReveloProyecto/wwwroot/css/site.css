@@ -22,13 +22,15 @@ html {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-   
         padding: 1rem;
     }
 
     .logo-img.img-medium {
-        max-width: 120px;
+        max-width: 280px;
         height: auto;
+        position:relative;
+        top: 60px;
+        
     }
 
     .auth-card {
@@ -106,6 +108,7 @@ h1 {
 .koulen-regular {
     color: #849671;
     font-family: "Koulen", sans-serif;
+    font-size: 80px;
 }
 
 .TituloIS {
@@ -117,7 +120,7 @@ h1 {
 .logopi {
     margin: auto;
     width: 50%; /* Ajusta el tamaño al 50% del contenedor */
-    max-width: 80px;
+    max-width: 250px;
 }
 
 .TituloCG {
@@ -413,15 +416,15 @@ footer {
 
         /* Botón de editar */
         .botones-detalles a.btn-editar {
-            background-color: #007bff; /* Azul */
+            background-color: #809671; /* Azul */
             color: white;
-            border: 1px solid #007bff;
+            border: 1px solid #809671;
             transition: background-color 0.3s ease;
         }
 
             .botones-detalles a.btn-editar:hover {
-                background-color: #0056b3; /* Azul más oscuro */
-                border-color: #0056b3;
+                background-color: #809671; /* Azul más oscuro */
+                border-color: #809671;
             }
 
         /* Botón de volver */
@@ -447,22 +450,22 @@ footer {
 
     /* Botón Guardar */
     .botones-edit .btn-guardar {
-        background-color: #28a745; /* Verde */
+        background-color: #809671; /* Verde */
         color: white;
-        border: 1px solid #28a745;
-        font-size: 0.875rem; 
-        padding: 5px 15px; 
+        border: 1px solid #809671;
+        font-size: 0.875rem;
+        padding: 5px 15px;
         border-radius: 5px; /* Bordes redondeados */
         transition: background-color 0.3s ease;
         text-align: center;
-        font-family: "Kosugi Maru", sans-serif; 
+        font-family: "Kosugi Maru", sans-serif;
         font-weight: 400;
-        font-style: normal; 
+        font-style: normal;
     }
 
         .botones-edit .btn-guardar:hover {
-            background-color: #218838; /* Verde más oscuro */
-            border-color: #218838;
+            background-color: #809671; /* Verde más oscuro */
+            border-color: #809671;
         }
 
     /* Botón Cancelar */
@@ -490,37 +493,4 @@ footer {
     font-family: "Kosugi Maru", sans-serif; /* Tipografía consistente */
 }
 
-/* Botón Eliminar */
-.btn-eliminar {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: white;
-    padding: 10px 25px;
-    font-family: "Kosugi Maru", sans-serif;
-    font-size: 1rem;
-    border-radius: 8px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
 
-    .btn-eliminar:hover {
-        background-color: #c82333; /* Rojo más oscuro */
-        border-color: #c82333;
-    }
-
-/* Botón Cancelar */
-.btn-cancelar {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    color: white;
-    padding: 10px 25px;
-    font-family: "Kosugi Maru", sans-serif;
-    font-size: 1rem;
-    border-radius: 8px;
-    margin-left: 15px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-    .btn-cancelar:hover {
-        background-color: #5a6268; /* Gris más oscuro */
-        border-color: #5a6268;
-    }
