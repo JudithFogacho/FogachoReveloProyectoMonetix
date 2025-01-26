@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using MonetixProyectoAPP.Models;
 using MonetixProyectoAPP.Services;
 
 namespace MonetixProyectoAPP.ViewModels;
@@ -42,12 +43,13 @@ public class PaginaInicialViewModel : BaseViewModel
         }
     }
 
-    public int GastosAtrasados => GastosFiltrados?.Count(g => g.Estado == "Atrasado") ?? 0;
-    public int GastosPendientes => GastosFiltrados?.Count(g => g.Estado == "Pendiente") ?? 0;
-    public int GastosFinalizados => GastosFiltrados?.Count(g => g.Estado == "Finalizado") ?? 0;
+    public int GastosAtrasados => GastosFiltrados.Count(g => g.Estado == Estado.Atrasado);
+    public int GastosPendientes => GastosFiltrados.Count(g => g.Estado == Estado.Pendiente);
+    public int GastosFinalizados => GastosFiltrados.Count(g => g.Estado == Estado.Finalizado);
 
-    public double ResumenGastos => GastosFiltrados?.Sum(g => g.Valor) ?? 0;
-    public double ResumenPagado => GastosFiltrados?.Sum(g => g.ValorPagado) ?? 0;
+
+    public double ResumenGastos => GastosFiltrados.Sum(g => g.Valor);
+    public double ResumenPagado => GastosFiltrados.Sum(g => g.ValorPagado);
     public double ResumenPendiente => ResumenGastos - ResumenPagado;
 
     public Command RefreshCommand { get; }
@@ -56,22 +58,25 @@ public class PaginaInicialViewModel : BaseViewModel
     {
         _gastoService = gastoService;
         RefreshCommand = new Command(async () => await CargarGastos());
+
         Task.Run(CargarGastos);
     }
 
     private async Task CargarGastos()
     {
         if (IsLoading) return;
+
         try
         {
             IsLoading = true;
             var gastos = await _gastoService.GetGastosAsync();
-            GastosFiltrados = new ObservableCollection<GastoResponse>(gastos.OrderByDescending(g => g.FechaRegistro));
+            GastosFiltrados = new ObservableCollection<GastoResponse>(gastos);
             _gastos = new ObservableCollection<GastoResponse>(gastos);
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+            await Application.Current.MainPage.DisplayAlert("Error",
+                $"Error al cargar gastos: {ex.Message}", "OK");
         }
         finally
         {
@@ -83,17 +88,14 @@ public class PaginaInicialViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(TextoBusqueda))
         {
-            GastosFiltrados = new ObservableCollection<GastoResponse>(_gastos.OrderByDescending(g => g.FechaRegistro));
+            GastosFiltrados = new ObservableCollection<GastoResponse>(_gastos);
             return;
         }
 
         var busqueda = TextoBusqueda.Trim().ToLower();
         var filtrados = _gastos.Where(g =>
-            g.Descripcion?.ToLower().Contains(busqueda) == true ||
-            g.Categoria?.ToLower().Contains(busqueda) == true ||
-            g.Valor.ToString().Contains(busqueda) ||
-            g.Estado?.ToLower().Contains(busqueda) == true)
-        .OrderByDescending(g => g.FechaRegistro);
+             g.Descripcion.ToLower().Contains(busqueda) ||
+             (g.Categoria.HasValue && Enum.GetName(typeof(Categoria), g.Categoria.Value)?.ToLower().Contains(busqueda) == true));
 
         GastosFiltrados = new ObservableCollection<GastoResponse>(filtrados);
     }

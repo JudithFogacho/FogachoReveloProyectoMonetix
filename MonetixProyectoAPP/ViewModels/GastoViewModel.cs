@@ -1,4 +1,5 @@
-﻿using MonetixProyectoAPP.Services;
+﻿using MonetixProyectoAPP.Models;
+using MonetixProyectoAPP.Services;
 using System.Collections.ObjectModel;
 
 namespace MonetixProyectoAPP.ViewModels
@@ -38,6 +39,7 @@ namespace MonetixProyectoAPP.ViewModels
         }
 
         public async Task CreateGastoAsync(
+            DateTime fechaRegistro,
             DateTime fechaFinal,
             string categoria,
             string descripcion,
@@ -45,7 +47,7 @@ namespace MonetixProyectoAPP.ViewModels
         {
             await ExecuteAsync(async () =>
             {
-                await _gastoService.CreateGastoAsync(fechaFinal, categoria, descripcion, valor);
+                await _gastoService.CreateGastoAsync(fechaRegistro, fechaFinal, categoria, descripcion, valor);
                 await LoadGastos();
             });
         }
@@ -70,14 +72,15 @@ namespace MonetixProyectoAPP.ViewModels
 
         public async Task UpdateGastoAsync(
             int idGasto,
+            DateTime? fechaRegistro = null,
             DateTime? fechaFinal = null,
-            string? categoria = null,
+            Categoria? categoria = null,
             string? descripcion = null,
             double? valor = null)
         {
             await ExecuteAsync(async () =>
             {
-                await _gastoService.UpdateGastoAsync(idGasto, fechaFinal, categoria, descripcion, valor);
+                await _gastoService.UpdateGastoAsync(idGasto, fechaRegistro, fechaFinal, categoria, descripcion, valor);
                 await LoadGastos();
             });
         }
