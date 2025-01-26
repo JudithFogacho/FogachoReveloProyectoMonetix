@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FogachoReveloProyecto.Migrations
 {
     [DbContext(typeof(FogachoReveloDataBase))]
-    [Migration("20250121201613_BDD")]
-    partial class BDD
+    [Migration("20250126155510_FogachoReveloData")]
+    partial class FogachoReveloData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,15 +32,17 @@ namespace FogachoReveloProyecto.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdGasto"));
 
-                    b.Property<int>("Categorias")
-                        .HasColumnType("int");
+                    b.Property<string>("Categorias")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Estados")
-                        .HasColumnType("int");
+                    b.Property<string>("Estados")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("FechaFinal")
                         .HasColumnType("datetime2");
@@ -99,7 +101,7 @@ namespace FogachoReveloProyecto.Migrations
                     b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuario")
                         .WithMany("Gastos")
                         .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Usuario");

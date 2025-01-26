@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Http.Features
+
+@{
+    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    var showBanner = !consentFeature?.CanTrack ?? false;
+    var cookieString = consentFeature?.CreateConsentCookie();
+}
+
+@if (showBanner)
+{
+    <div id="cookieConsent" class="alert alert-info alert-dismissible fade show" role="alert">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10">
+                    <strong>Usamos cookies</strong> 🍪
+                    <p>
+                        Utilizamos cookies esenciales y tecnologías similares para mejorar tu experiencia en nuestro sitio.
+                        Al continuar navegando, aceptas nuestro uso de cookies. Para más información, consulta nuestra
+                        <a asp-controller="Home" asp-action="Privacy" class="alert-link">Política de Privacidad</a>.
+                    </p>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="alert" aria-label="Close" data-cookie-string="@cookieString">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var button = document.querySelector("#cookieConsent button[data-cookie-string]");
+            if (button) {
+                button.addEventListener("click", function (event) {
+                    document.cookie = button.dataset.cookieString;
+                    document.querySelector("#cookieConsent").classList.add("d-none");
+                }, false);
+            }
+        })();
+    </script>
+}

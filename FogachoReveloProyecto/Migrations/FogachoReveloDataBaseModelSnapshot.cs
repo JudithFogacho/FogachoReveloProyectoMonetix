@@ -29,15 +29,17 @@ namespace FogachoReveloProyecto.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdGasto"));
 
-                    b.Property<int>("Categorias")
-                        .HasColumnType("int");
+                    b.Property<string>("Categorias")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Estados")
-                        .HasColumnType("int");
+                    b.Property<string>("Estados")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("FechaFinal")
                         .HasColumnType("datetime2");
@@ -96,7 +98,7 @@ namespace FogachoReveloProyecto.Migrations
                     b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuario")
                         .WithMany("Gastos")
                         .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Usuario");

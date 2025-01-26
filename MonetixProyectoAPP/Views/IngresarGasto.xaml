@@ -1,94 +1,114 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MonetixProyectoAPP.Views.IngresarGasto"
-             Title="IngresarGasto"
-             BackgroundColor="#EFEDE5">
-
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            x:Class="MonetixProyectoAPP.Views.IngresarGasto"
+            Title="IngresarGasto"
+            BackgroundColor="#EFEDE5">
     <ScrollView>
         <StackLayout Padding="20" Spacing="10">
             <Label Text="MONETIX"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   FontFamily="Koulen"
-                   HorizontalOptions="Center"
-                   TextColor="#809671" />
+                  FontSize="26" 
+                  FontAttributes="Bold"
+                  FontFamily="Koulen"
+                  HorizontalOptions="Center"
+                  TextColor="#809671" />
 
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
                 <Label Text="INGRESAR GASTO"
-                       FontSize="36"
-                       FontAttributes="Bold"
-                       FontFamily="Koulen"
-                       TextColor="#000000" />
+                      FontSize="36"
+                      FontAttributes="Bold" 
+                      FontFamily="Koulen"
+                      TextColor="#000000" />
                 <Image Source="cerdito.png"
-                       HeightRequest="38"
-                       WidthRequest="38" />
+                      HeightRequest="38"
+                      WidthRequest="38" />
             </HorizontalStackLayout>
 
+            <Label Text="Fecha Inicio"
+                  FontSize="26"
+                  FontFamily="Koulen"
+                  FontAttributes="Bold"
+                  TextColor="Black"/>
+            <DatePicker Date="{Binding FechaInicio}"
+                      TextColor="#000000"
+                      BackgroundColor="#FFFFFF" />
+
             <Label Text="Fecha Final"
-                   FontSize="26"
-                   FontFamily="Koulen"
-                   FontAttributes="Bold"
-                   TextColor="Black"/>
+                  FontSize="26"
+                  FontFamily="Koulen" 
+                  FontAttributes="Bold"
+                  TextColor="Black"/>
             <DatePicker Date="{Binding FechaFinal}"
-                       TextColor="#000000"
-                       BackgroundColor="#FFFFFF" />
+                      TextColor="#000000"
+                      BackgroundColor="#FFFFFF" />
 
             <Label Text="CATEGORÍA"
-                   FontSize="26"
-                   FontFamily="Koulen"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
+                  FontSize="26"
+                  FontFamily="Koulen"
+                  FontAttributes="Bold"
+                  TextColor="Black" />
             <Picker ItemsSource="{Binding Categorias}"
-                    SelectedItem="{Binding CategoriaSeleccionada}"
-                    Title="Seleccione una categoría"
-                    TitleColor="#5A5A5A"
-                    TextColor="#000000"
-                    BackgroundColor="#FFFFFF" />
+                   SelectedItem="{Binding CategoriaSeleccionada}"
+                   Title="Seleccione una categoría"
+                   TitleColor="#5A5A5A"
+                   TextColor="#000000"
+                   BackgroundColor="#FFFFFF" />
+
+            <Label Text="EMPRESA"
+                  FontSize="26"
+                  FontFamily="Koulen"
+                  FontAttributes="Bold"
+                  TextColor="Black" />
+            <Picker ItemsSource="{Binding Empresas}"
+                   SelectedItem="{Binding EmpresaSeleccionada}"
+                   Title="Seleccione una empresa"
+                   TitleColor="#5A5A5A"
+                   TextColor="#000000"
+                   BackgroundColor="#FFFFFF" />
 
             <Label Text="DESCRIPCIÓN"
-                   FontFamily="Koulen"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
+                  FontFamily="Koulen"
+                  FontSize="26"
+                  FontAttributes="Bold"
+                  TextColor="Black" />
             <Entry Text="{Binding Descripcion}"
-                   Placeholder="Ingrese la descripción"
-                   TextColor="#000000"
-                   BackgroundColor="#FFFFFF" />
+                  Placeholder="Ingrese la descripción"
+                  TextColor="#000000"
+                  BackgroundColor="#FFFFFF" />
 
             <Label Text="VALOR"
-                   FontFamily="Koulen"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
+                  FontFamily="Koulen"
+                  FontSize="26"
+                  FontAttributes="Bold"
+                  TextColor="Black" />
             <Entry Text="{Binding Valor}"
-                   Placeholder="Ingrese el valor"
-                   Keyboard="Numeric"
-                   TextColor="#000000"
-                   BackgroundColor="#FFFFFF" />
+                  Placeholder="Ingrese el valor"
+                  Keyboard="Numeric"
+                  TextColor="#000000"
+                  BackgroundColor="#FFFFFF" />
 
             <StackLayout Orientation="Horizontal" 
-                        Spacing="20" 
-                        HorizontalOptions="Center"
-                        Margin="0,20,0,0">
+                       Spacing="20" 
+                       HorizontalOptions="Center"
+                       Margin="0,20,0,0">
                 <Button Text="CANCELAR"
-                        TextColor="#FFFFFF"
-                        FontFamily="Koulen"
-                        FontSize="22"
-                        BackgroundColor="#95928F"
-                        CornerRadius="25"
-                        HeightRequest="50"
-                        WidthRequest="120"
-                        Clicked="OnCancelarClicked" />
+                       TextColor="#FFFFFF"
+                       FontFamily="Koulen"
+                       FontSize="22"
+                       BackgroundColor="#95928F"
+                       CornerRadius="25"
+                       HeightRequest="50"
+                       WidthRequest="120"
+                       Clicked="OnCancelarClicked" />
                 <Button Text="CREAR"
-                        FontSize="22"
-                        TextColor="#FFFFFF"
-                        FontFamily="Koulen"
-                        BackgroundColor="#849671"
-                        CornerRadius="25"
-                        HeightRequest="50"
-                        WidthRequest="120"
-                        Command="{Binding GuardarGastoCommand}" />
+                       FontSize="22"
+                       TextColor="#FFFFFF"
+                       FontFamily="Koulen"
+                       BackgroundColor="#849671"
+                       CornerRadius="25"
+                       HeightRequest="50"
+                       WidthRequest="120"
+                       Command="{Binding GuardarGastoCommand}" />
             </StackLayout>
         </StackLayout>
     </ScrollView>

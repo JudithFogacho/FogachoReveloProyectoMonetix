@@ -1,59 +1,58 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
+using System;
 
 namespace FogachoReveloProyecto.Controllers
 {
     public class GastosController : Controller
     {
         private readonly FogachoReveloDataBase _context;
+        private readonly IDataProtector _protector;
 
-        public GastosController(FogachoReveloDataBase context)
+        public GastosController(FogachoReveloDataBase context, IDataProtectionProvider provider)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
+            _protector = provider.CreateProtector("Monetix.Usuario");
         }
 
         // GET: Gastos/PaginaInicial
         public async Task<IActionResult> PaginaInicial(string categoria)
         {
-            var userId = TempData["UserId"] as int?;
-            var nombreUsuario = TempData["NombreUsuario"] as string;
-
+            var userId = GetUserIdFromCookies();
             if (userId == null)
             {
                 return RedirectToAction("Login", "Usuarios");
             }
 
-            var gastosQuery = _context.Gasto
-                .Include(g => g.Usuario)
-                .Where(g => g.IdUsuario == userId);
+            var nombreUsuario = Request.Cookies["NombreUsuario"];
 
-            if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, out var categoriaEnum))
+            IQueryable<Gasto> query = _context.Gasto
+                .Where(g => g.IdUsuario == userId)
+                .Include(g => g.Usuario);
+
+            if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, true, out var categoriaFiltro))
             {
-                gastosQuery = gastosQuery.Where(g => g.Categorias == categoriaEnum);
+                query = query.Where(g => g.Categorias == categoriaFiltro);
             }
 
-            var subtotalGastos = await gastosQuery.SumAsync(g => g.Valor ?? 0);
-            var subtotalValorPagado = await gastosQuery.SumAsync(g => g.ValorPagado);
-            var total = subtotalGastos - subtotalValorPagado;
-
-            ViewBag.SubtotalGastos = subtotalGastos;
-            ViewBag.SubtotalValorPagado = subtotalValorPagado;
-            ViewBag.Total = total;
+            ViewBag.SubtotalGastos = await query.SumAsync(g => g.Valor ?? 0);
+            ViewBag.SubtotalValorPagado = await query.SumAsync(g => g.ValorPagado);
+            ViewBag.Total = ViewBag.SubtotalGastos - ViewBag.SubtotalValorPagado;
             ViewBag.NombreUsuario = nombreUsuario;
-            ViewBag.UserId = userId; // Pasar el userId a la vista
 
-            return View(await gastosQuery.ToListAsync());
+            return View(await query.ToListAsync());
         }
 
         // GET: Gastos/CrearGasto
-        [HttpGet]
-        public IActionResult CrearGasto(int userId)
+        public IActionResult CrearGasto()
         {
-            if (userId == 0)
+            var userId = GetUserIdFromCookies();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Usuarios");
             }
@@ -61,48 +60,49 @@ namespace FogachoReveloProyecto.Controllers
             return View(new Gasto
             {
                 FechaRegristo = DateTime.Now,
-                IdUsuario = userId
+                FechaFinal = DateTime.Now.AddDays(7),
+                IdUsuario = userId.Value
             });
         }
 
         // POST: Gastos/CrearGasto
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CrearGasto([Bind("FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados,IdUsuario")] Gasto gasto)
+        public async Task<IActionResult> CrearGasto([Bind("IdGasto,IdUsuario,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado")] Gasto gasto)
         {
-            if (gasto.IdUsuario == 0)
+            var userId = GetUserIdFromCookies();
+            if (userId == null || gasto.IdUsuario != userId)
             {
                 return RedirectToAction("Login", "Usuarios");
             }
 
-            if (!ModelState.IsValid)
-            {
-                return View(gasto);
-            }
+            gasto.Estados = Estado.Pendiente;
+            gasto.ValidarValor();
 
-            try
+            if (ModelState.IsValid)
             {
-                gasto.ValidarValor();
-                _context.Add(gasto);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Gasto creado exitosamente.";
-                return RedirectToAction(nameof(PaginaInicial), new { userId = gasto.IdUsuario });
+                try
+                {
+                    _context.Add(gasto);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Gasto creado exitosamente!";
+                    return RedirectToAction(nameof(PaginaInicial));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error al crear el gasto: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Error al crear el gasto: " + ex.Message);
-                return View(gasto);
-            }
+            return View(gasto);
         }
 
         // GET: Gastos/Edit/5
-        [HttpGet]
-        public async Task<IActionResult> Edit(int? id, int userId)
+        public async Task<IActionResult> Edit(int? id)
         {
-            if (!id.HasValue || userId == 0)
+            var userId = GetUserIdFromCookies();
+            if (userId == null || id == null)
             {
-                return BadRequest("ID de gasto o usuario no proporcionado.");
+                return RedirectToAction("Login", "Usuarios");
             }
 
             var gasto = await _context.Gasto
@@ -110,68 +110,67 @@ namespace FogachoReveloProyecto.Controllers
 
             if (gasto == null)
             {
-                return NotFound($"No se encontró el gasto con ID: {id}");
+                return NotFound();
             }
-
             return View(gasto);
         }
 
         // POST: Gastos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdGasto,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados,IdUsuario")] Gasto gasto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdGasto,IdUsuario,FechaRegristo,FechaFinal,Categorias,Descripcion,Valor,ValorPagado,Estados")] Gasto gasto)
         {
-            if (id != gasto.IdGasto || gasto.IdUsuario == 0)
+            var userId = GetUserIdFromCookies();
+            if (userId == null || id != gasto.IdGasto || gasto.IdUsuario != userId)
             {
-                return BadRequest("ID de gasto o usuario no coincide.");
+                return RedirectToAction("Login", "Usuarios");
             }
 
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(gasto);
+                try
+                {
+                    gasto.ValidarValor();
+                    _context.Update(gasto);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Gasto actualizado correctamente!";
+                    return RedirectToAction(nameof(PaginaInicial));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!GastoExists(gasto.IdGasto))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error al actualizar: {ex.Message}");
+                }
             }
-
-            try
-            {
-                gasto.ValidarValor();
-                _context.Update(gasto);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Gasto actualizado exitosamente.";
-                TempData["UserId"] = gasto.IdUsuario; // Guardar el userId en TempData
-                TempData.Keep("UserId"); // Mantener el userId para la próxima solicitud
-
-                return RedirectToAction(nameof(PaginaInicial), new { userId = gasto.IdUsuario });
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                ModelState.AddModelError("", "Error de concurrencia al actualizar el gasto.");
-                return View(gasto);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Error al actualizar el gasto: " + ex.Message);
-                return View(gasto);
-            }
+            return View(gasto);
         }
 
         // GET: Gastos/Delete/5
-        [HttpGet]
-        public async Task<IActionResult> Delete(int? id, int userId)
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (!id.HasValue || userId == 0)
+            var userId = GetUserIdFromCookies();
+            if (userId == null || id == null)
             {
-                return BadRequest("ID de gasto o usuario no proporcionado.");
+                return RedirectToAction("Login", "Usuarios");
             }
 
             var gasto = await _context.Gasto
                 .Include(g => g.Usuario)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.IdGasto == id && m.IdUsuario == userId);
+                .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
 
             if (gasto == null)
             {
-                return NotFound($"No se encontró el gasto con ID: {id}");
+                return NotFound();
             }
 
             return View(gasto);
@@ -180,9 +179,10 @@ namespace FogachoReveloProyecto.Controllers
         // POST: Gastos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, int userId)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (userId == 0)
+            var userId = GetUserIdFromCookies();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Usuarios");
             }
@@ -190,29 +190,67 @@ namespace FogachoReveloProyecto.Controllers
             var gasto = await _context.Gasto
                 .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
 
-            if (gasto == null)
+            if (gasto != null)
             {
-                return NotFound($"No se encontró el gasto con ID: {id}");
+                try
+                {
+                    _context.Gasto.Remove(gasto);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Gasto eliminado correctamente!";
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = $"Error al eliminar: {ex.Message}";
+                }
             }
-
-            try
-            {
-                _context.Gasto.Remove(gasto);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Gasto eliminado exitosamente.";
-                return RedirectToAction(nameof(PaginaInicial), new { userId = userId });
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error al eliminar el gasto: " + ex.Message;
-                return RedirectToAction(nameof(PaginaInicial), new { userId = userId });
-            }
+            return RedirectToAction(nameof(PaginaInicial));
         }
 
-        private async Task<bool> GastoExists(int id, int userId)
+        // GET: Gastos/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            return await _context.Gasto.AnyAsync(e => e.IdGasto == id && e.IdUsuario == userId);
+            var userId = GetUserIdFromCookies();
+            if (userId == null || id == null)
+            {
+                return RedirectToAction("Login", "Usuarios");
+            }
+
+            var gasto = await _context.Gasto
+                .Include(g => g.Usuario)
+                .FirstOrDefaultAsync(g => g.IdGasto == id && g.IdUsuario == userId);
+
+            if (gasto == null)
+            {
+                return NotFound();
+            }
+
+            return View(gasto);
+        }
+
+        private bool GastoExists(int id)
+        {
+            return _context.Gasto.Any(e => e.IdGasto == id);
+        }
+
+        private int? GetUserIdFromCookies()
+        {
+            if (Request.Cookies.TryGetValue("UserId", out string userIdEncrypted))
+            {
+                try
+                {
+                    string userIdStr = _protector.Unprotect(userIdEncrypted);
+                    if (int.TryParse(userIdStr, out int userId))
+                    {
+                        return userId;
+                    }
+                }
+                catch
+                {
+                    Response.Cookies.Delete("UserId");
+                    Response.Cookies.Delete("NombreUsuario");
+                }
+            }
+            return null;
         }
     }
 }

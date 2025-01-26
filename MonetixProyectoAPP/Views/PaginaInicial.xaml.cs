@@ -1,65 +1,111 @@
 using Microsoft.Maui.Controls;
+using MonetixProyectoAPP.Models;
 using MonetixProyectoAPP.Services;
 using MonetixProyectoAPP.ViewModels;
+using System.Globalization;
 
-namespace MonetixProyectoAPP.Views
+namespace MonetixProyectoAPP.Views;
+
+public partial class PaginaInicial : ContentPage
 {
-    public partial class PaginaInicial : ContentPage
+    private readonly PaginaInicialViewModel _viewModel;
+
+    public PaginaInicial(GastoService gastoService)
     {
-        private readonly GastoService _gastoService;
+        InitializeComponent();
+        _viewModel = new PaginaInicialViewModel(gastoService);
+        BindingContext = _viewModel;
+    }
 
-        public PaginaInicial(GastoService gastoService)
-        {
-            InitializeComponent();
-            _gastoService = gastoService;
-            BindingContext = new PaginaInicialViewModel(_gastoService);
-        }
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        _viewModel.RefreshCommand.Execute(null);
+    }
 
-        protected override void OnAppearing()
+    private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is GastoResponse gastoSeleccionado)
         {
-            base.OnAppearing();
-            if (BindingContext is PaginaInicialViewModel viewModel)
-            {
-                viewModel.CargarGastos();
-            }
-        }
-
-        private async void OnIngresarGastoClicked(object sender, EventArgs e)
-        {
-            await Shell.Current.GoToAsync("IngresarGasto");
-        }
-
-        private async void OnTiendasFavoritasClicked(object sender, EventArgs e)
-        {
-            await Shell.Current.GoToAsync("///TiendasFavoritasGuardadas");
-        }
-
-        private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.CurrentSelection.FirstOrDefault() is GastoResponse gastoSeleccionado)
-            {
-                await Shell.Current.GoToAsync($"DetalleGasto?gastoId={gastoSeleccionado.IdGasto}");
-            }
+            await Shell.Current.GoToAsync($"DetalleGasto?gastoId={gastoSeleccionado.IdGasto}");
             ((CollectionView)sender).SelectedItem = null;
         }
     }
 
-    public class EstadoColorConverter : IValueConverter
+    private async void OnIngresarGastoClicked(object sender, EventArgs e)
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return (string)value switch
-            {
-                "Atrasado" => Color.FromArgb("#E57373"),
-                "Pendiente" => Color.FromArgb("#FFD54F"),
-                "Finalizado" => Color.FromArgb("#81C784"),
-                _ => Colors.Gray
-            };
-        }
+        await Shell.Current.GoToAsync("IngresarGasto");
+    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    private async void OnTiendasFavoritasClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("///TiendasFavoritasGuardadas");
+    }
+}
+
+public class EstadoConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value == null) return "Desconocido";
+
+        return value.ToString() switch
         {
-            throw new NotImplementedException();
-        }
+            "2" => "Finalizado",
+            "1" => "Pendiente",
+            "0" => "Atrasado",
+            _ => "Desconocido"
+        };
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class CategoriaConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value == null) return "Otro";
+
+        return value.ToString() switch
+        {
+            "1" => "Entretenimiento",
+            "2" => "Comida",
+            "3" => "Transporte",
+            "4" => "Ropa",
+            "5" => "Educación",
+            "6" => "Salud",
+            "7" => "Servicios Básicos",
+            _ => "Otro"
+        };
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class EstadoColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value == null) return Colors.Gray;
+
+        return value.ToString() switch
+        {
+            "2" => Color.Parse("#81C784"),  // Finalizado
+            "1" => Color.Parse("#FFD54F"),  // Pendiente
+            "0" => Color.Parse("#E57373"),  // Atrasado
+            _ => Colors.Gray
+        };
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }

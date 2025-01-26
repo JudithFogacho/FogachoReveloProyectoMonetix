@@ -1,85 +1,168 @@
-﻿
-@model FogachoReveloProyecto.Models.Gasto
+﻿@model FogachoReveloProyecto.Models.Gasto
 
 @{
-    ViewData["Title"] = "CrearGasto";
+    ViewData["Title"] = "Nuevo Gasto";
 }
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Koulen&family=Kosugi+Maru&family=Lilita+One&display=swap" rel="stylesheet">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Koulen&family=Lilita+One&display=swap" rel="stylesheet">
-
-<div class="imagen-gasto">
-    <div>
-        <h1 class="koulen-regular">Monetix</h1>
+<div class="container-lg mt-5">
+    <div class="header-section text-center mb-5">
+        <img src="~/img/LogoImg.png" alt="Monetix Logo" class="logo-img mb-3">
+        <h1 class="koulen-regular text-primary">Monetix</h1>
     </div>
-    <div>
-        <img src="~/img/LogoImg.png" alt="LogoImg" class="logopi" />
+
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">INGRESAR NUEVO GASTO</h2>
+        </div>
+
+        <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <form asp-action="CrearGasto" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <!-- Campo oculto para el ID de usuario -->
+                @Html.HiddenFor(m => m.IdUsuario)
+
+                <div class="row g-4">
+                    <!-- Fechas -->
+                    <div class="col-md-6">
+                        <label asp-for="FechaRegristo" class="form-label"></label>
+                        <input asp-for="FechaRegristo"
+                               class="form-control"
+                               type="datetime-local"
+                               value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                        <span asp-validation-for="FechaRegristo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="FechaFinal" class="form-label"></label>
+                        <input asp-for="FechaFinal"
+                               class="form-control"
+                               type="datetime-local"
+                               min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                        <span asp-validation-for="FechaFinal" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Categoría -->
+                    <div class="col-12">
+                        <label asp-for="Categorias" class="form-label"></label>
+                        <select asp-for="Categorias" class="form-select" required>
+                            <option value="" disabled selected>Seleccione una categoría</option>
+                            @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
+                            {
+                                <option value="@categoria">@categoria</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Categorias" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="col-12">
+                        <label asp-for="Descripcion" class="form-label"></label>
+                        <textarea asp-for="Descripcion"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Ej: Pago de servicios públicos"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Valores -->
+                    <div class="col-md-6">
+                        <label asp-for="Valor" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="Valor"
+                                   class="form-control"
+                                   type="number"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00">
+                        </div>
+                        <span asp-validation-for="Valor" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ValorPagado" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="ValorPagado"
+                                   class="form-control"
+                                   type="number"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00">
+                        </div>
+                        <span asp-validation-for="ValorPagado" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="col-12 d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="PaginaInicial" class="btn btn-outline-secondary me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Gasto
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-
-
-<div class="row">
-    <div class="col-md-4">
-        <h2 class="TituloCG"> INGRESAR GASTO</h2>
-        <div class="TituloSG">Gasto</div>
-        <form asp-action="CrearGasto">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <!-- Cada div es un apartado nuevo para la creacion del gasto-->
-            <div class="form-group">
-                <label asp-for="FechaRegristo" class="control-label"></label>
-                <input asp-for="FechaRegristo" class="form-control" />
-                <span asp-validation-for="FechaRegristo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaFinal" class="control-label"></label>
-                <input asp-for="FechaFinal" class="form-control" />
-                <span asp-validation-for="FechaFinal" class="text-danger"></span>
-            </div>
-            <label asp-for="Categorias" class="control-label"></label>
-            <select asp-for="Categorias" class="form-control">
-                <!-- Este apartado/bucle recorre todo los valores del enum de categorias y los muestra-->
-                @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
-                {
-                    <option value="@categoria">@categoria</option>
-                }
-            </select>
-            <span asp-validation-for="Categorias" class="text-danger"></span>
-            <div class="form-group">
-                <label asp-for="Descripcion" class="control-label"></label>
-                <input asp-for="Descripcion" class="form-control" />
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Valor" class="control-label"></label>
-                <input asp-for="Valor" class="form-control" type="number" step="0.01" />
-                <span asp-validation-for="Valor" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ValorPagado" class="control-label"></label>
-                <input asp-for="ValorPagado" class="form-control" type="number" step="0.01"/>
-                <span asp-validation-for="ValorPagado" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Crear" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
-    <a asp-action="PaginaInicial">Cancelar</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const fechaFinal = new Date(document.getElementById('FechaFinal').value);
+            const fechaRegistro = new Date(document.getElementById('FechaRegristo').value);
 
+            if (fechaFinal < fechaRegistro) {
+                alert('La fecha final no puede ser anterior a la fecha de registro!');
+                e.preventDefault();
+            }
+        });
+    </script>
 }
+
+<style>
+    .logo-img {
+        width: 120px;
+        height: auto;
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .koulen-regular {
+        font-family: 'Koulen', sans-serif;
+        letter-spacing: 1.5px;
+    }
+
+    .card-header {
+        font-family: 'Lilita One', cursive;
+        font-size: 1.5rem;
+    }
+
+    .form-label {
+        font-family: 'Kosugi Maru', sans-serif;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+</style>

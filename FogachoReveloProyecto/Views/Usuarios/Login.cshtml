@@ -8,50 +8,111 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Koulen&family=Kosugi+Maru&family=Lilita+One&display=swap" rel="stylesheet">
 
-<h1 class="koulen-regular">Monetix</h1>
-
-<div class="ImgLogo">
-    <img src="~/img/LogoImg.png" alt="LogoImg" class="centrada" />
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <div class="TituloIS">Iniciar Sesión</div>
-        <!-- Formulario de inicio de sesión -->
-        <form asp-action="Login" method="post">
-            <!-- Antiforgery token -->
-            @Html.AntiForgeryToken()
-
-            <!-- Resumen de errores de validación -->
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <!-- Campo de correo electrónico -->
-            <div class="form-group">
-                <label asp-for="Email" class="control-label">Email</label>
-                <input asp-for="Email" class="form-control" type="email" required />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <!-- Campo de contraseña -->
-            <div class="form-group">
-                <label asp-for="Password" class="control-label">Contraseña</label>
-                <input asp-for="Password" class="form-control" type="password" required />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <!-- Botón para iniciar sesión -->
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Iniciar</button>
-            </div>
-        </form>
-        <!-- Link para registrarse -->
-        <div>
-            <p>¿No tienes cuenta? <a asp-controller="Usuarios" asp-action="Registro">Regístrate aquí</a></p>
-        </div>
+<div class="container login-wrapper">
+    <div class="text-center mb-5">
+        <img src="~/img/LogoImg.png" alt="Logo Monetix" class="logo-img">
+        <h1 class="koulen-regular title-brand">Monetix</h1>
     </div>
-</div>
+
+    <div class="auth-card">
+        <h2 class="lilita-one text-center mb-4">Iniciar Sesión</h2>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        }
+
+        @if (ViewData.ModelState.IsValid == false)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @Html.ValidationSummary(true, "", new { @class = "mb-0" })
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-4">
+                <form asp-action="Login" method="post" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Email" class="control-label">Email</label>
+                        <input asp-for="Email"
+                               class="form-control"
+                               type="email"
+                               placeholder="nombre@ejemplo.com"
+                               required>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="Password" class="control-label">Contraseña</label>
+                        <div class="input-group">
+                            <input asp-for="Password"
+                                   class="form-control"
+                                   type="password"
+                                   id="password"
+                                   placeholder="••••••••"
+                                   required>
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    id="togglePassword">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary w-100" id="loginButton">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            <span class="submit-text">Iniciar</span>
+                            <div class="spinner-border spinner-border-sm ms-2 d-none"
+                                 role="status"
+                                 id="loadingSpinner">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <p>¿No tienes cuenta? <a asp-controller="Usuarios" asp-action="Registro" class="text-decoration-none">Regístrate aquí</a></p>
+        </div>
 
 @section Scripts {
-    <!-- Incluyendo scripts de validación para manejo de errores en el cliente -->
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+
+        // Form submission handler
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const submitButton = document.querySelector('.auth-btn');
+            const spinner = document.getElementById('loadingSpinner');
+            const submitText = document.querySelector('.submit-text');
+            
+            submitButton.disabled = true;
+            submitText.textContent = 'Autenticando...';
+            spinner.classList.remove('d-none');
+        });
+
+        // Auto-close alerts after 5 seconds
+        window.setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => new bootstrap.Alert(alert).close());
+        }, 5000);
+    </script>
 }

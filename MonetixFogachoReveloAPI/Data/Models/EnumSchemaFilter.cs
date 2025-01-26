@@ -13,11 +13,11 @@ namespace MonetixFogachoReveloAPI.Data.Models
             if (context.Type.IsEnum)
             {
                 schema.Enum.Clear();
+                schema.Type = "string";
+                schema.Format = null;
                 Enum.GetNames(context.Type)
                     .ToList()
                     .ForEach(name => schema.Enum.Add(new OpenApiString(name)));
-                schema.Type = "string";
-                schema.Format = null;
             }
         }
     }

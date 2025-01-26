@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Koulen&family=Kosugi+Maru&family=Lilita+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <div class="bienvenida">
     <div class="imagen-bienvenida">
@@ -15,7 +16,9 @@
             <p>Bienvenido, @ViewBag.NombreUsuario</p>
         </div>
         <div class="cerrar-sesion">
-            <p><a asp-controller="Usuarios" asp-action="Login">Cerrar Sesión</a></p>
+            <form asp-controller="Usuarios" asp-action="Logout" method="post">
+                <button type="submit" class="btn btn-danger btn-sm">Cerrar Sesión</button>
+            </form>
         </div>
     </div>
     <div>
@@ -25,83 +28,176 @@
 
 <h2 class="TituloIS">PÁGINA INICIAL</h2>
 
-<form asp-action="PaginaInicial" method="get">
-    <div class="Buscar">
-        <label for="categoria">Buscar por Categoría:</label>
-        <select id="categoria" name="categoria" class="form-control">
-            <option value="">-- Todas --</option>
-            @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
-            {
-                <option value="@categoria">@categoria</option>
-            }
-        </select>
+<!-- Filtro por categoría -->
+<form asp-action="PaginaInicial" method="get" class="mb-4">
+    <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+            <label for="categoria" class="form-label">Buscar por Categoría:</label>
+            <select id="categoria" name="categoria" class="form-select">
+                <option value="">-- Todas --</option>
+                @foreach (var categoria in Enum.GetValues(typeof(FogachoReveloProyecto.Models.Categoria)))
+                {
+                    <option value="@categoria">@categoria</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100 mt-4">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
     </div>
-    <button type="submit" class="btn btn-buscar">-----Buscar-----</button>
 </form>
 
+<!-- Botón para agregar gasto -->
 <p>
-    <a asp-action="CrearGasto" class="btn btn-success">Ingresar Gasto</a>
+    <a asp-action="CrearGasto" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Ingresar Gasto
+    </a>
 </p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.First().FechaRegristo)</th>
-            <th>@Html.DisplayNameFor(model => model.First().FechaFinal)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Categorias)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Descripcion)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Valor)</th>
-            <th>@Html.DisplayNameFor(model => model.First().ValorPagado)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Estados)</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<!-- Tabla de gastos -->
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
             <tr>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.FechaRegristo)</td>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.FechaFinal)</td>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Categorias)</td>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Descripcion)</td>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Valor)</td>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.ValorPagado)</td>
-                <td class="tabla-body">@Html.DisplayFor(modelItem => item.Estados)</td>
-                <td class="tabla-body">
-                    <a asp-action="Edit" asp-route-id="@item.IdGasto" asp-route-userId="@ViewBag.UserId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdGasto" asp-route-userId="@ViewBag.UserId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdGasto" asp-route-userId="@ViewBag.UserId">Delete</a>
-                </td>
+                <th>@Html.DisplayNameFor(model => model.First().FechaRegristo)</th>
+                <th>@Html.DisplayNameFor(model => model.First().FechaFinal)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Categorias)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Descripcion)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Valor)</th>
+                <th>@Html.DisplayNameFor(model => model.First().ValorPagado)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Estados)</th>
+                <th>Acciones</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.FechaRegristo)</td>
+                    <td>@Html.DisplayFor(modelItem => item.FechaFinal)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Categorias)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Descripcion)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Valor)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ValorPagado)</td>
+                    <td>
+                        <span class="badge @GetEstadoBadgeClass(item.Estados)">
+                            @Html.DisplayFor(modelItem => item.Estados)
+                        </span>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.IdGasto" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.IdGasto" class="btn btn-sm btn-info">
+                            <i class="bi bi-eye"></i> Detalles
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.IdGasto" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-<div class="totales1">
-    <div colspan="4" class="text-right">
-        <strong>Subtotal Gastos:</strong>
-        <strong class="precio1">@ViewBag.SubtotalGastos.ToString("C")</strong>
+<!-- Totales -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Subtotal Gastos</h5>
+                <p class="card-text text-danger">@ViewBag.SubtotalGastos.ToString("C")</p>
+            </div>
+        </div>
     </div>
-</div>
-<div class="totales2">
-    <div colspan="4" class="text-right">
-        <strong>Subtotal Valor Pagado:</strong>
-        <strong class="precio2">@ViewBag.SubtotalValorPagado.ToString("C")</strong>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Subtotal Pagado</h5>
+                <p class="card-text text-success">@ViewBag.SubtotalValorPagado.ToString("C")</p>
+            </div>
+        </div>
     </div>
-</div>
-<div class="totales3">
-    <div colspan="4" class="text-right">
-        <strong>Total:</strong>
-        <strong class="precio3">@ViewBag.Total.ToString("C")</strong>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Pendiente</h5>
+                <p class="card-text text-primary">@ViewBag.Total.ToString("C")</p>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        // Obtener el userId desde localStorage
-        const userId = localStorage.getItem("userId");
-        if (!userId) {
-            window.location.href = "/Usuarios/Login";
-        }
-    </script>
+    
 }
+
+@functions {
+    // Método para obtener la clase CSS del badge según el estado
+    public string GetEstadoBadgeClass(Estado estado)
+    {
+        switch (estado)
+        {
+            case Estado.Pendiente:
+                return "bg-warning text-dark";
+            case Estado.Finalizado:
+                return "bg-success text-white";
+            case Estado.Atrasado:
+                return "bg-danger text-white";
+            default:
+                return "bg-secondary text-white";
+        }
+    }
+}
+
+<style>
+    .bienvenida {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .imagen-bienvenida {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .logopi {
+        width: 100px;
+        height: auto;
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .koulen-regular {
+        font-family: 'Koulen', sans-serif;
+        font-size: 2.5rem;
+        color: #2c3e50;
+        letter-spacing: 1.5px;
+    }
+
+    .TituloIS {
+        font-family: 'Lilita One', cursive;
+        color: #34495e;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>

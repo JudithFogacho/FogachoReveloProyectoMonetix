@@ -1,38 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FogachoReveloProyecto.Models;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace FogachoReveloProyecto.Controllers
 {
     public class UsuariosController : Controller
     {
         private readonly FogachoReveloDataBase _context;
+        private readonly IDataProtector _protector;
 
-        public UsuariosController(FogachoReveloDataBase context)
+        public UsuariosController(FogachoReveloDataBase context, IDataProtectionProvider provider)
         {
             _context = context;
+            _protector = provider.CreateProtector("Monetix.Usuario");
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
-
+        // GET: Usuarios/Login
         public IActionResult Login()
         {
             return View();
         }
 
-        public IActionResult Registro()
-        {
-            return View();
-        }
-
+        // POST: Usuarios/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([Bind("Email,Password")] Usuario usuario)
@@ -44,12 +36,11 @@ namespace FogachoReveloProyecto.Controllers
             }
 
             var userBaseDatos = await _context.Usuario
-                .Include(u => u.Gastos)
                 .FirstOrDefaultAsync(u => u.Email == usuario.Email);
 
             if (userBaseDatos == null)
             {
-                ModelState.AddModelError(string.Empty, "Email no encontrado.");
+                ModelState.AddModelError(string.Empty, "Credenciales inválidas.");
                 return View(usuario);
             }
 
@@ -59,38 +50,68 @@ namespace FogachoReveloProyecto.Controllers
                 return View(usuario);
             }
 
-            // Guardar el ID y el nombre del usuario en TempData
-            TempData["UserId"] = userBaseDatos.IdUsuario;
-            TempData["NombreUsuario"] = userBaseDatos.Nombre;
+            // Configurar cookies seguras
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.Now.AddMinutes(30)
+            };
 
-            // Redirigir a la página principal
+            Response.Cookies.Append("UserId", _protector.Protect(userBaseDatos.IdUsuario.ToString()), cookieOptions);
+            Response.Cookies.Append("NombreUsuario", userBaseDatos.Nombre, cookieOptions);
+
             return RedirectToAction("PaginaInicial", "Gastos");
         }
 
+        // GET: Usuarios/Registro
+        public IActionResult Registro()
+        {
+            return View();
+        }
+
+        // POST: Usuarios/Registro
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Registro([Bind("IdUsuario,Nombre,Apellido,Email,Password")] Usuario usuario)
+        public async Task<IActionResult> Registro([Bind("Nombre,Apellido,Email,Password")] Usuario usuario)
         {
             if (ModelState.IsValid)
             {
-                // Verificar si el email ya existe
-                var existingUser = await _context.Usuario
-                    .FirstOrDefaultAsync(u => u.Email == usuario.Email);
-
-                if (existingUser != null)
+                if (await _context.Usuario.AnyAsync(u => u.Email == usuario.Email))
                 {
-                    ModelState.AddModelError("Email", "Este correo electrónico ya está registrado.");
+                    ModelState.AddModelError("Email", "El correo electrónico ya está registrado.");
                     return View(usuario);
                 }
 
-                // Inicializar la colección de Gastos
                 usuario.Gastos = new List<Gasto>();
-
                 _context.Add(usuario);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Login");
+
+                // Configurar cookies después del registro
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.Now.AddMinutes(30)
+                };
+
+                Response.Cookies.Append("UserId", _protector.Protect(usuario.IdUsuario.ToString()), cookieOptions);
+                Response.Cookies.Append("NombreUsuario", usuario.Nombre, cookieOptions);
+
+                return RedirectToAction("PaginaInicial", "Gastos");
             }
             return View(usuario);
+        }
+
+        // GET: Usuarios/Logout
+        public IActionResult Logout()
+        {
+            // Eliminar cookies
+            Response.Cookies.Delete("UserId");
+            Response.Cookies.Delete("NombreUsuario");
+            return RedirectToAction("Login", "Usuarios");
         }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FogachoReveloProyecto.Migrations
 {
     /// <inheritdoc />
-    public partial class BDD : Migration
+    public partial class FogachoReveloData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,11 +35,11 @@ namespace FogachoReveloProyecto.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FechaRegristo = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FechaFinal = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Categorias = table.Column<int>(type: "int", nullable: false),
+                    Categorias = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Valor = table.Column<double>(type: "float", nullable: false),
                     ValorPagado = table.Column<double>(type: "float", nullable: false),
-                    Estados = table.Column<int>(type: "int", nullable: false),
+                    Estados = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IdUsuario = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -50,7 +50,7 @@ namespace FogachoReveloProyecto.Migrations
                         column: x => x.IdUsuario,
                         principalTable: "Usuario",
                         principalColumn: "IdUsuario",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
