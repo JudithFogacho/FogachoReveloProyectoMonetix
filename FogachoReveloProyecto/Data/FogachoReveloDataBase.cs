@@ -17,20 +17,38 @@ public class FogachoReveloDataBase : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configurar enums para guardar como strings
+        // Configurar relación Usuario-Gasto
+        modelBuilder.Entity<Usuario>()
+            .HasMany(u => u.Gastos)
+            .WithOne(g => g.Usuario)
+            .HasForeignKey(g => g.IdUsuario)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configurar enums para guardar como valores numéricos
         modelBuilder.Entity<Gasto>()
             .Property(g => g.Categorias)
-            .HasConversion<string>();
+            .HasColumnType("int");
 
         modelBuilder.Entity<Gasto>()
             .Property(g => g.Estados)
-            .HasConversion<string>();
+            .HasColumnType("int");
 
-        // Configurar relación Usuario-Gasto
+        // Configurar índices para mejor rendimiento
+        modelBuilder.Entity<Gasto>()
+            .HasIndex(g => g.IdUsuario);
+
+        modelBuilder.Entity<Gasto>()
+            .HasIndex(g => g.Categorias);
+
+        modelBuilder.Entity<Gasto>()
+            .HasIndex(g => g.Estados);
+
         modelBuilder.Entity<Usuario>()
-    .HasMany(u => u.Gastos)
-    .WithOne(g => g.Usuario)
-    .HasForeignKey(g => g.IdUsuario)
-    .OnDelete(DeleteBehavior.Restrict);
+            .HasIndex(u => u.Email)
+            .IsUnique();
+        modelBuilder.Entity<Gasto>()
+        .HasOne(g => g.Usuario)
+        .WithMany(u => u.Gastos) // Si Usuario tiene una colección de Gastos
+        .HasForeignKey(g => g.IdUsuario);
     }
 }

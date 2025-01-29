@@ -13,7 +13,9 @@ public static class GastoEndpoints
 
         group.MapGet("/", async (int userId, string? preference, FogachoReveloDataContext db) =>
         {
-            var query = db.Gastos.Where(g => g.IdUsuario == userId);
+            var query = db.Gastos
+                .Include(g => g.Usuario)
+                .Where(g => g.IdUsuario == userId);
 
             if (!string.IsNullOrEmpty(preference))
             {
@@ -26,17 +28,46 @@ public static class GastoEndpoints
                 };
             }
 
-            return Results.Ok(await query.OrderByDescending(g => g.FechaRegristo).ToListAsync());
+            var gastos = await query
+                .OrderByDescending(g => g.FechaRegristo)
+                .Select(g => new GastoWithUserResponse
+                {
+                    IdGasto = g.IdGasto,
+                    FechaRegristo = g.FechaRegristo,
+                    FechaFinal = g.FechaFinal,
+                    Categorias = (int)g.Categorias,
+                    Descripcion = g.Descripcion,
+                    Valor = g.Valor ?? 0,
+                    ValorPagado = g.ValorPagado,
+                    Estados = (int)g.Estados,
+                    IdUsuario = g.IdUsuario,
+                    Usuario = g.Usuario != null ? new UsuarioResponse
+                    {
+                        IdUsuario = g.Usuario.IdUsuario,
+                        Nombre = g.Usuario.Nombre,
+                        Apellido = g.Usuario.Apellido,
+                        Email = g.Usuario.Email
+                    } : null
+                })
+                .ToListAsync();
+
+            return Results.Ok(gastos);
         });
 
         group.MapPost("/", async (CreateGastoRequest request, FogachoReveloDataContext db) =>
         {
+            // Validar y convertir la categoría a su valor numérico
+            if (!Enum.TryParse<Categoria>(request.Categoria, true, out Categoria categoria))
+            {
+                return Results.BadRequest("Categoría inválida");
+            }
+
             var gasto = new Gasto
             {
                 IdUsuario = request.UserId,
                 FechaRegristo = DateTime.UtcNow,
                 FechaFinal = request.FechaFinal,
-                Categorias = Enum.Parse<Categoria>(request.Categoria),
+                Categorias = categoria,
                 Descripcion = request.Descripcion,
                 Valor = request.Valor,
                 ValorPagado = 0,
@@ -54,7 +85,14 @@ public static class GastoEndpoints
             if (gasto == null) return Results.NotFound();
 
             if (request.Categoria != null)
-                gasto.Categorias = Enum.Parse<Categoria>(request.Categoria);
+            {
+                if (!Enum.TryParse<Categoria>(request.Categoria, true, out Categoria categoria))
+                {
+                    return Results.BadRequest("Categoría inválida");
+                }
+                gasto.Categorias = categoria;
+            }
+
             if (request.FechaFinal.HasValue)
                 gasto.FechaFinal = request.FechaFinal.Value;
             if (request.Descripcion != null)
@@ -106,6 +144,28 @@ public static class GastoEndpoints
     }
 }
 
+// DTOs
 public record CreateGastoRequest(int UserId, DateTime FechaFinal, string Categoria, string Descripcion, double Valor);
 public record UpdateGastoRequest(DateTime? FechaFinal = null, string? Categoria = null, string? Descripcion = null, double? Valor = null);
 public record PagoRequest(double Valor);
+public class GastoWithUserResponse
+{
+    public int IdGasto { get; set; }
+    public DateTime FechaRegristo { get; set; }
+    public DateTime FechaFinal { get; set; }
+    public int Categorias { get; set; }
+    public string Descripcion { get; set; }
+    public double Valor { get; set; }
+    public double ValorPagado { get; set; }
+    public int Estados { get; set; }
+    public int IdUsuario { get; set; }
+    public UsuarioResponse Usuario { get; set; }
+}
+
+public class UsuarioResponse
+{
+    public int IdUsuario { get; set; }
+    public string Nombre { get; set; }
+    public string Apellido { get; set; }
+    public string Email { get; set; }
+}

@@ -14,7 +14,7 @@ public class GastoService
         _usuarioService = usuarioService;
     }
 
-    public async Task<List<GastoResponse>> GetGastosAsync(string? preference = null)
+    public async Task<List<Gasto>> GetGastosAsync(string? preference = null)
     {
         try
         {
@@ -22,114 +22,170 @@ public class GastoService
             var url = $"gastos?userId={userId}";
             if (!string.IsNullOrEmpty(preference)) url += $"&preference={preference}";
 
-            return await _httpClient.GetFromJsonAsync<List<GastoResponse>>(url)
-                ?? new List<GastoResponse>();
+            var response = await _httpClient.GetFromJsonAsync<List<GastoResponse>>(url);
+            return response?.Select(MapGastoResponseToGasto).ToList() ?? new List<Gasto>();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new List<GastoResponse>();
+            Console.WriteLine($"Error obteniendo gastos: {ex.Message}");
+            return new List<Gasto>();
         }
     }
 
-    public async Task<GastoResponse?> CreateGastoAsync(DateTime fechaRegistro, DateTime fechaFinal, string categoria,
-        string descripcion, double valor)
+    public async Task<Gasto?> CreateGastoAsync(DateTime fechaFinal, Categoria categoria,
+        string empresa, string descripcion, double valor)
     {
-        var request = new CreateGastoRequest(
-            _usuarioService.CurrentUserId,
-            fechaRegistro,
-            fechaFinal,
-            categoria,
-            descripcion,
-            valor);
+        try
+        {
+            var userId = _usuarioService.CurrentUserId;
+            var descripcionCompleta = $"{empresa} - {descripcion}";
 
-        var response = await _httpClient.PostAsJsonAsync("gastos", request);
-        return response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<GastoResponse>()
-            : null;
+            var request = new CreateGastoRequest(
+                userId,
+                fechaFinal,
+                categoria.ToString(),
+                descripcionCompleta,
+                valor);
+
+            var response = await _httpClient.PostAsJsonAsync("gastos", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error al crear gasto: {error}");
+                return null;
+            }
+
+            var gastoResponse = await response.Content.ReadFromJsonAsync<GastoResponse>();
+            return gastoResponse != null ? MapGastoResponseToGasto(gastoResponse) : null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al crear gasto: {ex.Message}");
+            return null;
+        }
     }
 
-    public async Task<GastoResponse?> UpdateGastoAsync(int idGasto, DateTime? fechaRegistro = null, DateTime? fechaFinal = null,
+    public async Task<Gasto?> UpdateGastoAsync(int idGasto, DateTime? fechaFinal = null,
         Categoria? categoria = null, string? descripcion = null, double? valor = null)
     {
-        var request = new UpdateGastoRequest(fechaRegistro, fechaFinal, categoria, descripcion, valor);
-        var response = await _httpClient.PutAsJsonAsync(
-            $"gastos/{idGasto}?userId={_usuarioService.CurrentUserId}", request);
+        try
+        {
+            var userId = _usuarioService.CurrentUserId;
+            var request = new UpdateGastoRequest(
+                fechaFinal,
+                categoria?.ToString(),
+                descripcion,
+                valor);
 
-        return response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<GastoResponse>()
-            : null;
+            var response = await _httpClient.PutAsJsonAsync($"gastos/{idGasto}?userId={userId}", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error al actualizar gasto: {error}");
+                return null;
+            }
+
+            var gastoResponse = await response.Content.ReadFromJsonAsync<GastoResponse>();
+            return gastoResponse != null ? MapGastoResponseToGasto(gastoResponse) : null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar gasto: {ex.Message}");
+            return null;
+        }
     }
 
-    public async Task<GastoResponse?> PagarGastoAsync(int idGasto, double valorPago)
+    public async Task<Gasto?> PagarGastoAsync(int idGasto, double valorPago)
     {
-        var request = new PagoRequest(valorPago);
-        var response = await _httpClient.PostAsJsonAsync(
-            $"gastos/{idGasto}/pagos?userId={_usuarioService.CurrentUserId}", request);
+        try
+        {
+            var userId = _usuarioService.CurrentUserId;
+            var request = new PagoRequest(valorPago);
 
-        return response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<GastoResponse>()
-            : null;
+            var response = await _httpClient.PostAsJsonAsync(
+                $"gastos/{idGasto}/pagos?userId={userId}", request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error al realizar pago: {error}");
+                return null;
+            }
+
+            var gastoResponse = await response.Content.ReadFromJsonAsync<GastoResponse>();
+            return gastoResponse != null ? MapGastoResponseToGasto(gastoResponse) : null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al realizar pago: {ex.Message}");
+            return null;
+        }
     }
 
     public async Task<ResumenGastos?> GetResumenGastosAsync()
     {
         try
         {
+            var userId = _usuarioService.CurrentUserId;
             return await _httpClient.GetFromJsonAsync<ResumenGastos>(
-                $"gastos/resumen?userId={_usuarioService.CurrentUserId}");
+                $"gastos/resumen?userId={userId}");
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error al obtener resumen: {ex.Message}");
             return null;
         }
     }
+
     public async Task<bool> DeleteGastoAsync(int idGasto)
     {
         try
         {
             var userId = _usuarioService.CurrentUserId;
             var response = await _httpClient.DeleteAsync($"gastos/{idGasto}?userId={userId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error al eliminar gasto: {error}");
+            }
+
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
         {
-            // Manejo de errores
             Console.WriteLine($"Error al eliminar el gasto: {ex.Message}");
             return false;
         }
     }
-}
 
-public record CreateGastoRequest(int UserId, DateTime FechaRegistro, DateTime FechaFinal, string Categoria,
-    string Descripcion, double Valor);
-public record UpdateGastoRequest(DateTime? FechaRegistro, DateTime? FechaFinal, Categoria? Categoria, string? Descripcion,
-    double? Valor);
-public record GastoResponse( int IdGasto, DateTime FechaRegistro, DateTime FechaFinal, Categoria? Categoria, 
-    string Descripcion, double Valor, double ValorPagado, Estado Estado)
-{
-    // Propiedad calculada que devuelve el color correspondiente al estado
-    public string ColorEstado
+    private static Gasto MapGastoResponseToGasto(GastoResponse response)
     {
-        get
+        var gasto = new Gasto
         {
-            return Estado switch
+            IdGasto = response.IdGasto,
+            FechaRegristo = response.FechaRegristo,
+            FechaFinal = response.FechaFinal,
+            Categorias = (Categoria)response.Categorias,
+            Descripcion = response.Descripcion,
+            Valor = response.Valor,
+            ValorPagado = response.ValorPagado,
+            Estados = (Estado)response.Estados,
+            IdUsuario = response.IdUsuario
+        };
+
+        if (response.Usuario != null)
+        {
+            gasto.Usuario = new Usuario
             {
-                Estado.Finalizado => "#81C784",
-                Estado.Atrasado => "#E57373", // Rojo
-                Estado.Pendiente => "#FFD54F", // Amarillo
-                 // Verde
-                _ => "#FFFFFF" // Blanco por defecto
+                IdUsuario = response.Usuario.IdUsuario,
+                Nombre = response.Usuario.Nombre,
+                Apellido = response.Usuario.Apellido,
+                Email = response.Usuario.Email
             };
         }
+
+        gasto.AsignarColorEstado();
+        return gasto;
     }
 }
-public record PagoRequest(double Valor);
-
-public record ResumenGastos(
-    int TotalGastos,
-    int GastosPendientes,
-    int GastosAtrasados,
-    int GastosFinalizados,
-    double ValorTotal,
-    double ValorPagado,
-    double ValorPendiente);

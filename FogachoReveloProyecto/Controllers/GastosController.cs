@@ -21,7 +21,7 @@ namespace FogachoReveloProyecto.Controllers
         }
 
         // GET: Gastos/PaginaInicial
-        public async Task<IActionResult> PaginaInicial(string categoria)
+        public async Task<IActionResult> PaginaInicial(Categoria? categoria)
         {
             var userId = GetUserIdFromCookies();
             if (userId == null)
@@ -35,15 +35,18 @@ namespace FogachoReveloProyecto.Controllers
                 .Where(g => g.IdUsuario == userId)
                 .Include(g => g.Usuario);
 
-            if (!string.IsNullOrEmpty(categoria) && Enum.TryParse<Categoria>(categoria, true, out var categoriaFiltro))
+            if (categoria.HasValue)
             {
-                query = query.Where(g => g.Categorias == categoriaFiltro);
+                query = query.Where(g => g.Categorias == categoria.Value);
             }
 
             ViewBag.SubtotalGastos = await query.SumAsync(g => g.Valor ?? 0);
             ViewBag.SubtotalValorPagado = await query.SumAsync(g => g.ValorPagado);
             ViewBag.Total = ViewBag.SubtotalGastos - ViewBag.SubtotalValorPagado;
             ViewBag.NombreUsuario = nombreUsuario;
+            ViewBag.Categorias = Enum.GetValues(typeof(Categoria))
+                .Cast<Categoria>()
+                .Select(c => new { Value = c, Text = c.ToString() });
 
             return View(await query.ToListAsync());
         }
@@ -56,6 +59,10 @@ namespace FogachoReveloProyecto.Controllers
             {
                 return RedirectToAction("Login", "Usuarios");
             }
+
+            ViewBag.Categorias = Enum.GetValues(typeof(Categoria))
+                .Cast<Categoria>()
+                .Select(c => new { Value = c, Text = c.ToString() });
 
             return View(new Gasto
             {
@@ -93,6 +100,11 @@ namespace FogachoReveloProyecto.Controllers
                     ModelState.AddModelError("", $"Error al crear el gasto: {ex.Message}");
                 }
             }
+
+            ViewBag.Categorias = Enum.GetValues(typeof(Categoria))
+                .Cast<Categoria>()
+                .Select(c => new { Value = c, Text = c.ToString() });
+
             return View(gasto);
         }
 
@@ -112,6 +124,11 @@ namespace FogachoReveloProyecto.Controllers
             {
                 return NotFound();
             }
+
+            ViewBag.Categorias = Enum.GetValues(typeof(Categoria))
+                .Cast<Categoria>()
+                .Select(c => new { Value = c, Text = c.ToString() });
+
             return View(gasto);
         }
 
@@ -152,6 +169,11 @@ namespace FogachoReveloProyecto.Controllers
                     ModelState.AddModelError("", $"Error al actualizar: {ex.Message}");
                 }
             }
+
+            ViewBag.Categorias = Enum.GetValues(typeof(Categoria))
+                .Cast<Categoria>()
+                .Select(c => new { Value = c, Text = c.ToString() });
+
             return View(gasto);
         }
 

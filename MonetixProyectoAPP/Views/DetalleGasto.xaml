@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MonetixProyectoAPP.ViewModels"
              x:Class="MonetixProyectoAPP.Views.DetalleGasto"
-             Title="DetalleGasto"
+             x:DataType="vm:DetalleGastoViewModel"
+             Title="Detalle del Gasto"
              BackgroundColor="#EFEDE5">
-
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Atrás" 
-                     IconImageSource="back_icon.png" 
-                     Clicked="OnBackClicked"/>
-    </ContentPage.ToolbarItems>
 
     <ScrollView>
         <StackLayout Padding="20" Spacing="10">
@@ -17,7 +13,7 @@
                    HeightRequest="30"
                    HorizontalOptions="End">
                 <Image.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnBackClicked" />
+                    <TapGestureRecognizer Command="{Binding NavigateBackCommand}"/>
                 </Image.GestureRecognizers>
             </Image>
 
@@ -39,20 +35,31 @@
                        WidthRequest="35" />
             </HorizontalStackLayout>
 
-            <HorizontalStackLayout HorizontalOptions="End">
-                <Label Text="{Binding Gasto.Estado}"
+            <Frame BackgroundColor="{Binding Gasto.ColorEstado}"
+                   CornerRadius="10"
+                   Padding="15"
+                   Margin="0,10">
+                <Label Text="{Binding CategoriaTexto}"
                        FontSize="16"
                        FontFamily="Koulen"
-                       TextColor="Black" />
-            </HorizontalStackLayout>
+                       TextColor="White"
+                       HorizontalOptions="Center"/>
+            </Frame>
 
-            <VerticalStackLayout Padding="20" Spacing="15">
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                             IsVisible="{Binding IsLoading}"
+                             Color="#809671"
+                             HeightRequest="50"/>
+
+            <VerticalStackLayout Padding="20" 
+                               Spacing="15" 
+                               IsVisible="{Binding IsNotLoading}">
                 <Label Text="Fecha Inicial"
                        FontAttributes="Bold" 
                        FontSize="18" 
                        FontFamily="Koulen"
                        TextColor="Black" />
-                <Label Text="{Binding Gasto.FechaRegistro, StringFormat='{0:dd/MMM/yyyy}'}" 
+                <Label Text="{Binding Gasto.FechaRegristo, StringFormat='{0:dd/MMM/yyyy}'}" 
                        FontSize="16"
                        FontFamily="Koulen"
                        TextColor="Black" />
@@ -67,55 +74,78 @@
                        FontFamily="Koulen"
                        TextColor="Black" />
 
-                <Label Text="Categoria"
+                <Label Text="Categoría"
                        FontAttributes="Bold" 
                        FontSize="18" 
                        FontFamily="Koulen"
                        TextColor="Black" />
-                <Label Text="{Binding Gasto.Categoria}" 
+                <Label Text="{Binding CategoriaTexto}" 
                        FontSize="16"
                        FontFamily="Koulen"
                        TextColor="Black" />
 
-                <Label Text="Descripcion"
+                <Label Text="Empresa"
                        FontAttributes="Bold" 
                        FontSize="18" 
                        FontFamily="Koulen"
                        TextColor="Black" />
-                <Label Text="{Binding Gasto.Descripcion}" 
+                <Label Text="{Binding Empresa}" 
                        FontSize="16"
                        FontFamily="Koulen"
                        TextColor="Black" />
 
-                <Label Text="Valor Total"
+                <Label Text="Descripción"
                        FontAttributes="Bold" 
                        FontSize="18" 
                        FontFamily="Koulen"
                        TextColor="Black" />
-                <Label Text="{Binding Gasto.Valor, StringFormat='${0:F2}'}" 
-                       FontSize="16" 
-                       FontFamily="Koulen"
-                       TextColor="Black" />
-
-                <Label Text="Valor Pagado"
-                       FontAttributes="Bold" 
-                       FontSize="18" 
-                       FontFamily="Koulen"
-                       TextColor="Black" />
-                <Label Text="{Binding Gasto.ValorPagado, StringFormat='${0:F2}'}" 
-                       FontSize="16" 
-                       FontFamily="Koulen"
-                       TextColor="Black" />
-
-                <Label Text="Valor Pendiente"
-                       FontAttributes="Bold"
-                       FontSize="18"
-                       FontFamily="Koulen"
-                       TextColor="Black" />
-                <Label Text="{Binding ValorPendiente, StringFormat='${0:F2}'}"
+                <Label Text="{Binding Descripcion}" 
                        FontSize="16"
                        FontFamily="Koulen"
                        TextColor="Black" />
+
+                <Frame BackgroundColor="White"
+                       CornerRadius="10"
+                       Padding="15"
+                       Margin="0,10">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                        <StackLayout Grid.Row="0">
+                            <Label Text="Valor Total"
+                                   FontAttributes="Bold" 
+                                   FontSize="18" 
+                                   FontFamily="Koulen"
+                                   TextColor="Black" />
+                            <Label Text="{Binding Gasto.Valor, StringFormat='${0:N2}'}" 
+                                   FontSize="16" 
+                                   FontFamily="Koulen"
+                                   TextColor="#849671" />
+                        </StackLayout>
+
+                        <StackLayout Grid.Row="1">
+                            <Label Text="Valor Pagado"
+                                   FontAttributes="Bold" 
+                                   FontSize="18" 
+                                   FontFamily="Koulen"
+                                   TextColor="Black" />
+                            <Label Text="{Binding Gasto.ValorPagado, StringFormat='${0:N2}'}" 
+                                   FontSize="16" 
+                                   FontFamily="Koulen"
+                                   TextColor="#81C784" />
+                        </StackLayout>
+
+                        <StackLayout Grid.Row="2">
+                            <Label Text="Valor Pendiente"
+                                   FontAttributes="Bold"
+                                   FontSize="18"
+                                   FontFamily="Koulen"
+                                   TextColor="Black" />
+                            <Label Text="{Binding ValorPendiente, StringFormat='${0:N2}'}"
+                                   FontSize="16"
+                                   FontFamily="Koulen"
+                                   TextColor="#E57373" />
+                        </StackLayout>
+                    </Grid>
+                </Frame>
 
                 <StackLayout Orientation="Horizontal" 
                            Spacing="20" 
@@ -138,7 +168,8 @@
                             CornerRadius="25"
                             HeightRequest="50"
                             WidthRequest="120"
-                            Command="{Binding PagarGastoCommand}" />
+                            Command="{Binding PagarGastoCommand}"
+                            IsEnabled="{Binding IsNotLoading}" />
                 </StackLayout>
             </VerticalStackLayout>
         </StackLayout>

@@ -4,24 +4,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using MonetixFogachoReveloAPI.Data;
 
 #nullable disable
 
-namespace FogachoReveloProyecto.Migrations
+namespace MonetixFogachoReveloAPI.Migrations
 {
-    [DbContext(typeof(FogachoReveloDataBase))]
-    partial class FogachoReveloDataBaseModelSnapshot : ModelSnapshot
+    [DbContext(typeof(FogachoReveloDataContext))]
+    partial class FogachoReveloDataContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FogachoReveloProyecto.Models.Gasto", b =>
+            modelBuilder.Entity("MonetixFogachoReveloAPI.Data.Models.Gasto", b =>
                 {
                     b.Property<int>("IdGasto")
                         .ValueGeneratedOnAdd()
@@ -29,17 +30,15 @@ namespace FogachoReveloProyecto.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdGasto"));
 
-                    b.Property<string>("Categorias")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Categorias")
+                        .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Estados")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Estados")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("FechaFinal")
                         .HasColumnType("datetime2");
@@ -50,8 +49,7 @@ namespace FogachoReveloProyecto.Migrations
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
-                    b.Property<double?>("Valor")
-                        .IsRequired()
+                    b.Property<double>("Valor")
                         .HasColumnType("float");
 
                     b.Property<double>("ValorPagado")
@@ -61,10 +59,10 @@ namespace FogachoReveloProyecto.Migrations
 
                     b.HasIndex("IdUsuario");
 
-                    b.ToTable("Gasto");
+                    b.ToTable("Gasto", (string)null);
                 });
 
-            modelBuilder.Entity("FogachoReveloProyecto.Models.Usuario", b =>
+            modelBuilder.Entity("MonetixFogachoReveloAPI.Data.Models.Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
                         .ValueGeneratedOnAdd()
@@ -90,21 +88,21 @@ namespace FogachoReveloProyecto.Migrations
 
                     b.HasKey("IdUsuario");
 
-                    b.ToTable("Usuario");
+                    b.ToTable("Usuario", (string)null);
                 });
 
-            modelBuilder.Entity("FogachoReveloProyecto.Models.Gasto", b =>
+            modelBuilder.Entity("MonetixFogachoReveloAPI.Data.Models.Gasto", b =>
                 {
-                    b.HasOne("FogachoReveloProyecto.Models.Usuario", "Usuario")
+                    b.HasOne("MonetixFogachoReveloAPI.Data.Models.Usuario", "Usuario")
                         .WithMany("Gastos")
                         .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("FogachoReveloProyecto.Models.Usuario", b =>
+            modelBuilder.Entity("MonetixFogachoReveloAPI.Data.Models.Usuario", b =>
                 {
                     b.Navigation("Gastos");
                 });

@@ -1,69 +1,172 @@
 ﻿using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using MonetixProyectoAPP.Services;
+using System.Globalization;
+using MonetixProyectoAPP.Models;
 
 namespace MonetixProyectoAPP.ViewModels;
 
 public class DetalleGastoViewModel : BaseViewModel
 {
     private readonly GastoService _gastoService;
-    private GastoResponse _gasto;
+    private readonly int _gastoId;
+    private Gasto _gasto;
     private bool _isLoading;
+    private string _empresa = string.Empty;
+    private string _descripcion = string.Empty;
 
-
-    public GastoResponse Gasto
+    public Gasto Gasto
     {
         get => _gasto;
         set
         {
-            SetProperty(ref _gasto, value);
-            OnPropertyChanged(nameof(ValorPendiente));
+            if (SetProperty(ref _gasto, value))
+            {
+                OnPropertyChanged(nameof(ValorPendiente));
+                OnPropertyChanged(nameof(EstaFinalizado));
+                OnPropertyChanged(nameof(CategoriaTexto));
+                OnPropertyChanged(nameof(EstadoTexto));
+                OnPropertyChanged(nameof(ColorEstado));
+                if (value != null)
+                {
+                    ExtraerEmpresaYDescripcion(value.Descripcion);
+                }
+            }
         }
     }
+
+    public string Empresa
+    {
+        get => _empresa;
+        private set => SetProperty(ref _empresa, value);
+    }
+
+    public string Descripcion
+    {
+        get => _descripcion;
+        private set => SetProperty(ref _descripcion, value);
+    }
+
+    public string CategoriaTexto
+    {
+        get
+        {
+            if (Gasto?.Categorias == null) return "Desconocido";
+            return Gasto.Categorias switch
+            {
+                Categoria.Entretenimiento => "Entretenimiento",
+                Categoria.Comida => "Comida",
+                Categoria.Transporte => "Transporte",
+                Categoria.Ropa => "Ropa",
+                Categoria.Educacion => "Educación",
+                Categoria.Salud => "Salud",
+                Categoria.ServiciosBasicos => "Servicios Básicos",
+                Categoria.Otro => "Otro",
+                _ => "Desconocido"
+            };
+        }
+    }
+
+    public string EstadoTexto
+    {
+        get
+        {
+            return Gasto?.Estados switch
+            {
+                Estado.Atrasado => "Atrasado",
+                Estado.Finalizado => "Finalizado",
+                Estado.Pendiente => "Pendiente",
+                _ => "Desconocido"
+            };
+        }
+    }
+
+    public string ColorEstado => Gasto?.ColorEstado ?? "#FFFFFF";
 
     public bool IsLoading
     {
         get => _isLoading;
-        set => SetProperty(ref _isLoading, value);
+        set
+        {
+            if (SetProperty(ref _isLoading, value))
+            {
+                OnPropertyChanged(nameof(IsNotLoading));
+                ((Command)PagarGastoCommand).ChangeCanExecute();
+            }
+        }
     }
 
-    public double ValorPendiente => Gasto?.Valor - Gasto?.ValorPagado ?? 0;
+    public bool IsNotLoading => !IsLoading;
 
+    public double ValorPendiente => Math.Max(0, Gasto?.Valor ?? 0 - Gasto?.ValorPagado ?? 0);
+
+    public bool EstaFinalizado => Gasto?.Estados == Estado.Finalizado;
+
+    public ICommand RefreshCommand { get; }
     public ICommand PagarGastoCommand { get; }
     public ICommand EliminarGastoCommand { get; }
+    public ICommand NavigateBackCommand { get; }
 
     public DetalleGastoViewModel(GastoService gastoService, int gastoId)
     {
         _gastoService = gastoService;
-        PagarGastoCommand = new Command(async () => await PagarGastoAsync());
-        EliminarGastoCommand = new Command(async () => await EliminarGastoAsync());
+        _gastoId = gastoId;
 
-        Task.Run(async () => await CargarGasto(gastoId));
+        RefreshCommand = new Command(async () => await CargarGasto());
+        PagarGastoCommand = new Command(
+            async () => await PagarGastoAsync(),
+            () => !EstaFinalizado && !IsLoading
+        );
+        EliminarGastoCommand = new Command(async () => await EliminarGastoAsync());
+        NavigateBackCommand = new Command(async () => await Shell.Current.GoToAsync(".."));
+
+        Task.Run(CargarGasto);
     }
 
-    private async Task CargarGasto(int gastoId)
+    private void ExtraerEmpresaYDescripcion(string? descripcionCompleta)
     {
+        if (string.IsNullOrEmpty(descripcionCompleta))
+        {
+            Empresa = "Sin empresa";
+            Descripcion = "Sin descripción";
+            return;
+        }
+
+        var partes = descripcionCompleta.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length >= 2)
+        {
+            Empresa = partes[0].Trim();
+            Descripcion = string.Join(" - ", partes.Skip(1)).Trim();
+        }
+        else
+        {
+            Empresa = "Otros";
+            Descripcion = descripcionCompleta.Trim();
+        }
+    }
+
+    private async Task CargarGasto()
+    {
+        if (IsLoading) return;
+
         try
         {
             IsLoading = true;
             var gastos = await _gastoService.GetGastosAsync();
-            Gasto = gastos.FirstOrDefault(g => g.IdGasto == gastoId);
+            var gasto = gastos.FirstOrDefault(g => g.IdGasto == _gastoId);
 
-            if (Gasto == null)
+            if (gasto == null)
             {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    "No se encontró el gasto",
-                    "OK");
-                await Shell.Current.GoToAsync("..");
+                await MostrarError("No se encontró el gasto", true);
+                return;
             }
+
+            gasto.ValidarValor(); // Asegura que el estado y color estén actualizados
+            Gasto = gasto;
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert(
-                "Error",
-                $"Error al cargar el gasto: {ex.Message}",
-                "OK");
+            await MostrarError($"Error al cargar el gasto: {ex.Message}");
         }
         finally
         {
@@ -73,25 +176,38 @@ public class DetalleGastoViewModel : BaseViewModel
 
     private async Task PagarGastoAsync()
     {
+        if (Gasto == null || EstaFinalizado) return;
+
         var valorPagado = await Application.Current.MainPage.DisplayPromptAsync(
             "Pagar Gasto",
-            "Ingrese el valor a pagar",
+            $"Valor pendiente: {ValorPendiente.ToString("C", new CultureInfo("es-EC"))}\nIngrese el valor a pagar:",
             "Pagar",
             "Cancelar",
             keyboard: Keyboard.Numeric);
 
-        if (!double.TryParse(valorPagado, out double valor))
+        if (string.IsNullOrEmpty(valorPagado)) return;
+
+        if (!double.TryParse(valorPagado, NumberStyles.Any, CultureInfo.InvariantCulture, out double valor))
         {
-            await Application.Current.MainPage.DisplayAlert(
-                "Error",
-                "El valor ingresado no es válido",
-                "OK");
+            await MostrarError("El valor ingresado no es válido");
+            return;
+        }
+
+        if (valor <= 0)
+        {
+            await MostrarError("El valor a pagar debe ser mayor a cero");
+            return;
+        }
+
+        if (valor > ValorPendiente)
+        {
+            await MostrarError("El valor a pagar no puede ser mayor al valor pendiente");
             return;
         }
 
         var confirmar = await Application.Current.MainPage.DisplayAlert(
             "Confirmar Pago",
-            $"¿Está seguro de pagar {valor:C2}?",
+            $"¿Está seguro de pagar {valor.ToString("C", new CultureInfo("es-EC"))}?",
             "Sí",
             "No");
 
@@ -104,6 +220,7 @@ public class DetalleGastoViewModel : BaseViewModel
 
             if (resultado != null)
             {
+                resultado.ValidarValor(); // Asegura que el estado y color estén actualizados
                 Gasto = resultado;
                 await Application.Current.MainPage.DisplayAlert(
                     "Éxito",
@@ -112,26 +229,23 @@ public class DetalleGastoViewModel : BaseViewModel
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    "No se pudo procesar el pago",
-                    "OK");
+                await MostrarError("No se pudo procesar el pago");
             }
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert(
-                "Error",
-                $"Error al procesar el pago: {ex.Message}",
-                "OK");
+            await MostrarError($"Error al procesar el pago: {ex.Message}");
         }
         finally
         {
             IsLoading = false;
         }
     }
+
     private async Task EliminarGastoAsync()
     {
+        if (Gasto == null) return;
+
         bool confirmar = await Application.Current.MainPage.DisplayAlert(
             "Confirmar Eliminación",
             "¿Está seguro de eliminar este gasto?",
@@ -139,35 +253,42 @@ public class DetalleGastoViewModel : BaseViewModel
             "No"
         );
 
-        if (confirmar)
+        if (!confirmar) return;
+
+        try
         {
-            try
-            {
-                IsLoading = true;  // Mostrar un indicador de carga, si es necesario
+            IsLoading = true;
+            bool eliminado = await _gastoService.DeleteGastoAsync(Gasto.IdGasto);
 
-                // Llamar al servicio de eliminación
-                bool eliminado = await _gastoService.DeleteGastoAsync(Gasto.IdGasto);
+            if (eliminado)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Éxito",
+                    "Gasto eliminado correctamente",
+                    "OK");
+                await Shell.Current.GoToAsync("///PaginaInicial");
+            }
+            else
+            {
+                await MostrarError("No se pudo eliminar el gasto");
+            }
+        }
+        catch (Exception ex)
+        {
+            await MostrarError($"Error al eliminar el gasto: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 
-                if (eliminado)
-                {
-                    // Si la eliminación fue exitosa
-                    await Application.Current.MainPage.DisplayAlert("Éxito", "Gasto eliminado correctamente", "OK");
-                    await Shell.Current.GoToAsync("///PaginaInicial");  // Redirigir a la página inicial
-                }
-                else
-                {
-                    // Si no se pudo eliminar
-                    await Application.Current.MainPage.DisplayAlert("Error", "No se pudo eliminar el gasto", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Error al eliminar el gasto: {ex.Message}", "OK");
-            }
-            finally
-            {
-                IsLoading = false;  // Ocultar el indicador de carga
-            }
+    private async Task MostrarError(string mensaje, bool navegar = false)
+    {
+        await Application.Current.MainPage.DisplayAlert("Error", mensaje, "OK");
+        if (navegar)
+        {
+            await Shell.Current.GoToAsync("..");
         }
     }
 }

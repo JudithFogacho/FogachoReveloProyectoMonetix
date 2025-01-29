@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FogachoReveloProyecto", "FogachoReveloProyecto\FogachoReveloProyecto.csproj", "{FB5406C0-8AE1-42DA-9BC9-72DCCA382372}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57603F74-67AC-409D-B6D0-96669CE3068D} = {57603F74-67AC-409D-B6D0-96669CE3068D}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonetixFogachoReveloAPI", "MonetixFogachoReveloAPI\MonetixFogachoReveloAPI.csproj", "{57603F74-67AC-409D-B6D0-96669CE3068D}"
 EndProject

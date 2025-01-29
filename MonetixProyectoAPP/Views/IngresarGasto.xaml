@@ -1,104 +1,156 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MonetixProyectoAPP.ViewModels"
              x:Class="MonetixProyectoAPP.Views.IngresarGasto"
-             Title="IngresarGasto"
+             x:DataType="vm:IngresarGastoViewModel"
+             Title="Ingresar Gasto"
              BackgroundColor="#EFEDE5">
 
     <ScrollView>
-        <StackLayout Padding="20" Spacing="10">
-            <Label Text="MONETIX"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   FontFamily="Koulen"
-                   HorizontalOptions="Center"
-                   TextColor="#809671" />
+        <Grid RowDefinitions="Auto,*" Padding="20">
+            <ActivityIndicator Grid.RowSpan="2"
+                             IsRunning="{Binding IsLoading}"
+                             IsVisible="{Binding IsLoading}"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"
+                             Color="#809671"/>
 
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-                <Label Text="INGRESAR GASTO"
-                       FontSize="36"
+            <StackLayout Grid.Row="1" 
+                        Spacing="15" 
+                        IsEnabled="{Binding IsNotLoading}">
+
+                <!-- Encabezado -->
+                <Label Text="MONETIX"
+                       FontSize="28"
                        FontAttributes="Bold"
                        FontFamily="Koulen"
-                       TextColor="#000000" />
-                <Image Source="cerdito.png"
-                       HeightRequest="38"
-                       WidthRequest="38" />
-            </HorizontalStackLayout>
+                       HorizontalOptions="Center"
+                       TextColor="#809671" />
 
-            <Label Text="Fecha Inicial"
-                   FontSize="26"
-                   FontFamily="Koulen"
-                   FontAttributes="Bold"
-                   TextColor="Black"/>
-            <DatePicker Date="{Binding FechaRegistro}"
-                       TextColor="#000000"
-                       BackgroundColor="#FFFFFF" />
+                <HorizontalStackLayout HorizontalOptions="Center" 
+                                     Spacing="15">
+                    <Label Text="INGRESAR GASTO"
+                           FontSize="36"
+                           FontAttributes="Bold"
+                           FontFamily="Koulen"
+                           TextColor="#000000" />
+                    <Image Source="cerdito.png"
+                           HeightRequest="40"
+                           WidthRequest="40" />
+                </HorizontalStackLayout>
 
-            <Label Text="Fecha Final"
-                   FontSize="26"
-                   FontFamily="Koulen"
-                   FontAttributes="Bold"
-                   TextColor="Black"/>
-            <DatePicker Date="{Binding FechaFinal}"
-                       TextColor="#000000"
-                       BackgroundColor="#FFFFFF" />
+                <!-- Formulario -->
+                <Frame BackgroundColor="White" 
+                       Padding="20" 
+                       CornerRadius="15" 
+                       Margin="0,10"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="15">
+                        <!-- Fecha Final -->
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Fecha Final"
+                                   FontSize="20"
+                                   FontFamily="Koulen"
+                                   FontAttributes="Bold"
+                                   TextColor="Black"/>
+                            <DatePicker Date="{Binding FechaFinal}"
+                                      MinimumDate="{Binding FechaMinima}"
+                                      TextColor="#000000"
+                                      BackgroundColor="#F5F5F5"/>
+                        </VerticalStackLayout>
 
-            <Label Text="CATEGORÍA"
-                   FontSize="26"
-                   FontFamily="Koulen"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
-            <Picker ItemsSource="{Binding Categorias}"
-                    SelectedItem="{Binding CategoriaSeleccionada}"
-                    Title="Seleccione una categoría"
-                    TitleColor="#5A5A5A"
-                    TextColor="#000000"
-                    BackgroundColor="#FFFFFF" />
+                        <!-- Categoría -->
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Categoría"
+                                   FontSize="20"
+                                   FontFamily="Koulen"
+                                   FontAttributes="Bold"
+                                   TextColor="Black"/>
+                            <Picker ItemsSource="{Binding Categorias}"
+                                    ItemDisplayBinding="{Binding Nombre}"
+                                    SelectedItem="{Binding CategoriaSeleccionada}"
+                                    Title="Seleccione una categoría"
+                                    TitleColor="#757575"
+                                    TextColor="#000000"
+                                    BackgroundColor="#F5F5F5"/>
+                        </VerticalStackLayout>
 
-            <Label Text="DESCRIPCIÓN"
-                   FontFamily="Koulen"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
-            <Entry Text="{Binding Descripcion}"
-                   Placeholder="Ingrese la descripción"
-                   TextColor="#000000"
-                   BackgroundColor="#FFFFFF" />
+                        <!-- Empresa -->
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Empresa"
+                                   FontSize="20"
+                                   FontFamily="Koulen"
+                                   FontAttributes="Bold"
+                                   TextColor="Black"/>
+                            <Picker ItemsSource="{Binding Empresas}"
+                                    SelectedItem="{Binding EmpresaSeleccionada}"
+                                    Title="Seleccione una empresa"
+                                    TitleColor="#757575"
+                                    TextColor="#000000"
+                                    BackgroundColor="#F5F5F5"
+                                    IsEnabled="{Binding CategoriaSeleccionada, Converter={StaticResource NotNullConverter}}"/>
+                        </VerticalStackLayout>
 
-            <Label Text="VALOR"
-                   FontFamily="Koulen"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   TextColor="Black" />
-            <Entry Text="{Binding Valor}"
-                   Placeholder="Ingrese el valor"
-                   Keyboard="Numeric"
-                   TextColor="#000000"
-                   BackgroundColor="#FFFFFF" />
+                        <!-- Descripción -->
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Descripción"
+                                   FontSize="20"
+                                   FontFamily="Koulen"
+                                   FontAttributes="Bold"
+                                   TextColor="Black"/>
+                            <Entry Text="{Binding Descripcion}"
+                                   Placeholder="Ingrese la descripción"
+                                   PlaceholderColor="#757575"
+                                   TextColor="#000000"
+                                   BackgroundColor="#F5F5F5"
+                                   MaxLength="100"/>
+                        </VerticalStackLayout>
 
-            <StackLayout Orientation="Horizontal" 
-                        Spacing="20" 
-                        HorizontalOptions="Center"
-                        Margin="0,20,0,0">
-                <Button Text="CANCELAR"
-                        TextColor="#FFFFFF"
-                        FontFamily="Koulen"
-                        FontSize="22"
-                        BackgroundColor="#95928F"
-                        CornerRadius="25"
-                        HeightRequest="50"
-                        WidthRequest="120"
-                        Clicked="OnCancelarClicked" />
-                <Button Text="CREAR"
-                        FontSize="22"
-                        TextColor="#FFFFFF"
-                        FontFamily="Koulen"
-                        BackgroundColor="#849671"
-                        CornerRadius="25"
-                        HeightRequest="50"
-                        WidthRequest="120"
-                        Command="{Binding GuardarGastoCommand}" />
+                        <!-- Valor -->
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Valor"
+                                   FontSize="20"
+                                   FontFamily="Koulen"
+                                   FontAttributes="Bold"
+                                   TextColor="Black"/>
+                            <Entry Text="{Binding Valor}"
+                                   Placeholder="Ingrese el valor"
+                                   PlaceholderColor="#757575"
+                                   Keyboard="Numeric"
+                                   TextColor="#000000"
+                                   BackgroundColor="#F5F5F5"
+                                   MaxLength="10"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Botones -->
+                <StackLayout Orientation="Horizontal" 
+                            Spacing="20" 
+                            HorizontalOptions="Center"
+                            Margin="0,10,0,20">
+                    <Button Text="CANCELAR"
+                            TextColor="#FFFFFF"
+                            FontFamily="Koulen"
+                            FontSize="22"
+                            BackgroundColor="#95928F"
+                            CornerRadius="25"
+                            HeightRequest="50"
+                            WidthRequest="120"
+                            Clicked="OnCancelarClicked" />
+                    <Button Text="CREAR"
+                            FontSize="22"
+                            TextColor="#FFFFFF"
+                            FontFamily="Koulen"
+                            BackgroundColor="#849671"
+                            CornerRadius="25"
+                            HeightRequest="50"
+                            WidthRequest="120"
+                            Command="{Binding GuardarGastoCommand}"
+                            IsEnabled="{Binding IsNotLoading}" />
+                </StackLayout>
             </StackLayout>
-        </StackLayout>
+        </Grid>
     </ScrollView>
 </ContentPage>

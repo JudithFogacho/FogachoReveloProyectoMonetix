@@ -1,4 +1,3 @@
-using Microsoft.Maui.Controls;
 using MonetixProyectoAPP.Models;
 using MonetixProyectoAPP.Services;
 using MonetixProyectoAPP.ViewModels;
@@ -16,28 +15,83 @@ public partial class PaginaInicial : ContentPage
         BindingContext = _viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.RefreshCommand.Execute(null);
+        await Task.Delay(100); // Give UI time to render
+        await RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        try
+        {
+            _viewModel.RefreshCommand.Execute(null);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(
+                "Error",
+                "No se pudieron cargar los gastos: " + ex.Message,
+                "OK");
+        }
     }
 
     private async void OnGastoSeleccionado(object sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is GastoResponse gastoSeleccionado)
+        if (e.CurrentSelection.FirstOrDefault() is Gasto gastoSeleccionado)
         {
-            await Shell.Current.GoToAsync($"DetalleGasto?gastoId={gastoSeleccionado.IdGasto}");
-            ((CollectionView)sender).SelectedItem = null;
+            try
+            {
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "gastoId", gastoSeleccionado.IdGasto }
+                };
+
+                await Shell.Current.GoToAsync("DetalleGasto", navigationParameter);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert(
+                    "Error",
+                    "No se pudo abrir el detalle del gasto: " + ex.Message,
+                    "OK");
+            }
+            finally
+            {
+                // Clear selection
+                ((CollectionView)sender).SelectedItem = null;
+            }
         }
     }
 
     private async void OnIngresarGastoClicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("IngresarGasto");
+        try
+        {
+            await Shell.Current.GoToAsync("IngresarGasto");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(
+                "Error",
+                "No se pudo abrir la página de ingreso: " + ex.Message,
+                "OK");
+        }
     }
 
     private async void OnTiendasFavoritasClicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("///TiendasFavoritasGuardadas");
+        try
+        {
+            await Shell.Current.GoToAsync("///TiendasFavoritasGuardadas");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(
+                "Error",
+                "No se pudo abrir la página de tiendas favoritas: " + ex.Message,
+                "OK");
+        }
     }
 }

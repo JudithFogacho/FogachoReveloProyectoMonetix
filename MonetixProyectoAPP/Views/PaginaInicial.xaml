@@ -2,14 +2,13 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MonetixProyectoAPP.ViewModels"
-             xmlns:views="clr-namespace:MonetixProyectoAPP.Views"
-             xmlns:services="clr-namespace:MonetixProyectoAPP.Services"
+             xmlns:models="clr-namespace:MonetixProyectoAPP.Models"
              x:Class="MonetixProyectoAPP.Views.PaginaInicial"
              x:DataType="vm:PaginaInicialViewModel"
              Title="MONETIX"
              BackgroundColor="#EFEDE5">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*" Padding="0">
         <RefreshView Grid.Row="1" 
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsLoading}">
@@ -21,118 +20,164 @@
                            TextColor="#809671"
                            FontFamily="Koulen" />
 
-                    <HorizontalStackLayout Spacing="10" Padding="0,10" HorizontalOptions="Center">
-                        <SearchBar Placeholder="Buscar categoría"
+                    <!-- Buscador y Filtros -->
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Padding="0,10">
+                        <SearchBar Grid.Row="0" Grid.Column="0"
+                                 Placeholder="Buscar gasto..."
+                                 PlaceholderColor="Gray"
                                  Text="{Binding TextoBusqueda}"
                                  FontSize="14"
                                  FontFamily="Koulen"
                                  BackgroundColor="#F2F2F2"
-                                 TextColor="Black"
-                                 PlaceholderColor="Gray"/>
+                                 TextColor="Black"/>
 
-                        <ImageButton Source="cerdito.png"
+                        <ImageButton Grid.Row="0" Grid.Column="1"
+                                   Source="cerdito.png"
                                    WidthRequest="30"
                                    HeightRequest="30"
                                    BackgroundColor="#849671"
-                                   CornerRadius="20"/>
-                    </HorizontalStackLayout>
+                                   CornerRadius="20"
+                                   Margin="10,0,0,0"/>
 
-                    <Label Text="GASTOS" 
+                        <Picker Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                ItemsSource="{Binding Categorias}"
+                                ItemDisplayBinding="{Binding Nombre}"
+                                SelectedItem="{Binding CategoriaSeleccionada}"
+                                Title="Filtrar por Categoría"
+                                FontFamily="Koulen"
+                                BackgroundColor="#F2F2F2"
+                                TextColor="Black"
+                                Margin="0,10,0,0"/>
+                    </Grid>
+
+                    <!-- Estados -->
+                    <Label Text="RESUMEN DE GASTOS" 
                            FontSize="26" 
                            FontFamily="Koulen" 
                            TextColor="Black"/>
 
                     <HorizontalStackLayout Spacing="10" Padding="0,5" HorizontalOptions="Center">
                         <Frame CornerRadius="10" BackgroundColor="#E57373" Padding="10" HasShadow="False">
-                            <Label Text="{Binding GastosAtrasados, StringFormat='Atrasado ({0})'}"
+                            <Label Text="{Binding GastosAtrasados, StringFormat='Atrasados: {0}'}"
                                    FontSize="14"
                                    FontFamily="Koulen"
                                    TextColor="White"/>
                         </Frame>
                         <Frame CornerRadius="10" BackgroundColor="#FFD54F" Padding="10" HasShadow="False">
-                            <Label Text="{Binding GastosPendientes, StringFormat='Pendiente ({0})'}"
+                            <Label Text="{Binding GastosPendientes, StringFormat='Pendientes: {0}'}"
                                    FontSize="14"
                                    FontFamily="Koulen"
                                    TextColor="White"/>
                         </Frame>
                         <Frame CornerRadius="10" BackgroundColor="#81C784" Padding="10" HasShadow="False">
-                            <Label Text="{Binding GastosFinalizados, StringFormat='Finalizado ({0})'}"
+                            <Label Text="{Binding GastosFinalizados, StringFormat='Finalizados: {0}'}"
                                    FontSize="14"
                                    FontFamily="Koulen"
                                    TextColor="White"/>
                         </Frame>
                     </HorizontalStackLayout>
 
-                    <Frame BackgroundColor="#EFEDE5" BorderColor="#EFEDE5" >
+                    <!-- Lista de Gastos -->
+                    <Frame BackgroundColor="#EFEDE5" BorderColor="#EFEDE5" Padding="0">
                         <CollectionView ItemsSource="{Binding GastosFiltrados}"
                                       HeightRequest="400"
                                       SelectionMode="Single"
                                       SelectionChanged="OnGastoSeleccionado">
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="services:GastoResponse">
-                                    <Frame BackgroundColor="White"
-                                           CornerRadius="10"
-                                           Padding="10"
-                                           Margin="0,5"
-                                           HasShadow="True">
-                                        <Grid ColumnDefinitions="Auto,4*,1*">
-                                            <Frame Padding="10" Margin="5" BackgroundColor="{Binding ColorEstado}" CornerRadius="10" WidthRequest="20" BorderColor="#E57373"/>
+                                <DataTemplate x:DataType="models:Gasto">
+                                    <Frame Margin="0,5" 
+                                           BackgroundColor="White" 
+                                           CornerRadius="10">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" 
+                                              RowDefinitions="Auto,Auto"
+                                              Padding="10">
+                                            <Border Grid.RowSpan="2"
+                                                    WidthRequest="13"
+                                                    Margin="0 4"
+                                                    BackgroundColor="{Binding ColorEstado}"
+                                                    StrokeShape="RoundRectangle 2,2,2,2"/>
 
-                                            <VerticalStackLayout Grid.Column="1" Spacing="2" Padding="6">
-                                                <Label Text="{Binding Categoria}"
-                                                       FontSize="16"
-                                                       TextColor="Black"
-                                                       FontFamily="Koulen"
-                                                       FontAttributes="Bold"/>
-                                                <Label Text="{Binding Descripcion}"
-                                                       FontSize="12"
-                                                       TextColor="Gray"/>
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding Descripcion}"
+                                                   FontSize="16"
+                                                   FontFamily="Koulen"
+                                                   TextColor="Black"/>
+
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Valor, StringFormat='${0:N2}'}"
+                                                   FontSize="16"
+                                                   FontFamily="Koulen"
+                                                   TextColor="#849671"/>
+
+                                            <StackLayout Grid.Row="1" 
+                                                         Grid.Column="1" 
+                                                         Grid.ColumnSpan="2"
+                                                         Orientation="Horizontal" 
+                                                         Spacing="10">
                                                 <Label Text="{Binding FechaFinal, StringFormat='{0:dd/MMM/yyyy}'}"
                                                        FontSize="12"
                                                        TextColor="Gray"/>
-                                            </VerticalStackLayout>
-
-                                            <VerticalStackLayout Grid.Column="2" HorizontalOptions="End">
-                                                <Label Text="{Binding Valor, StringFormat='${0:F2}'}"
-                                                       FontSize="16"
-                                                       TextColor="Black"
-                                                       FontFamily="Koulen"
-                                                       FontAttributes="Bold"/>
-                                                <Label Text="{Binding ValorPagado, StringFormat='${0:F2}'}"
+                                                <Label Text="{Binding ValorPagado, StringFormat='Pagado: ${0:N2}'}"
                                                        FontSize="12"
-                                                       TextColor="Gray"/>
-                                            </VerticalStackLayout>
+                                                       TextColor="#81C784"/>
+                                            </StackLayout>
                                         </Grid>
                                     </Frame>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <StackLayout Padding="20">
+                                    <Label Text="No se encontraron gastos"
+                                           HorizontalOptions="Center"
+                                           FontSize="16"
+                                           TextColor="Gray"
+                                           FontFamily="Koulen"/>
+                                </StackLayout>
+                            </CollectionView.EmptyView>
                         </CollectionView>
                     </Frame>
 
-                    <Grid Padding="10,5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                    <!-- Resumen Financiero -->
+                    <Frame BackgroundColor="White" 
+                           CornerRadius="10" 
+                           Padding="15" 
+                           Margin="0,10">
+                        <Grid RowDefinitions="Auto,Auto,Auto" 
+                              RowSpacing="10">
+                            <StackLayout Grid.Row="0">
+                                <Label Text="Total Gastos" 
+                                       FontSize="16" 
+                                       FontFamily="Koulen" 
+                                       TextColor="Black"/>
+                                <Label Text="{Binding ValorTotal}" 
+                                       TextColor="#849671"
+                                       FontFamily="Koulen"/>
+                            </StackLayout>
 
-                        <Label Grid.Row="0" Text="Subtotal Gastos:" 
-                               FontSize="16" FontAttributes="Bold" TextColor="Black"/>
-                        <Label Grid.Row="0" TextColor="Black" Text="{Binding ResumenGastos, StringFormat='${0:F2}'}" 
-                               HorizontalOptions="End"/>
+                            <StackLayout Grid.Row="1">
+                                <Label Text="Total Pagado" 
+                                       FontSize="16" 
+                                       FontFamily="Koulen" 
+                                       TextColor="Black"/>
+                                <Label Text="{Binding ValorPagado}" 
+                                       TextColor="#81C784"
+                                       FontFamily="Koulen"/>
+                            </StackLayout>
 
-                        <Label Grid.Row="1" Text="Total Pagado:" 
-                               FontSize="16" FontAttributes="Bold" TextColor="Black"/>
-                        <Label Grid.Row="1" TextColor="Black" Text="{Binding ResumenPagado, StringFormat='${0:F2}'}" 
-                               HorizontalOptions="End"/>
+                            <StackLayout Grid.Row="2">
+                                <Label Text="Total Pendiente" 
+                                       FontSize="18" 
+                                       FontFamily="Koulen" 
+                                       TextColor="Black"/>
+                                <Label Text="{Binding ValorPendiente}" 
+                                       TextColor="#E57373"
+                                       FontFamily="Koulen"/>
+                            </StackLayout>
+                        </Grid>
+                    </Frame>
 
-                        <Label Grid.Row="2" Text="Total Pendiente:" 
-                               FontSize="18" FontAttributes="Bold" TextColor="Black"/>
-                        <Label Grid.Row="2" TextColor="Black" Text="{Binding ResumenPendiente, StringFormat='${0:F2}'}" 
-                               HorizontalOptions="End"/>
-                    </Grid>
-
-                    <Button Text="Ingresar Gasto"
+                    <!-- Botones -->
+                    <Button Text="INGRESAR GASTO"
                             Clicked="OnIngresarGastoClicked"
                             FontSize="18"
                             BackgroundColor="#849671"
@@ -141,14 +186,15 @@
                             CornerRadius="25"
                             HeightRequest="45"/>
 
-                    <Button Text="Tiendas Favoritas"
+                    <Button Text="TIENDAS FAVORITAS"
                             FontSize="18"
                             BackgroundColor="#849671"
                             TextColor="White"
                             FontFamily="Koulen"
                             CornerRadius="25"
                             HeightRequest="45"
-                            Clicked="OnTiendasFavoritasClicked" />
+                            Clicked="OnTiendasFavoritasClicked" 
+                            Margin="0,0,0,20"/>
                 </VerticalStackLayout>
             </ScrollView>
         </RefreshView>
