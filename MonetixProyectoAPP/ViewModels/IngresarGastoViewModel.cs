@@ -206,8 +206,7 @@ namespace MonetixProyectoAPP.ViewModels
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await Shell.Current.DisplayAlert("Error",
-                        $"Error al guardar el gasto: {ex.Message}", "OK");
+                    
                 });
             }
             finally
